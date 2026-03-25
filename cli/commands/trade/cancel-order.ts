@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { privatePost, type PrivatePostOptions } from "../../http-private-post.js";
-import { type Result } from "../../types.js";
+import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
+import type { Result } from "../../types.js";
 import { printDryRun } from "./dry-run.js";
 
 const CancelOrderResponseSchema = z.object({
@@ -25,7 +25,8 @@ export async function cancelOrder(
   opts?: PrivatePostOptions,
 ): Promise<Result<CancelOrderResponse | { dryRun: true }>> {
   if (!args.pair) return { success: false, error: "pair is required. Example: --pair=btc_jpy" };
-  if (!args.orderId) return { success: false, error: "order-id is required. Example: --order-id=12345" };
+  if (!args.orderId)
+    return { success: false, error: "order-id is required. Example: --order-id=12345" };
 
   const body = { pair: args.pair, order_id: Number(args.orderId) };
 

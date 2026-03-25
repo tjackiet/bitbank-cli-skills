@@ -1,20 +1,22 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { pairs } from "../commands/public/pairs.js";
 
 const MOCK_DATA = {
-  pairs: [{
-    name: "btc_jpy",
-    base_asset: "btc",
-    quote_asset: "jpy",
-    maker_fee_rate_base_quote: "-0.02",
-    taker_fee_rate_base_quote: "0.12",
-    unit_amount: "0.0001",
-    limit_max_amount: "1000",
-    market_max_amount: "100",
-    is_enabled: true,
-    stop_order: true,
-    stop_order_and_cancel: true,
-  }],
+  pairs: [
+    {
+      name: "btc_jpy",
+      base_asset: "btc",
+      quote_asset: "jpy",
+      maker_fee_rate_base_quote: "-0.02",
+      taker_fee_rate_base_quote: "0.12",
+      unit_amount: "0.0001",
+      limit_max_amount: "1000",
+      market_max_amount: "100",
+      is_enabled: true,
+      stop_order: true,
+      stop_order_and_cancel: true,
+    },
+  ],
 };
 
 function mockFetch(): typeof globalThis.fetch {

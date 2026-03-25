@@ -1,11 +1,15 @@
-import { io, type Socket } from "socket.io-client";
-import { writeStreamMessage, type StreamFormat } from "./stream-format.js";
-import { type Result } from "./types.js";
+import { type Socket, io } from "socket.io-client";
+import { type StreamFormat, writeStreamMessage } from "./stream-format.js";
+import type { Result } from "./types.js";
 
 const WS_ENDPOINT = "wss://stream.bitbank.cc";
 
 const PUBLIC_CHANNELS = [
-  "ticker", "transactions", "depth_diff", "depth_whole", "circuit_break_info",
+  "ticker",
+  "transactions",
+  "depth_diff",
+  "depth_whole",
+  "circuit_break_info",
 ] as const;
 type PublicChannel = (typeof PUBLIC_CHANNELS)[number];
 

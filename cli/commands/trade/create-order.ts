@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { privatePost, type PrivatePostOptions } from "../../http-private-post.js";
-import { type Result } from "../../types.js";
+import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
+import type { Result } from "../../types.js";
 import { printDryRun } from "./dry-run.js";
 
 const SideEnum = z.enum(["buy", "sell"]);
@@ -83,14 +83,7 @@ export async function createOrder(
   if (parsed.data.postOnly) body.post_only = true;
 
   if (!args.execute) {
-    const hint =
-      `npx bitbank create-order --pair=${parsed.data.pair}` +
-      ` --side=${parsed.data.side} --type=${parsed.data.type}` +
-      (parsed.data.price ? ` --price=${parsed.data.price}` : "") +
-      ` --amount=${parsed.data.amount}` +
-      (parsed.data.triggerPrice ? ` --trigger-price=${parsed.data.triggerPrice}` : "") +
-      (parsed.data.postOnly ? " --post-only" : "") +
-      " --execute";
+    const hint = `npx bitbank create-order --pair=${parsed.data.pair} --side=${parsed.data.side} --type=${parsed.data.type}${parsed.data.price ? ` --price=${parsed.data.price}` : ""} --amount=${parsed.data.amount}${parsed.data.triggerPrice ? ` --trigger-price=${parsed.data.triggerPrice}` : ""}${parsed.data.postOnly ? " --post-only" : ""} --execute`;
     printDryRun({ endpoint: "/v1/user/spot/order", body, executeHint: hint });
     return { success: true, data: { dryRun: true } };
   }

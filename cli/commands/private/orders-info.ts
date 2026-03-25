@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { privatePost, type PrivatePostOptions } from "../../http-private-post.js";
-import { type Result } from "../../types.js";
+import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
+import type { Result } from "../../types.js";
 
 const OrderSchema = z.object({
   order_id: z.number(),

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock socket.io-client before importing the module
 const mockSocket = {
@@ -15,8 +15,8 @@ vi.mock("../stream-format.js", () => ({
   writeStreamMessage: vi.fn(),
 }));
 
-import { startPublicStream } from "../stream-public.js";
 import { writeStreamMessage } from "../stream-format.js";
+import { startPublicStream } from "../stream-public.js";
 
 beforeEach(() => {
   vi.clearAllMocks();

@@ -18,5 +18,5 @@ export function printDryRun(info: DryRunInfo): void {
   lines.push("");
   lines.push("実行するには --execute を付けてください:");
   lines.push(`  ${info.executeHint}`);
-  process.stdout.write(lines.join("\n") + "\n");
+  process.stdout.write(`${lines.join("\n")}\n`);
 }

@@ -1,8 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { depth } from "../commands/public/depth.js";
 
 const MOCK_DEPTH = {
-  asks: [["100", "1.0"], ["101", "2.0"]],
+  asks: [
+    ["100", "1.0"],
+    ["101", "2.0"],
+  ],
   bids: [["99", "1.5"]],
   timestamp: 1000,
 };

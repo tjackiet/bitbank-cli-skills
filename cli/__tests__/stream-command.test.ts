@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockStartPublic = vi.fn();
 const mockStartPrivate = vi.fn();
@@ -35,7 +35,10 @@ describe("streamCommand", () => {
 
   it("starts public stream with channel filter", async () => {
     await streamCommand({
-      pair: "btc_jpy", isPrivate: false, channel: "ticker,transactions", format: "table",
+      pair: "btc_jpy",
+      isPrivate: false,
+      channel: "ticker,transactions",
+      format: "table",
     });
     expect(mockStartPublic).toHaveBeenCalledWith(
       expect.objectContaining({ channels: ["ticker", "transactions"] }),
@@ -45,9 +48,7 @@ describe("streamCommand", () => {
   it("starts private stream", async () => {
     const result = await streamCommand({ isPrivate: true, format: "json" });
     expect(result.success).toBe(true);
-    expect(mockStartPrivate).toHaveBeenCalledWith(
-      expect.objectContaining({ format: "json" }),
-    );
+    expect(mockStartPrivate).toHaveBeenCalledWith(expect.objectContaining({ format: "json" }));
   });
 
   it("passes filter to private stream", async () => {

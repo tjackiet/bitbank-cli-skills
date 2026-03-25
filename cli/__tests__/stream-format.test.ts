@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { writeStreamMessage, type StreamMessage } from "../stream-format.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { type StreamMessage, writeStreamMessage } from "../stream-format.js";
 
 let written: string;
 beforeEach(() => {

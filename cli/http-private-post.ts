@@ -1,10 +1,6 @@
-import { type Result } from "./types.js";
-import {
-  loadCredentials,
-  authHeadersPost,
-  type ApiCredentials,
-} from "./auth.js";
+import { type ApiCredentials, authHeadersPost, loadCredentials } from "./auth.js";
 import { ERROR_CODES } from "./http-private.js";
+import type { Result } from "./types.js";
 
 const PRIVATE_BASE_URL = "https://api.bitbank.cc/v1";
 

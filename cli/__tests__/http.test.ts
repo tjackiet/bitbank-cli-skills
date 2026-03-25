@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { publicGet } from "../http.js";
 
 function mockFetch(body: unknown, status = 200): typeof globalThis.fetch {
@@ -25,7 +25,9 @@ describe("publicGet", () => {
   });
 
   it("returns error on network failure", async () => {
-    const fetch = async () => { throw new Error("network error"); };
+    const fetch = async () => {
+      throw new Error("network error");
+    };
     const result = await publicGet("/x", { fetch: fetch as typeof globalThis.fetch, retries: 0 });
     expect(result).toEqual({ success: false, error: "network error" });
   });

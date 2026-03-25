@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { cancelOrders } from "../commands/trade/cancel-orders.js";
 
 const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
@@ -23,12 +23,28 @@ describe("cancel-orders", () => {
           success: 1,
           data: {
             orders: [
-              { order_id: 1, pair: "btc_jpy", side: "buy", type: "limit", price: "5000000", status: "CANCELED_UNFILLED" },
-              { order_id: 2, pair: "btc_jpy", side: "sell", type: "limit", price: "6000000", status: "CANCELED_UNFILLED" },
+              {
+                order_id: 1,
+                pair: "btc_jpy",
+                side: "buy",
+                type: "limit",
+                price: "5000000",
+                status: "CANCELED_UNFILLED",
+              },
+              {
+                order_id: 2,
+                pair: "btc_jpy",
+                side: "sell",
+                type: "limit",
+                price: "6000000",
+                status: "CANCELED_UNFILLED",
+              },
             ],
           },
         }),
-        retries: 0, credentials: CREDS, nonce: "1",
+        retries: 0,
+        credentials: CREDS,
+        nonce: "1",
       },
     );
     expect(result.success).toBe(true);

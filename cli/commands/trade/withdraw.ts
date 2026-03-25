@@ -1,7 +1,7 @@
 import * as readline from "node:readline";
 import { z } from "zod";
-import { privatePost, type PrivatePostOptions } from "../../http-private-post.js";
-import { type Result } from "../../types.js";
+import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
+import type { Result } from "../../types.js";
 import { printDryRun } from "./dry-run.js";
 
 const WithdrawResponseSchema = z.object({
@@ -34,13 +34,10 @@ function askConfirmation(
 ): Promise<boolean> {
   const rl = readline.createInterface({ input, output });
   return new Promise((resolve) => {
-    rl.question(
-      "\n⚠️  本当に出金しますか？ (yes/no): ",
-      (answer) => {
-        rl.close();
-        resolve(answer.trim().toLowerCase() === "yes");
-      },
-    );
+    rl.question("\n⚠️  本当に出金しますか？ (yes/no): ", (answer) => {
+      rl.close();
+      resolve(answer.trim().toLowerCase() === "yes");
+    });
   });
 }
 
@@ -81,10 +78,7 @@ export async function withdraw(
 
   if (!opts?.skipConfirmPrompt) {
     process.stdout.write(
-      `\n⚠️  出金リクエスト\n` +
-        `  資産: ${args.asset}\n` +
-        `  出金先UUID: ${args.uuid}\n` +
-        `  金額: ${args.amount}\n`,
+      `\n⚠️  出金リクエスト\n  資産: ${args.asset}\n  出金先UUID: ${args.uuid}\n  金額: ${args.amount}\n`,
     );
     const input = opts?.input ?? process.stdin;
     const output = opts?.output ?? process.stdout;

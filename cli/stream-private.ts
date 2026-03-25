@@ -1,8 +1,8 @@
 import PubNub from "pubnub";
-import { writeStreamMessage, type StreamFormat } from "./stream-format.js";
-import { loadCredentials, type ApiCredentials } from "./auth.js";
-import { privateGet, type PrivateHttpOptions } from "./http-private.js";
-import { type Result } from "./types.js";
+import { type ApiCredentials, loadCredentials } from "./auth.js";
+import { type PrivateHttpOptions, privateGet } from "./http-private.js";
+import { type StreamFormat, writeStreamMessage } from "./stream-format.js";
+import type { Result } from "./types.js";
 
 const SUBSCRIBE_KEY = "sub-c-ecebae8e-dd60-11e6-b6b1-02ee2ddab7fe";
 // Refresh 5 minutes before the 12-hour TTL expires

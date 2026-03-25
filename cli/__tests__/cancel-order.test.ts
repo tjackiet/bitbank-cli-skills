@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { cancelOrder } from "../commands/trade/cancel-order.js";
 
 const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
@@ -23,9 +23,18 @@ describe("cancel-order", () => {
       {
         fetch: mockFetch({
           success: 1,
-          data: { order_id: 123, pair: "btc_jpy", side: "buy", type: "limit", price: "5000000", status: "CANCELED_UNFILLED" },
+          data: {
+            order_id: 123,
+            pair: "btc_jpy",
+            side: "buy",
+            type: "limit",
+            price: "5000000",
+            status: "CANCELED_UNFILLED",
+          },
         }),
-        retries: 0, credentials: CREDS, nonce: "1",
+        retries: 0,
+        credentials: CREDS,
+        nonce: "1",
       },
     );
     expect(result.success).toBe(true);
@@ -38,6 +47,9 @@ describe("cancel-order", () => {
 
   it("requires order-id", async () => {
     const result = await cancelOrder({ pair: "btc_jpy" });
-    expect(result).toEqual({ success: false, error: "order-id is required. Example: --order-id=12345" });
+    expect(result).toEqual({
+      success: false,
+      error: "order-id is required. Example: --order-id=12345",
+    });
   });
 });

@@ -8,7 +8,7 @@ export type StreamFormat = "json" | "table";
 
 export function writeStreamMessage(msg: StreamMessage, format: StreamFormat): void {
   const line = format === "json" ? formatJson(msg) : formatTable(msg);
-  if (line) process.stdout.write(line + "\n");
+  if (line) process.stdout.write(`${line}\n`);
 }
 
 function formatJson(msg: StreamMessage): string {
@@ -29,7 +29,9 @@ function formatTable(msg: StreamMessage): string {
     const txs = (data.transactions ?? []) as Array<Record<string, unknown>>;
     if (txs.length === 0) return `[${time}] TRADE  ${pair}  (no transactions)`;
     return txs
-      .map((tx) => `[${time}] TRADE  ${pair}  ${ucFirst(tx.side)} ${tx.amount} @ ${fmtNum(tx.price)}`)
+      .map(
+        (tx) => `[${time}] TRADE  ${pair}  ${ucFirst(tx.side)} ${tx.amount} @ ${fmtNum(tx.price)}`,
+      )
       .join("\n");
   }
   if (chan.startsWith("depth_diff_") || chan.startsWith("depth_whole_")) {
@@ -50,7 +52,7 @@ function formatTable(msg: StreamMessage): string {
 
 function fmtNum(v: unknown): string {
   const n = Number(v);
-  return isNaN(n) ? String(v ?? "") : n.toLocaleString();
+  return Number.isNaN(n) ? String(v ?? "") : n.toLocaleString();
 }
 
 function ucFirst(v: unknown): string {

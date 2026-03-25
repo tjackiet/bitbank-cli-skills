@@ -1,50 +1,50 @@
 #!/usr/bin/env tsx
 import { parseArgs } from "node:util";
-import { output } from "./output.js";
-import { type Format } from "./types.js";
-import { ticker } from "./commands/public/ticker.js";
-import { tickers, tickersJpy } from "./commands/public/tickers.js";
-import { depth } from "./commands/public/depth.js";
-import { transactions } from "./commands/public/transactions.js";
-import { candles } from "./commands/public/candles.js";
-import { circuitBreak } from "./commands/public/circuit-break.js";
-import { status } from "./commands/public/status.js";
-import { pairs } from "./commands/public/pairs.js";
+import { activeOrders } from "./commands/private/active-orders.js";
 import { assets } from "./commands/private/assets.js";
+import { depositHistory } from "./commands/private/deposit-history.js";
+import { depositOriginators } from "./commands/private/deposit-originators.js";
+import { marginPositions } from "./commands/private/margin-positions.js";
+import { marginStatus } from "./commands/private/margin-status.js";
 import { order } from "./commands/private/order.js";
 import { ordersInfo } from "./commands/private/orders-info.js";
-import { activeOrders } from "./commands/private/active-orders.js";
-import { tradeHistory } from "./commands/private/trade-history.js";
 import { tradeHistoryAll } from "./commands/private/trade-history-all.js";
-import { depositHistory } from "./commands/private/deposit-history.js";
+import { tradeHistory } from "./commands/private/trade-history.js";
 import { unconfirmedDeposits } from "./commands/private/unconfirmed-deposits.js";
-import { depositOriginators } from "./commands/private/deposit-originators.js";
 import { withdrawalAccounts } from "./commands/private/withdrawal-accounts.js";
 import { withdrawalHistory } from "./commands/private/withdrawal-history.js";
-import { marginStatus } from "./commands/private/margin-status.js";
-import { marginPositions } from "./commands/private/margin-positions.js";
-import { createOrder } from "./commands/trade/create-order.js";
+import { candles } from "./commands/public/candles.js";
+import { circuitBreak } from "./commands/public/circuit-break.js";
+import { depth } from "./commands/public/depth.js";
+import { pairs } from "./commands/public/pairs.js";
+import { status } from "./commands/public/status.js";
+import { ticker } from "./commands/public/ticker.js";
+import { tickers, tickersJpy } from "./commands/public/tickers.js";
+import { transactions } from "./commands/public/transactions.js";
+import { streamCommand } from "./commands/stream.js";
 import { cancelOrder } from "./commands/trade/cancel-order.js";
 import { cancelOrders } from "./commands/trade/cancel-orders.js";
-import { confirmDeposits } from "./commands/trade/confirm-deposits.js";
 import { confirmDepositsAll } from "./commands/trade/confirm-deposits-all.js";
+import { confirmDeposits } from "./commands/trade/confirm-deposits.js";
+import { createOrder } from "./commands/trade/create-order.js";
 import { withdraw } from "./commands/trade/withdraw.js";
-import { streamCommand } from "./commands/stream.js";
+import { output } from "./output.js";
+import type { Format } from "./types.js";
 
 const COMMANDS: Record<string, string> = {
   // Public API
-  ticker:        "Get ticker for a pair (e.g. btc_jpy)",
-  tickers:       "Get tickers for all pairs",
+  ticker: "Get ticker for a pair (e.g. btc_jpy)",
+  tickers: "Get tickers for all pairs",
   "tickers-jpy": "Get tickers for all JPY pairs",
-  depth:         "Get order book depth for a pair",
-  transactions:  "Get recent transactions for a pair",
-  candles:       "Get candlestick OHLCV data",
+  depth: "Get order book depth for a pair",
+  transactions: "Get recent transactions for a pair",
+  candles: "Get candlestick OHLCV data",
   "circuit-break": "Get circuit breaker info for a pair",
-  status:        "Get exchange status for all pairs",
-  pairs:         "Get all pair settings",
+  status: "Get exchange status for all pairs",
+  pairs: "Get all pair settings",
   // Private API (read)
-  assets:        "Get your asset balances",
-  order:         "Get a specific order",
+  assets: "Get your asset balances",
+  order: "Get a specific order",
   "orders-info": "Get multiple orders by IDs",
   "active-orders": "Get active (open) orders",
   "trade-history": "Get trade execution history",
@@ -56,14 +56,14 @@ const COMMANDS: Record<string, string> = {
   "margin-status": "Get margin account status",
   "margin-positions": "Get open margin positions",
   // Trade (write) — dry-run by default
-  "create-order":         "Create a spot order (dry-run default)",
-  "cancel-order":         "Cancel a spot order (dry-run default)",
-  "cancel-orders":        "Cancel multiple spot orders (dry-run default)",
-  "confirm-deposits":     "Confirm a deposit (dry-run default)",
+  "create-order": "Create a spot order (dry-run default)",
+  "cancel-order": "Cancel a spot order (dry-run default)",
+  "cancel-orders": "Cancel multiple spot orders (dry-run default)",
+  "confirm-deposits": "Confirm a deposit (dry-run default)",
   "confirm-deposits-all": "Confirm all deposits (dry-run default)",
-  withdraw:               "Request withdrawal (dry-run default, requires --confirm)",
+  withdraw: "Request withdrawal (dry-run default, requires --confirm)",
   // Stream (real-time)
-  stream:                 "Subscribe to real-time stream (public or --private)",
+  stream: "Subscribe to real-time stream (public or --private)",
 };
 
 function showHelp(): void {
@@ -194,7 +194,7 @@ async function main(): Promise<void> {
               pair: values.pair as string | undefined,
               since: values.since as string | undefined,
               end: values.end as string | undefined,
-            }, )
+            })
           : await tradeHistory({
               pair: values.pair as string | undefined,
               count: values.count as string | undefined,

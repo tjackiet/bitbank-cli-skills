@@ -1,10 +1,5 @@
-import { type Result } from "./types.js";
-import {
-  loadCredentials,
-  authHeadersGet,
-  authHeadersPost,
-  type ApiCredentials,
-} from "./auth.js";
+import { type ApiCredentials, authHeadersGet, authHeadersPost, loadCredentials } from "./auth.js";
+import type { Result } from "./types.js";
 
 const PRIVATE_BASE_URL = "https://api.bitbank.cc/v1";
 
@@ -63,9 +58,8 @@ export async function privateGet<T>(
   if ("error" in creds) return { success: false, error: creds.error };
 
   const { timeoutMs = 5000, retries = 2, fetch: fetchFn = globalThis.fetch } = opts;
-  const qs = params && Object.keys(params).length > 0
-    ? "?" + new URLSearchParams(params).toString()
-    : "";
+  const qs =
+    params && Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : "";
   const url = `${PRIVATE_BASE_URL}${path}${qs}`;
   const headers = authHeadersGet(creds, path, qs, opts.nonce);
 

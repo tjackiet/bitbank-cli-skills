@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
 
 const SKILLS_DIR = resolve(import.meta.dirname, "../../.claude/skills");
 
@@ -39,7 +39,7 @@ describe("Agent Skills", () => {
         // name must match folder name
         const nameMatch = frontmatter.match(/^name:\s*(.+)$/m);
         expect(nameMatch).not.toBeNull();
-        expect(nameMatch![1].trim()).toBe(skill);
+        expect(nameMatch?.[1].trim()).toBe(skill);
       });
 
       it("description is within 1024 characters", () => {
@@ -52,16 +52,17 @@ describe("Agent Skills", () => {
           /description:\s*\|\n([\s\S]*?)(?=\n\w|\nmetadata:|\ncompatibility:)/,
         );
         expect(descMatch).not.toBeNull();
-        const description = descMatch![1]
+        const description = descMatch?.[1]
           .split("\n")
           .map((l) => l.trim())
           .join("\n")
           .trim();
-        expect(description.length).toBeLessThanOrEqual(1024);
+        expect(description).toBeDefined();
+        expect(description!.length).toBeLessThanOrEqual(1024);
       });
 
       it("references/ files exist", () => {
-        const refs = EXPECTED_REFERENCES[skill]!;
+        const refs = EXPECTED_REFERENCES[skill] ?? [];
         for (const ref of refs) {
           const refPath = resolve(SKILLS_DIR, skill, "references", ref);
           expect(existsSync(refPath), `Missing: ${ref}`).toBe(true);

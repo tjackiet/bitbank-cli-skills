@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { signGet, signPost, authHeadersGet, authHeadersPost, loadCredentials } from "../auth.js";
 import { createHmac } from "node:crypto";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { authHeadersGet, authHeadersPost, loadCredentials, signGet, signPost } from "../auth.js";
 
 describe("signGet", () => {
   it("generates correct HMAC-SHA256 for GET requests", () => {
@@ -8,9 +8,7 @@ describe("signGet", () => {
     const path = "/user/assets";
     const qs = "";
     const secret = "test_secret";
-    const expected = createHmac("sha256", secret)
-      .update(nonce + "/v1" + path + qs)
-      .digest("hex");
+    const expected = createHmac("sha256", secret).update(`${nonce}/v1${path}${qs}`).digest("hex");
     expect(signGet(nonce, path, qs, secret)).toBe(expected);
   });
 
@@ -19,9 +17,7 @@ describe("signGet", () => {
     const path = "/user/spot/order";
     const qs = "?pair=btc_jpy&order_id=123";
     const secret = "test_secret";
-    const expected = createHmac("sha256", secret)
-      .update(nonce + "/v1" + path + qs)
-      .digest("hex");
+    const expected = createHmac("sha256", secret).update(`${nonce}/v1${path}${qs}`).digest("hex");
     expect(signGet(nonce, path, qs, secret)).toBe(expected);
   });
 });
@@ -66,13 +62,17 @@ describe("loadCredentials", () => {
 
   afterEach(() => {
     if (origKey) process.env.BITBANK_API_KEY = origKey;
+    // biome-ignore lint/performance/noDelete: process.env requires delete
     else delete process.env.BITBANK_API_KEY;
     if (origSecret) process.env.BITBANK_API_SECRET = origSecret;
+    // biome-ignore lint/performance/noDelete: process.env requires delete
     else delete process.env.BITBANK_API_SECRET;
   });
 
   it("returns error when keys are missing", () => {
+    // biome-ignore lint/performance/noDelete: process.env requires delete
     delete process.env.BITBANK_API_KEY;
+    // biome-ignore lint/performance/noDelete: process.env requires delete
     delete process.env.BITBANK_API_SECRET;
     const result = loadCredentials();
     expect("error" in result).toBe(true);
