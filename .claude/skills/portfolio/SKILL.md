@@ -47,13 +47,22 @@ npx tsx --env-file=.env cli/index.ts assets --format=json
 npx tsx --env-file=.env cli/index.ts assets --all --format=json
 ```
 
-### Step 2: 取引履歴の取得（損益計算に必要）
+### Step 2: 取引履歴・入出金履歴の取得（損益計算に必要）
 
 保有している各ペアについて取引履歴を取得:
 
 ```bash
 npx tsx --env-file=.env cli/index.ts trade-history --pair=btc_jpy --format=json
 npx tsx --env-file=.env cli/index.ts trade-history --pair=eth_jpy --format=json
+```
+
+入出金履歴を取得（コストベース計算の精度向上に必要）:
+
+```bash
+npx tsx --env-file=.env cli/index.ts deposit-history --asset=btc --format=json
+npx tsx --env-file=.env cli/index.ts deposit-history --asset=eth --format=json
+npx tsx --env-file=.env cli/index.ts withdrawal-history --asset=btc --format=json
+npx tsx --env-file=.env cli/index.ts withdrawal-history --asset=eth --format=json
 ```
 
 ### Step 3: 現在価格の取得
@@ -73,9 +82,22 @@ npx tsx cli/index.ts tickers-jpy --format=json
 取得したデータからモデルが以下を計算する:
 
 1. **保有比率:** 各資産の評価額 / ポートフォリオ合計
-2. **平均取得単価:** 取引履歴から加重平均で算出
+2. **平均取得単価:** 取引履歴と入出金履歴から算出（下記ルール参照）
 3. **評価損益:** (現在価格 - 平均取得単価) × 保有量
 4. **損益率:** 評価損益 / 投資額 × 100
+
+#### 平均取得単価の計算ルール（入出金考慮）
+
+1. **取引所内での購入分:** 取引履歴の buy レコードから加重平均で取得単価を算出
+2. **外部入金分（deposit-history）:** 取得単価不明として扱う。以下のいずれかで対処:
+   - ユーザーが取得単価を知っている場合 → ユーザーに確認して手動指定
+   - 不明な場合 → 入金時点の市場価格（ticker）を参考値として使用し、「推定値」と明示する
+   - 入金量は保有量に加算するが、コストベースの確度が下がる旨を注記する
+3. **出金分（withdrawal-history）のコストベース調整:**
+   - 出金時点までの平均取得単価で出金量分のコストを差し引く
+   - 調整後コストベース = 調整前コストベース - (出金量 × 出金時点の平均取得単価)
+   - 出金後の平均取得単価自体は変わらない（単価は同じまま、数量とコスト総額が減る）
+4. **計算順序:** 取引・入金・出金をすべて時系列順に並べ、古い順に処理する
 
 ## デフォルト分析項目
 
