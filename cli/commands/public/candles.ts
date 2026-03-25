@@ -83,7 +83,10 @@ export function previousDate(dateStr: string, type: string): string {
 const MAX_FETCHES = 3;
 
 async function fetchOne(
-  pair: string, type: string, dateStr: string, opts?: HttpOptions,
+  pair: string,
+  type: string,
+  dateStr: string,
+  opts?: HttpOptions,
 ): Promise<Result<Candle[]>> {
   const result = await publicGet<unknown>(`/${pair}/candlestick/${type}/${dateStr}`, opts);
   if (!result.success) return result;
@@ -94,7 +97,12 @@ async function fetchOne(
   }
   const ohlcv = parsed.data.candlestick[0]?.ohlcv ?? [];
   const rows: Candle[] = ohlcv.map(([open, high, low, close, vol, timestamp]) => ({
-    open, high, low, close, vol, timestamp,
+    open,
+    high,
+    low,
+    close,
+    vol,
+    timestamp,
   }));
   return { success: true, data: rows };
 }
@@ -147,19 +155,6 @@ export async function candles(
       fetches++;
     }
   }
-<<<<<<< HEAD
-  const ohlcv = parsed.data.candlestick[0]?.ohlcv ?? [];
-  const rows: Candle[] = ohlcv.map(([open, high, low, close, vol, timestamp]) => ({
-    open,
-    high,
-    low,
-    close,
-    vol,
-    timestamp,
-  }));
-  return { success: true, data: rows.slice(-limit) };
-=======
 
   return { success: true, data: allRows.slice(-limit) };
->>>>>>> 9820689 (feat: candles コマンドの --limit で年跨ぎ自動結合)
 }
