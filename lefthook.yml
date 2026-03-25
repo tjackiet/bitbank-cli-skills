@@ -18,5 +18,9 @@ pre-commit:
       exclude: "cli/__tests__/**"
       run: |
         ! grep -rn --include='*.ts' 'new Date()' cli/ --exclude-dir=__tests__ || (echo '⚠️  new Date() の使用を確認。タイムゾーン問題に注意' && exit 0)
+    secret-check:
+      glob: "cli/**/*.{ts,json}"
+      run: |
+        ! grep -rn 'BITBANK_API_KEY\|BITBANK_API_SECRET\|API_KEY=' --include='*.ts' --include='*.json' cli/ || (echo '❌ シークレットがコードに含まれています' && exit 1)
     test:
       run: npx vitest run
