@@ -112,6 +112,18 @@ cli/
 
 ---
 
+## ブランチ管理
+
+- **main 以外のブランチはマージ後に削除する。** 不要なブランチが残らないようにする。
+- **GitHub 側:** リポジトリ Settings > General > "Automatically delete head branches" を有効にする。
+- **ローカル側:** 以下を設定しておくと、`git fetch` 時にリモートで削除されたブランチがローカルからも消える:
+
+```bash
+git config --local fetch.prune true
+```
+
+---
+
 ## セッション開始時のチェックリスト
 
 1. この `CLAUDE.md` を読む
