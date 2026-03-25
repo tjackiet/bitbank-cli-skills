@@ -1,0 +1,204 @@
+# カスタマイズガイド
+
+このプロジェクトは CLI と Agent Skills の両方を拡張できる設計になっています。
+
+---
+
+## 1. 独自 Skill の追加
+
+Skill は「モデルへの指示書」です。コードは書きません。CLI コマンドをどう組み合わせて分析するかをモデルに教えます。
+
+### ディレクトリを作成
+
+```
+.claude/skills/<skill-name>/
+  SKILL.md              # Skill 定義（必須）
+  references/           # 参照資料（任意）
+    bitbank-api-formats.md
+```
+
+### SKILL.md を書く
+
+```markdown
+---
+name: my-strategy
+description: |
+  何をする Skill か、1〜3行で説明。
+  トリガーとなるユーザーの発話例:
+  「〇〇を分析して」「〇〇の状況は？」
+compatibility: |
+  Requires bitbank CLI (npx tsx cli/index.ts). Node.js 18+.
+metadata:
+  author: your-name
+  version: "1.0"
+---
+
+# My Strategy Skill
+
+## データ取得
+
+どの CLI コマンドをどの引数で実行するか:
+
+\`\`\`bash
+npx tsx cli/index.ts candles btc_jpy --type=1day --format=json
+\`\`\`
+
+## 計算手順
+
+取得データをどう計算・分析するかの手順。
+
+## 出力フォーマット
+
+結果をどう表示するかのテンプレート。
+
+## Gotchas
+
+注意点・落とし穴。
+```
+
+### 重要なポイント
+
+- **分析ロジックのコードは書かない。** 手順をモデルに伝え、モデルが計算する
+- **CLI コマンドの実行例を具体的に書く。** モデルが正確にコマンドを組み立てられるようにする
+- **Gotchas を充実させる。** 価格が文字列で返る、配列の順序など、モデルが間違えやすいポイントを列挙する
+- **references/ に `bitbank-api-formats.md` を配置する。** 既存 Skill からコピーする
+
+### 動作確認
+
+Claude Code でリポジトリを開き、Skill の description に書いた発話例で話しかけて、正しくトリガーされることを確認します。
+
+---
+
+## 2. Skill のカスタマイズ例
+
+### テクニカル指標のパラメータ変更
+
+`indicator-analysis` Skill の「デフォルト分析セット」を変更:
+
+```markdown
+## デフォルト分析セット
+
+- **SMA**: 10, 25, 75 期間（短期トレード向け）
+- **RSI**: 9 期間
+- **MACD**: 短期 8, 長期 21, シグナル 5
+```
+
+### バックテストのデフォルト戦略変更
+
+`backtest` Skill の「デフォルト戦略」セクションを編集:
+
+```markdown
+## デフォルト戦略: RSI 逆張り
+
+- **買いエントリー:** RSI(14) が 30 を下回った次の足の始値
+- **売りイグジット:** RSI(14) が 70 を上回った次の足の始値
+- **初期資金:** 1,000,000 JPY
+- **手数料:** 片道 0.12%
+```
+
+### 複合 Skill の作成
+
+複数の分析を組み合わせた Skill を作れます。例えば「モーニングレポート」:
+
+```markdown
+---
+name: morning-report
+description: |
+  毎朝の暗号資産マーケットレポートを生成する。
+  「今日のレポート」「朝のマーケット状況」で起動。
+---
+
+# モーニングレポート Skill
+
+## 実行フロー
+
+1. 主要ペア（BTC, ETH, XRP）の ticker を取得
+2. 各ペアの日足ローソク足を取得（直近30日）
+3. SMA(20), RSI(14) を計算
+4. 前日比・週間変動率を算出
+5. 総合サマリーを出力
+```
+
+---
+
+## 3. CLI コマンドの追加
+
+新しい API エンドポイントに対応するコマンドを追加できます。
+
+### 手順
+
+1. カテゴリを決める（`public` / `private` / `trade`）
+2. `cli/commands/<category>/<command>.ts` を作成
+3. Zod でスキーマ定義、Result パターンで返す
+4. `cli/index.ts` にルーティングを追加
+5. `cli/__tests__/<command>.test.ts` にテストを追加
+
+### コマンド実装テンプレート
+
+```typescript
+import { z } from "zod";
+import { publicGet } from "../../http.js";
+import type { Result } from "../../types.js";
+
+const MySchema = z.object({
+  field1: z.string(),
+  field2: z.number(),
+});
+
+type MyData = z.infer<typeof MySchema>;
+
+export async function myCommand(
+  pair: string,
+  opts?: { timeout?: number },
+): Promise<Result<MyData>> {
+  const res = await publicGet<{ data: unknown }>(
+    `/${pair}/my-endpoint`,
+    opts,
+  );
+  if (!res.success) return res;
+  const parsed = MySchema.safeParse(res.data.data);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.message };
+  }
+  return { success: true, data: parsed.data };
+}
+```
+
+### 規約チェックリスト
+
+- [ ] 1 ファイル 100 行以内
+- [ ] Zod スキーマ + `z.infer`（手動 interface 禁止）
+- [ ] Result パターン（throw 禁止）
+- [ ] `--format=json|table|csv` 対応
+- [ ] テスト追加（API モック使用）
+
+---
+
+## 4. 出力パイプライン
+
+CLI の出力は `--format` でフォーマットを選べます。これを活用してパイプラインを組めます:
+
+```bash
+# JSON で取得 → jq でフィルタ
+npx bitbank ticker btc_jpy --format=json | jq '.last'
+
+# CSV で取得 → スプレッドシートにインポート
+npx bitbank candles btc_jpy --type=1day --format=csv > btc_daily.csv
+
+# テーブル形式で確認
+npx bitbank assets --format=table
+```
+
+---
+
+## 5. CI / 自動化での利用
+
+```bash
+# GitHub Actions 等で定期的に価格データを取得
+npx tsx cli/index.ts candles btc_jpy --type=1hour --format=json > data.json
+
+# Private API を使う場合は環境変数で認証
+BITBANK_API_KEY=${{ secrets.BB_KEY }} \
+BITBANK_API_SECRET=${{ secrets.BB_SECRET }} \
+npx tsx cli/index.ts assets --format=json
+```

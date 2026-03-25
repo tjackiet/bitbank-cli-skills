@@ -1,42 +1,191 @@
 # bitbank CLI & Agent Skills
 
-> **開発中** — このプロジェクトは現在アクティブに開発中です。
-
 bitbank 暗号資産取引所の CLI と Agent Skills スターターキット。
 
-## MCP サーバーとの関係
+## 設計思想
 
-このプロジェクトは姉妹プロジェクト [bitbank-genesis-mcp-server](https://github.com/tjackiet/bitbank-genesis-mcp-server) と対をなします。MCP サーバーがサーバー側で計算済みの結論を LLM に渡すのに対し、この CLI は bitbank API の生データを高速に取得し、モデル（Opus, o3 等）自身に分析・計算させるアプローチを取ります。同じ bitbank API に対して、2つの異なるアクセス方法を提供します。
+CLI は bitbank API への**薄いアクセス層**。分析ロジックは一切持たない。
+
+- **MCP サーバー** ([bitbank-genesis-mcp-server](https://github.com/tjackiet/bitbank-genesis-mcp-server)) はサーバー側で計算済みの結論を LLM に渡す
+- **この CLI** は生データを高速に取得し、モデル（Opus, o3 等）自身に計算させる
+
+同じ bitbank API に対して、真逆のアプローチを提供します。モデルに生 OHLCV を渡せば、指標のパラメータもロジックも完全にカスタマイズ可能。MCP の固定実装では対応できない「自分だけの指標」が作れます。
 
 ## セットアップ
 
 ```bash
+git clone https://github.com/tjackiet/bitbank-cli-skills.git
+cd bitbank-cli-skills
 npm install
-npx bitbank --help
 ```
 
-## Private API の設定
-
-Private API（資産残高、注文履歴など）を利用するには、bitbank の API キーが必要です。
+### Public API（認証不要）
 
 ```bash
-# .env.example をコピー
+npx bitbank ticker btc_jpy
+npx bitbank candles btc_jpy --type=1day --format=table
+```
+
+### Private API（要 API キー）
+
+```bash
 cp .env.example .env
+# .env を編集して BITBANK_API_KEY / BITBANK_API_SECRET を設定
 
-# .env を編集して API キーを設定
-# BITBANK_API_KEY=your_api_key
-# BITBANK_API_SECRET=your_api_secret
+npx tsx --env-file=.env cli/index.ts assets
+npx tsx --env-file=.env cli/index.ts active-orders --pair=btc_jpy
 ```
 
-実行時に `--env-file` オプションで読み込みます:
+> `.env` は `.gitignore` に含まれています。API キーは絶対にコミットしないでください。
+
+## コマンド一覧
+
+### Public（認証不要）
+
+| コマンド | 説明 | 使用例 |
+|---------|------|--------|
+| `ticker` | 単一ペアのティッカー | `npx bitbank ticker btc_jpy` |
+| `tickers` | 全ペア一括ティッカー | `npx bitbank tickers` |
+| `tickers-jpy` | 全JPYペア一括 | `npx bitbank tickers-jpy` |
+| `depth` | 板情報（asks/bids） | `npx bitbank depth btc_jpy` |
+| `transactions` | 約定履歴 | `npx bitbank transactions btc_jpy` |
+| `candles` | ローソク足 OHLCV | `npx bitbank candles btc_jpy --type=1day` |
+| `circuit-break` | サーキットブレーカー | `npx bitbank circuit-break btc_jpy` |
+| `status` | 取引所ステータス | `npx bitbank status` |
+| `pairs` | ペア設定情報 | `npx bitbank pairs` |
+
+### Private（要認証）
+
+| コマンド | 説明 | 使用例 |
+|---------|------|--------|
+| `assets` | 保有資産一覧 | `assets --format=table` |
+| `order` | 注文情報照会 | `order --pair=btc_jpy --order-id=123` |
+| `orders-info` | 複数注文照会 | `orders-info --pair=btc_jpy --order-ids=1,2,3` |
+| `active-orders` | アクティブ注文 | `active-orders --pair=btc_jpy` |
+| `trade-history` | 約定履歴 | `trade-history --pair=btc_jpy` |
+| `deposit-history` | 入金履歴 | `deposit-history --asset=btc` |
+| `unconfirmed-deposits` | 未確認入金 | `unconfirmed-deposits` |
+| `deposit-originators` | 入金元情報 | `deposit-originators --asset=btc` |
+| `withdrawal-accounts` | 出金先一覧 | `withdrawal-accounts --asset=btc` |
+| `withdrawal-history` | 出金履歴 | `withdrawal-history --asset=btc` |
+| `margin-status` | 証拠金ステータス | `margin-status` |
+| `margin-positions` | ポジション情報 | `margin-positions --pair=btc_jpy` |
+
+### Trade（資金操作 — ドライランデフォルト）
+
+| コマンド | 説明 | 使用例 |
+|---------|------|--------|
+| `create-order` | 新規注文 | `create-order --pair=btc_jpy --side=buy --type=limit --price=9000000 --amount=0.001` |
+| `cancel-order` | 注文キャンセル | `cancel-order --pair=btc_jpy --order-id=123` |
+| `cancel-orders` | 一括キャンセル | `cancel-orders --pair=btc_jpy --order-ids=1,2,3` |
+| `confirm-deposits` | 入金確認 | `confirm-deposits --id=456` |
+| `confirm-deposits-all` | 全入金確認 | `confirm-deposits-all` |
+| `withdraw` | 出金リクエスト | `withdraw --asset=btc --uuid=xxx --amount=0.1 --execute --confirm` |
+
+> Trade コマンドは `--execute` を付けない限り API を叩きません（ドライラン）。`withdraw` は追加で `--confirm` も必須です。
+
+### Stream（リアルタイム）
 
 ```bash
-npx tsx --env-file=.env cli/index.ts assets
-npx tsx --env-file=.env cli/index.ts assets --format=table
+# Public: ティッカー・約定・板のリアルタイム配信
+npx bitbank stream btc_jpy
+
+# チャンネル指定
+npx bitbank stream btc_jpy --channel=transactions
+
+# Private: ユーザーデータのリアルタイム配信
+npx tsx --env-file=.env cli/index.ts stream --private --pair=btc_jpy
 ```
 
-> **注意:** `.env` は `.gitignore` に含まれており、コミットされません。API キーは絶対にコミットしないでください。
+## 出力フォーマット
 
----
+全コマンドで `--format` オプションが使えます:
 
-詳細なドキュメントは今後追加予定です。
+```bash
+npx bitbank ticker btc_jpy --format=json   # デフォルト
+npx bitbank ticker btc_jpy --format=table  # 見やすいテーブル
+npx bitbank ticker btc_jpy --format=csv    # パイプ・インポート向け
+```
+
+```bash
+# jq でフィルタ
+npx bitbank ticker btc_jpy | jq '.last'
+
+# CSV をファイルに保存
+npx bitbank candles btc_jpy --type=1day --format=csv > btc_daily.csv
+```
+
+## Agent Skills
+
+Claude Code / Cursor 等のエージェント環境で自動的にトリガーされる Skill を3つ搭載しています。Skill はモデルへの指示書であり、CLI コマンドを組み合わせて分析を実行します。
+
+### indicator-analysis
+
+テクニカル指標を計算・分析。SMA、RSI、MACD、ボリンジャーバンド等。
+
+```
+「BTC の RSI を見て」
+「移動平均のクロスを確認して」
+「ETH の4時間足でテクニカル分析して」
+```
+
+### backtest
+
+トレーディング戦略のバックテスト。SMA クロス、RSI 逆張り等を過去データでシミュレーション。
+
+```
+「SMA クロス戦略をバックテストして」
+「過去1年の BTC で RSI 逆張りの成績は？」
+「複数の戦略を比較して」
+```
+
+### portfolio
+
+保有資産のポートフォリオ分析。資産構成・JPY 建て評価額・月次推移。
+
+```
+「ポートフォリオの状況を見せて」
+「資産推移を見たい」
+「保有資産の比率を確認して」
+```
+
+### 独自 Skill の追加
+
+`.claude/skills/<name>/SKILL.md` を作成するだけで独自 Skill を追加できます。詳細は [カスタマイズガイド](docs/customization-guide.md) を参照してください。
+
+## 開発
+
+```bash
+npm test          # テスト実行
+npm run lint      # Biome lint
+npm run typecheck # 型チェック
+```
+
+### アーキテクチャ
+
+```
+cli/
+  index.ts              # サブコマンドルーター
+  output.ts             # json/table/csv フォーマッター
+  types.ts              # Result<T> 型定義
+  http.ts               # Public API クライアント
+  http-private.ts       # Private GET（HMAC 認証）
+  http-private-post.ts  # Private POST（HMAC 認証）
+  auth.ts               # HMAC-SHA256 署名
+  commands/
+    public/             # 認証不要コマンド（9）
+    private/            # 認証必要・読み取り専用（13）
+    trade/              # 資金操作・ドライランデフォルト（6）
+    stream.ts           # リアルタイムストリーム
+  __tests__/            # 全コマンドのテスト（37ファイル / 140テスト）
+.claude/skills/         # Agent Skills（3本）
+docs/                   # ADR・フェーズ管理・カスタマイズガイド
+```
+
+### 設計原則
+
+- **CLI に分析ロジックを入れない** — API データの取得と整形だけ
+- **Zod スキーマが型の単一ソース** — 手動 `interface` 禁止
+- **Result パターン** — `throw` せず `{ success, data } | { success, error }` で返す
+- **1 ファイル 100 行以内** — 超えたら分割
+- **Trade コマンドはドライランデフォルト** — `--execute` なしでは API を叩かない
