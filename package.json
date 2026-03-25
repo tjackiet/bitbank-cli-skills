@@ -10,6 +10,8 @@
     "test": "vitest"
   },
   "dependencies": {
+    "pubnub": "^10.2.9",
+    "socket.io-client": "^4.8.3",
     "tsx": "^4.19.0",
     "zod": "^3.24.0"
   },

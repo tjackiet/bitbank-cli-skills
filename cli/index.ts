@@ -28,6 +28,7 @@ import { cancelOrders } from "./commands/trade/cancel-orders.js";
 import { confirmDeposits } from "./commands/trade/confirm-deposits.js";
 import { confirmDepositsAll } from "./commands/trade/confirm-deposits-all.js";
 import { withdraw } from "./commands/trade/withdraw.js";
+import { streamCommand } from "./commands/stream.js";
 
 const COMMANDS: Record<string, string> = {
   // Public API
@@ -60,6 +61,8 @@ const COMMANDS: Record<string, string> = {
   "confirm-deposits":     "Confirm a deposit (dry-run default)",
   "confirm-deposits-all": "Confirm all deposits (dry-run default)",
   withdraw:               "Request withdrawal (dry-run default, requires --confirm)",
+  // Stream (real-time)
+  stream:                 "Subscribe to real-time stream (public or --private)",
 };
 
 function showHelp(): void {
@@ -102,6 +105,10 @@ async function main(): Promise<void> {
       uuid: { type: "string" },
       token: { type: "string" },
       id: { type: "string" },
+      // Stream options
+      private: { type: "boolean", default: false },
+      channel: { type: "string" },
+      filter: { type: "string" },
     },
     strict: false,
   });
@@ -294,6 +301,21 @@ async function main(): Promise<void> {
       });
       if (r.success && "dryRun" in r.data) break;
       output(r, format);
+      break;
+    }
+    // Stream (real-time)
+    case "stream": {
+      const r = await streamCommand({
+        pair: args[0],
+        isPrivate: !!values.private,
+        channel: values.channel as string | undefined,
+        filter: values.filter as string | undefined,
+        format: format === "csv" ? "json" : (format as "json" | "table"),
+      });
+      if (!r.success) {
+        process.stderr.write(`Error: ${r.error}\n`);
+        process.exitCode = 1;
+      }
       break;
     }
     default:
