@@ -137,12 +137,12 @@
 
 ### Skills
 
-- [ ] `indicator-analysis` — 生OHLCVからモデルに任意の指標を計算させる
-- [ ] `backtest` — ストラテジーをモデルに定義・シミュレーションさせる
-- [ ] `portfolio` — 保有資産の損益分析・リバランス提案
+- [x] `indicator-analysis` — 生OHLCVからモデルに任意の指標を計算させる
+- [x] `backtest` — ストラテジーをモデルに定義・シミュレーションさせる
+- [x] `portfolio` — 保有資産の損益分析・リバランス提案
 
 ### ドキュメント
 
-- [ ] references（API リファレンス等）
+- [x] references（API リファレンス等）
 - [ ] カスタマイズガイド
 - [ ] README 拡充
