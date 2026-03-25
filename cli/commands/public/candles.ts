@@ -26,9 +26,11 @@ const CandlestickSchema = z.object({
 
 export type Candle = { open: number; high: number; low: number; close: number; vol: number; timestamp: number };
 
+const YEARLY_TYPES = new Set(["4hour", "8hour", "12hour", "1day", "1week", "1month"]);
+
 function todayDate(type: string): string {
   const now = new Date();
-  if (type === "1month") {
+  if (YEARLY_TYPES.has(type)) {
     return String(now.getFullYear());
   }
   const y = now.getFullYear();
