@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { candles, previousDate } from "../commands/public/candles.js";
 
 const MOCK_DATA = {
@@ -72,7 +72,10 @@ describe("candles", () => {
       callCount++;
       return new Response(JSON.stringify({ success: 1, data: MOCK_DATA }));
     };
-    const result = await candles("btc_jpy", "1day", "2026", 10, { fetch: countingFetch, retries: 0 });
+    const result = await candles("btc_jpy", "1day", "2026", 10, {
+      fetch: countingFetch,
+      retries: 0,
+    });
     expect(result.success).toBe(true);
     expect(callCount).toBe(1);
   });
@@ -95,27 +98,38 @@ describe("previousDate", () => {
 describe("candles auto-merge", () => {
   it("fetches previous period when limit exceeds single response", async () => {
     const year2026 = {
-      candlestick: [{
-        type: "1day", ohlcv: [
-          ["100", "110", "90", "105", "50", 4000],
-          ["105", "115", "95", "110", "60", 5000],
-        ]
-      }],
+      candlestick: [
+        {
+          type: "1day",
+          ohlcv: [
+            ["100", "110", "90", "105", "50", 4000],
+            ["105", "115", "95", "110", "60", 5000],
+          ],
+        },
+      ],
     };
     const year2025 = {
-      candlestick: [{
-        type: "1day", ohlcv: [
-          ["80", "90", "70", "85", "40", 1000],
-          ["85", "95", "75", "90", "45", 2000],
-          ["90", "100", "80", "95", "50", 3000],
-        ]
-      }],
+      candlestick: [
+        {
+          type: "1day",
+          ohlcv: [
+            ["80", "90", "70", "85", "40", 1000],
+            ["85", "95", "75", "90", "45", 2000],
+            ["90", "100", "80", "95", "50", 3000],
+          ],
+        },
+      ],
     };
 
     let callCount = 0;
     const mergeFetch: typeof globalThis.fetch = async (input) => {
       callCount++;
-      const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : (input as Request).url;
+      const url =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.toString()
+            : (input as Request).url;
       const data = url.includes("/2025") ? year2025 : year2026;
       return new Response(JSON.stringify({ success: 1, data }));
     };
@@ -123,7 +137,10 @@ describe("candles auto-merge", () => {
     // date=undefined triggers auto-merge; mock todayDate by not passing date
     // We can't easily mock todayDate, so we test via fetchOne directly
     // Instead, pass date=undefined and override fetch
-    const result = await candles("btc_jpy", "1day", undefined, 5, { fetch: mergeFetch, retries: 0 });
+    const result = await candles("btc_jpy", "1day", undefined, 5, {
+      fetch: mergeFetch,
+      retries: 0,
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toHaveLength(5);
@@ -135,12 +152,15 @@ describe("candles auto-merge", () => {
 
   it("stops on fetch error for previous period", async () => {
     const currentData = {
-      candlestick: [{
-        type: "1day", ohlcv: [
-          ["100", "110", "90", "105", "50", 1000],
-          ["105", "115", "95", "110", "60", 2000],
-        ]
-      }],
+      candlestick: [
+        {
+          type: "1day",
+          ohlcv: [
+            ["100", "110", "90", "105", "50", 1000],
+            ["105", "115", "95", "110", "60", 2000],
+          ],
+        },
+      ],
     };
 
     let callCount = 0;
@@ -152,7 +172,10 @@ describe("candles auto-merge", () => {
       return new Response(JSON.stringify({ success: 0, data: { code: 10000 } }), { status: 404 });
     };
 
-    const result = await candles("btc_jpy", "1day", undefined, 10, { fetch: errorFetch, retries: 0 });
+    const result = await candles("btc_jpy", "1day", undefined, 10, {
+      fetch: errorFetch,
+      retries: 0,
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toHaveLength(2);
@@ -162,11 +185,12 @@ describe("candles auto-merge", () => {
 
   it("respects MAX_FETCHES limit", async () => {
     const smallData = {
-      candlestick: [{
-        type: "1day", ohlcv: [
-          ["100", "110", "90", "105", "50", 1000],
-        ]
-      }],
+      candlestick: [
+        {
+          type: "1day",
+          ohlcv: [["100", "110", "90", "105", "50", 1000]],
+        },
+      ],
     };
 
     let callCount = 0;
@@ -175,7 +199,10 @@ describe("candles auto-merge", () => {
       return new Response(JSON.stringify({ success: 1, data: smallData }));
     };
 
-    const result = await candles("btc_jpy", "1day", undefined, 100, { fetch: manyFetch, retries: 0 });
+    const result = await candles("btc_jpy", "1day", undefined, 100, {
+      fetch: manyFetch,
+      retries: 0,
+    });
     expect(result.success).toBe(true);
     expect(callCount).toBe(3); // MAX_FETCHES = 3
   });
