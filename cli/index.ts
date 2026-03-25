@@ -15,6 +15,7 @@ import { order } from "./commands/private/order.js";
 import { ordersInfo } from "./commands/private/orders-info.js";
 import { activeOrders } from "./commands/private/active-orders.js";
 import { tradeHistory } from "./commands/private/trade-history.js";
+import { tradeHistoryAll } from "./commands/private/trade-history-all.js";
 import { depositHistory } from "./commands/private/deposit-history.js";
 import { unconfirmedDeposits } from "./commands/private/unconfirmed-deposits.js";
 import { depositOriginators } from "./commands/private/deposit-originators.js";
@@ -188,14 +189,20 @@ async function main(): Promise<void> {
       break;
     case "trade-history":
       output(
-        await tradeHistory({
-          pair: values.pair as string | undefined,
-          count: values.count as string | undefined,
-          orderId: values["order-id"] as string | undefined,
-          since: values.since as string | undefined,
-          end: values.end as string | undefined,
-          order: values.order as string | undefined,
-        }),
+        values.all
+          ? await tradeHistoryAll({
+              pair: values.pair as string | undefined,
+              since: values.since as string | undefined,
+              end: values.end as string | undefined,
+            }, )
+          : await tradeHistory({
+              pair: values.pair as string | undefined,
+              count: values.count as string | undefined,
+              orderId: values["order-id"] as string | undefined,
+              since: values.since as string | undefined,
+              end: values.end as string | undefined,
+              order: values.order as string | undefined,
+            }),
         format,
       );
       break;

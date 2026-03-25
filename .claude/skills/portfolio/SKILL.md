@@ -52,8 +52,8 @@ npx tsx --env-file=.env cli/index.ts assets --all --format=json
 保有している各ペアについて取引履歴を取得:
 
 ```bash
-npx tsx --env-file=.env cli/index.ts trade-history --pair=btc_jpy --format=json
-npx tsx --env-file=.env cli/index.ts trade-history --pair=eth_jpy --format=json
+npx tsx --env-file=.env cli/index.ts trade-history --pair=btc_jpy --all --format=json
+npx tsx --env-file=.env cli/index.ts trade-history --pair=eth_jpy --all --format=json
 ```
 
 入出金履歴を取得（コストベース計算の精度向上に必要）:
@@ -128,7 +128,7 @@ ETH     | 2.0        | 612,500     | 24.5% | 280,000      | 306,250     | +52,50
 ## Gotchas
 
 - **金額は文字列で返る。** `assets` の `onhand_amount`, `locked_amount` 等はすべて文字列。数値変換が必要
-- **取引履歴の取得件数に注意。** `trade-history` は1回のリクエストで最大1000件。件数が多い場合は `--since` / `--end` で期間を分割して取得する
+- **取引履歴は `--all` で全件取得する。** `trade-history --all` は自動ページネーションで1000件超の履歴も全件取得する。期間を絞りたい場合は `--since` / `--end` と併用可能
 - **maker/taker 手数料の区別。** 取引履歴の `fee_amount_base` と `fee_amount_quote` で手数料がわかる。損益計算に含めること
 - **locked_amount に注意。** オーダー中の資産は `locked_amount` に入る。実際に使える量は `free_amount`
 - **API がエラーを返した場合は `references/bitbank-api-formats.md` を読んでエラーコードを確認する**
