@@ -106,7 +106,7 @@ ETH     | 2.0        | 612,500     | 24.5% | 280,000      | 306,250     | +52,50
 ## Gotchas
 
 - **金額は文字列で返る。** `assets` の `onhand_amount`, `locked_amount` 等はすべて文字列。数値変換が必要
-- **取引履歴は最大3ヶ月分。** `trade-history` は過去約3ヶ月分しか取得できない。それ以前の取引は含まれないため、平均取得単価が正確でない可能性をユーザーに伝える
+- **取引履歴の取得件数に注意。** `trade-history` は1回のリクエストで最大1000件。件数が多い場合は `--since` / `--end` で期間を分割して取得する
 - **maker/taker 手数料の区別。** 取引履歴の `fee_amount_base` と `fee_amount_quote` で手数料がわかる。損益計算に含めること
 - **locked_amount に注意。** オーダー中の資産は `locked_amount` に入る。実際に使える量は `free_amount`
 - **API がエラーを返した場合は `references/bitbank-api-formats.md` を読んでエラーコードを確認する**
