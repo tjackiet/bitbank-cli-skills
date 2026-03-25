@@ -92,7 +92,7 @@ npx tsx --env-file=.env cli/index.ts <command> --format=json
 | `--end` | 終了タイムスタンプ（ミリ秒） |
 | `--order` | ソート順（`asc` or `desc`） |
 
-**制限:** 約3ヶ月分のデータのみ取得可能。
+**制限:** 1回のリクエストで最大1000件。件数が多い場合は `--since` / `--end` で期間を分割して取得する。
 
 ## ticker レスポンス形式
 
