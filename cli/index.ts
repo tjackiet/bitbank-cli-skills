@@ -22,6 +22,12 @@ import { withdrawalAccounts } from "./commands/private/withdrawal-accounts.js";
 import { withdrawalHistory } from "./commands/private/withdrawal-history.js";
 import { marginStatus } from "./commands/private/margin-status.js";
 import { marginPositions } from "./commands/private/margin-positions.js";
+import { createOrder } from "./commands/trade/create-order.js";
+import { cancelOrder } from "./commands/trade/cancel-order.js";
+import { cancelOrders } from "./commands/trade/cancel-orders.js";
+import { confirmDeposits } from "./commands/trade/confirm-deposits.js";
+import { confirmDepositsAll } from "./commands/trade/confirm-deposits-all.js";
+import { withdraw } from "./commands/trade/withdraw.js";
 
 const COMMANDS: Record<string, string> = {
   // Public API
@@ -47,6 +53,13 @@ const COMMANDS: Record<string, string> = {
   "withdrawal-history": "Get withdrawal history",
   "margin-status": "Get margin account status",
   "margin-positions": "Get open margin positions",
+  // Trade (write) — dry-run by default
+  "create-order":         "Create a spot order (dry-run default)",
+  "cancel-order":         "Cancel a spot order (dry-run default)",
+  "cancel-orders":        "Cancel multiple spot orders (dry-run default)",
+  "confirm-deposits":     "Confirm a deposit (dry-run default)",
+  "confirm-deposits-all": "Confirm all deposits (dry-run default)",
+  withdraw:               "Request withdrawal (dry-run default, requires --confirm)",
 };
 
 function showHelp(): void {
@@ -78,6 +91,17 @@ async function main(): Promise<void> {
       order: { type: "string" },
       asset: { type: "string" },
       all: { type: "boolean", default: false },
+      // Trade options
+      side: { type: "string" },
+      price: { type: "string" },
+      amount: { type: "string" },
+      "trigger-price": { type: "string" },
+      "post-only": { type: "boolean", default: false },
+      execute: { type: "boolean", default: false },
+      confirm: { type: "boolean", default: false },
+      uuid: { type: "string" },
+      token: { type: "string" },
+      id: { type: "string" },
     },
     strict: false,
   });
@@ -205,6 +229,73 @@ async function main(): Promise<void> {
     case "margin-positions":
       output(await marginPositions(values.pair as string | undefined), format);
       break;
+
+    // Trade (write)
+    case "create-order": {
+      const r = await createOrder({
+        pair: values.pair as string | undefined,
+        side: values.side as string | undefined,
+        type: values.type as string | undefined,
+        price: values.price as string | undefined,
+        amount: values.amount as string | undefined,
+        triggerPrice: values["trigger-price"] as string | undefined,
+        postOnly: !!values["post-only"],
+        execute: !!values.execute,
+      });
+      if (r.success && "dryRun" in r.data) break;
+      output(r, format);
+      break;
+    }
+    case "cancel-order": {
+      const r = await cancelOrder({
+        pair: values.pair as string | undefined,
+        orderId: values["order-id"] as string | undefined,
+        execute: !!values.execute,
+      });
+      if (r.success && "dryRun" in r.data) break;
+      output(r, format);
+      break;
+    }
+    case "cancel-orders": {
+      const r = await cancelOrders({
+        pair: values.pair as string | undefined,
+        orderIds: values["order-ids"] as string | undefined,
+        execute: !!values.execute,
+      });
+      if (r.success && "dryRun" in r.data) break;
+      output(r, format);
+      break;
+    }
+    case "confirm-deposits": {
+      const r = await confirmDeposits({
+        id: values.id as string | undefined,
+        execute: !!values.execute,
+      });
+      if (r.success && "dryRun" in r.data) break;
+      output(r, format);
+      break;
+    }
+    case "confirm-deposits-all": {
+      const r = await confirmDepositsAll({
+        execute: !!values.execute,
+      });
+      if (r.success && "dryRun" in r.data) break;
+      output(r, format);
+      break;
+    }
+    case "withdraw": {
+      const r = await withdraw({
+        asset: values.asset as string | undefined,
+        uuid: values.uuid as string | undefined,
+        amount: values.amount as string | undefined,
+        token: values.token as string | undefined,
+        execute: !!values.execute,
+        confirm: !!values.confirm,
+      });
+      if (r.success && "dryRun" in r.data) break;
+      output(r, format);
+      break;
+    }
     default:
       process.stderr.write(`Error: Unknown command "${command}". Run with --help for usage.\n`);
       process.exitCode = 1;
