@@ -1,13 +1,21 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { order } from "../commands/private/order.js";
 
 const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
 
 const MOCK_ORDER = {
-  order_id: 12345, pair: "btc_jpy", side: "buy", type: "limit",
-  start_amount: "0.001", remaining_amount: "0.001", executed_amount: "0",
-  price: "15000000", average_price: "0", ordered_at: 1234567890123,
-  expire_at: null, status: "UNFILLED",
+  order_id: 12345,
+  pair: "btc_jpy",
+  side: "buy",
+  type: "limit",
+  start_amount: "0.001",
+  remaining_amount: "0.001",
+  executed_amount: "0",
+  price: "15000000",
+  average_price: "0",
+  ordered_at: 1234567890123,
+  expire_at: null,
+  status: "UNFILLED",
 };
 
 function mockFetch(data: unknown = MOCK_ORDER): typeof globalThis.fetch {
@@ -26,7 +34,12 @@ describe("order", () => {
   });
 
   it("returns parsed order data", async () => {
-    const result = await order("btc_jpy", "12345", { fetch: mockFetch(), retries: 0, credentials: CREDS, nonce: "1" });
+    const result = await order("btc_jpy", "12345", {
+      fetch: mockFetch(),
+      retries: 0,
+      credentials: CREDS,
+      nonce: "1",
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.order_id).toBe(12345);

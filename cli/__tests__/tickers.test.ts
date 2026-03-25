@@ -1,8 +1,18 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { tickers, tickersJpy } from "../commands/public/tickers.js";
 
 const MOCK_DATA = [
-  { pair: "btc_jpy", sell: "100", buy: "99", high: "110", low: "90", open: "95", last: "100", vol: "10", timestamp: 1000 },
+  {
+    pair: "btc_jpy",
+    sell: "100",
+    buy: "99",
+    high: "110",
+    low: "90",
+    open: "95",
+    last: "100",
+    vol: "10",
+    timestamp: 1000,
+  },
 ];
 
 function mockFetch(data: unknown = MOCK_DATA): typeof globalThis.fetch {

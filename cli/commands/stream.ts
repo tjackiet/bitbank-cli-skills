@@ -1,5 +1,5 @@
-import { type Result } from "../types.js";
-import { type StreamFormat } from "../stream-format.js";
+import type { StreamFormat } from "../stream-format.js";
+import type { Result } from "../types.js";
 
 export type StreamArgs = {
   pair?: string;
@@ -22,7 +22,10 @@ export async function streamCommand(args: StreamArgs): Promise<Result<void>> {
   }
 
   if (!args.pair) {
-    return { success: false, error: "Pair is required for public stream. Usage: bitbank stream <pair>" };
+    return {
+      success: false,
+      error: "Pair is required for public stream. Usage: bitbank stream <pair>",
+    };
   }
 
   const { startPublicStream } = await import("../stream-public.js");

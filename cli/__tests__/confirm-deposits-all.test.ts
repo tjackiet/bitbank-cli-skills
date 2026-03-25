@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { confirmDepositsAll } from "../commands/trade/confirm-deposits-all.js";
 
 const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
@@ -20,7 +20,9 @@ describe("confirm-deposits-all", () => {
       { execute: true },
       {
         fetch: mockFetch({ success: 1, data: { status: "CONFIRMED" } }),
-        retries: 0, credentials: CREDS, nonce: "1",
+        retries: 0,
+        credentials: CREDS,
+        nonce: "1",
       },
     );
     expect(result.success).toBe(true);

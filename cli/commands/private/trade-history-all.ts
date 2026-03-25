@@ -1,6 +1,6 @@
-import { tradeHistory, type Trade } from "./trade-history.js";
-import { type PrivateHttpOptions } from "../../http-private.js";
-import { type Result } from "../../types.js";
+import type { PrivateHttpOptions } from "../../http-private.js";
+import type { Result } from "../../types.js";
+import { type Trade, tradeHistory } from "./trade-history.js";
 
 const PAGE_SIZE = 1000;
 

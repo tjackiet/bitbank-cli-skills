@@ -18,21 +18,12 @@ export function loadCredentials(): ApiCredentials | { error: string } {
   return { apiKey, apiSecret };
 }
 
-export function signGet(
-  nonce: string,
-  path: string,
-  queryString: string,
-  secret: string,
-): string {
-  const message = nonce + "/v1" + path + queryString;
+export function signGet(nonce: string, path: string, queryString: string, secret: string): string {
+  const message = `${nonce}/v1${path}${queryString}`;
   return createHmac("sha256", secret).update(message).digest("hex");
 }
 
-export function signPost(
-  nonce: string,
-  body: string,
-  secret: string,
-): string {
+export function signPost(nonce: string, body: string, secret: string): string {
   const message = nonce + body;
   return createHmac("sha256", secret).update(message).digest("hex");
 }

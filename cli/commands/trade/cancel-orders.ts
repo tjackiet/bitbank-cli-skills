@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { privatePost, type PrivatePostOptions } from "../../http-private-post.js";
-import { type Result } from "../../types.js";
+import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
+import type { Result } from "../../types.js";
 import { printDryRun } from "./dry-run.js";
 
 const CancelOrderItemSchema = z.object({
@@ -31,12 +31,17 @@ export async function cancelOrders(
   opts?: PrivatePostOptions,
 ): Promise<Result<CancelOrdersResponse | { dryRun: true }>> {
   if (!args.pair) return { success: false, error: "pair is required. Example: --pair=btc_jpy" };
-  if (!args.orderIds) return { success: false, error: "order-ids is required. Example: --order-ids=1,2,3" };
+  if (!args.orderIds)
+    return { success: false, error: "order-ids is required. Example: --order-ids=1,2,3" };
 
   const ids = args.orderIds.split(",").map((s) => Number(s.trim()));
-  if (ids.some(isNaN)) return { success: false, error: "order-ids must be comma-separated numbers" };
+  if (ids.some(Number.isNaN))
+    return { success: false, error: "order-ids must be comma-separated numbers" };
   if (ids.length > MAX_ORDER_IDS) {
-    return { success: false, error: `order-ids must be at most ${MAX_ORDER_IDS} items (got ${ids.length})` };
+    return {
+      success: false,
+      error: `order-ids must be at most ${MAX_ORDER_IDS} items (got ${ids.length})`,
+    };
   }
 
   const body = { pair: args.pair, order_ids: ids };

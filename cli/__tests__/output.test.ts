@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { output } from "../output.js";
 
 describe("output", () => {
@@ -8,8 +8,14 @@ describe("output", () => {
   beforeEach(() => {
     stdout = "";
     stderr = "";
-    vi.spyOn(process.stdout, "write").mockImplementation((s) => { stdout += s; return true; });
-    vi.spyOn(process.stderr, "write").mockImplementation((s) => { stderr += s; return true; });
+    vi.spyOn(process.stdout, "write").mockImplementation((s) => {
+      stdout += s;
+      return true;
+    });
+    vi.spyOn(process.stderr, "write").mockImplementation((s) => {
+      stderr += s;
+      return true;
+    });
     process.exitCode = undefined;
   });
 

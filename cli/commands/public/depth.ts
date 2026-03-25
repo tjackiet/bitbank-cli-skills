@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { publicGet, type HttpOptions } from "../../http.js";
-import { type Result } from "../../types.js";
+import { type HttpOptions, publicGet } from "../../http.js";
+import type { Result } from "../../types.js";
 
 const DepthSchema = z.object({
   asks: z.array(z.tuple([z.string(), z.string()])),
@@ -10,10 +10,7 @@ const DepthSchema = z.object({
 
 export type Depth = z.infer<typeof DepthSchema>;
 
-export async function depth(
-  pair: string | undefined,
-  opts?: HttpOptions,
-): Promise<Result<Depth>> {
+export async function depth(pair: string | undefined, opts?: HttpOptions): Promise<Result<Depth>> {
   if (!pair) {
     return { success: false, error: "pair is required. Example: npx bitbank depth btc_jpy" };
   }

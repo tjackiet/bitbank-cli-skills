@@ -1,12 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { depositOriginators } from "../commands/private/deposit-originators.js";
 
 const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
 
 const MOCK = {
-  originators: [
-    { uuid: "abc", label: "main", address: "1A1zP1...", asset: "btc" },
-  ],
+  originators: [{ uuid: "abc", label: "main", address: "1A1zP1...", asset: "btc" }],
 };
 
 function mockFetch(data: unknown = MOCK): typeof globalThis.fetch {
@@ -21,7 +19,10 @@ describe("depositOriginators", () => {
 
   it("returns originators", async () => {
     const result = await depositOriginators("btc", {
-      fetch: mockFetch(), retries: 0, credentials: CREDS, nonce: "1",
+      fetch: mockFetch(),
+      retries: 0,
+      credentials: CREDS,
+      nonce: "1",
     });
     expect(result.success).toBe(true);
     if (result.success) expect(result.data).toHaveLength(1);

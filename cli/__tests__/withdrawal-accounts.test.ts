@@ -1,12 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { withdrawalAccounts } from "../commands/private/withdrawal-accounts.js";
 
 const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
 
 const MOCK = {
-  accounts: [
-    { uuid: "abc", label: "main wallet", address: "1A1zP1..." },
-  ],
+  accounts: [{ uuid: "abc", label: "main wallet", address: "1A1zP1..." }],
 };
 
 function mockFetch(data: unknown = MOCK): typeof globalThis.fetch {
@@ -21,7 +19,10 @@ describe("withdrawalAccounts", () => {
 
   it("returns withdrawal accounts", async () => {
     const result = await withdrawalAccounts("btc", {
-      fetch: mockFetch(), retries: 0, credentials: CREDS, nonce: "1",
+      fetch: mockFetch(),
+      retries: 0,
+      credentials: CREDS,
+      nonce: "1",
     });
     expect(result.success).toBe(true);
     if (result.success) expect(result.data).toHaveLength(1);

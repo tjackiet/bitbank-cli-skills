@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { ticker } from "../commands/public/ticker.js";
 
 const MOCK_TICKER = {
@@ -13,8 +13,7 @@ const MOCK_TICKER = {
 };
 
 function mockFetch(data: unknown = MOCK_TICKER): typeof globalThis.fetch {
-  return async () =>
-    new Response(JSON.stringify({ success: 1, data }));
+  return async () => new Response(JSON.stringify({ success: 1, data }));
 }
 
 describe("ticker", () => {

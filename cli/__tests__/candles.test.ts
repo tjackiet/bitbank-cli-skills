@@ -1,15 +1,17 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { candles } from "../commands/public/candles.js";
 
 const MOCK_DATA = {
-  candlestick: [{
-    type: "1hour",
-    ohlcv: [
-      ["100", "110", "90", "105", "50", 1000],
-      ["105", "115", "95", "110", "60", 2000],
-      ["110", "120", "100", "115", "70", 3000],
-    ],
-  }],
+  candlestick: [
+    {
+      type: "1hour",
+      ohlcv: [
+        ["100", "110", "90", "105", "50", 1000],
+        ["105", "115", "95", "110", "60", 2000],
+        ["110", "120", "100", "115", "70", 3000],
+      ],
+    },
+  ],
 };
 
 function mockFetch(): typeof globalThis.fetch {
@@ -28,7 +30,10 @@ describe("candles", () => {
   });
 
   it("returns parsed candles", async () => {
-    const result = await candles("btc_jpy", "1hour", "20240101", 100, { fetch: mockFetch(), retries: 0 });
+    const result = await candles("btc_jpy", "1hour", "20240101", 100, {
+      fetch: mockFetch(),
+      retries: 0,
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toHaveLength(3);
@@ -50,7 +55,10 @@ describe("candles", () => {
   });
 
   it("respects limit", async () => {
-    const result = await candles("btc_jpy", "1hour", "20240101", 2, { fetch: mockFetch(), retries: 0 });
+    const result = await candles("btc_jpy", "1hour", "20240101", 2, {
+      fetch: mockFetch(),
+      retries: 0,
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toHaveLength(2);

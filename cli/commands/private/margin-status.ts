@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { privateGet, type PrivateHttpOptions } from "../../http-private.js";
-import { type Result } from "../../types.js";
+import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
+import type { Result } from "../../types.js";
 
 const MarginStatusSchema = z.object({
   margin_rate: z.string().nullable(),
@@ -14,9 +14,7 @@ const MarginStatusSchema = z.object({
 
 export type MarginStatus = z.infer<typeof MarginStatusSchema>;
 
-export async function marginStatus(
-  opts?: PrivateHttpOptions,
-): Promise<Result<MarginStatus>> {
+export async function marginStatus(opts?: PrivateHttpOptions): Promise<Result<MarginStatus>> {
   const result = await privateGet<unknown>("/user/margin/status", undefined, opts);
   if (!result.success) return result;
 

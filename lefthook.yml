@@ -1,0 +1,22 @@
+# lefthook.yml — pre-commit 品質ゲート
+pre-commit:
+  parallel: true
+  commands:
+    biome-check:
+      glob: "cli/**/*.ts"
+      run: npx biome check cli/
+    typecheck:
+      glob: "cli/**/*.ts"
+      run: npx tsc --noEmit
+    banned-throw:
+      glob: "cli/**/*.ts"
+      exclude: "cli/__tests__/**"
+      run: |
+        ! grep -rn --include='*.ts' '^\s*throw ' cli/ --exclude-dir=__tests__ || (echo '❌ throw は禁止。Result パターンを使うこと' && exit 1)
+    banned-new-date:
+      glob: "cli/**/*.ts"
+      exclude: "cli/__tests__/**"
+      run: |
+        ! grep -rn --include='*.ts' 'new Date()' cli/ --exclude-dir=__tests__ || (echo '⚠️  new Date() の使用を確認。タイムゾーン問題に注意' && exit 0)
+    test:
+      run: npx vitest run

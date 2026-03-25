@@ -1,5 +1,5 @@
 import { Readable } from "node:stream";
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { withdraw } from "../commands/trade/withdraw.js";
 
 const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
@@ -43,12 +43,14 @@ describe("withdraw", () => {
       { asset: "btc", uuid: "uuid-1", amount: "0.5", execute: true, confirm: true },
       {
         fetch: mockFetch(VALID_RESPONSE),
-        retries: 0, credentials: CREDS, nonce: "1",
+        retries: 0,
+        credentials: CREDS,
+        nonce: "1",
         skipConfirmPrompt: true,
       },
     );
     expect(result.success).toBe(true);
-    if (result.success) expect((result.data as any).uuid).toBe("withdraw-uuid");
+    if (result.success) expect((result.data as Record<string, unknown>).uuid).toBe("withdraw-uuid");
   });
 
   it("requires asset", async () => {
@@ -80,7 +82,14 @@ describe("withdraw", () => {
     const input = Readable.from(["no\n"]);
     const result = await withdraw(
       { asset: "btc", uuid: "uuid-1", amount: "0.5", execute: true, confirm: true },
-      { fetch: mockFetch(VALID_RESPONSE), retries: 0, credentials: CREDS, nonce: "1", input, output: process.stdout },
+      {
+        fetch: mockFetch(VALID_RESPONSE),
+        retries: 0,
+        credentials: CREDS,
+        nonce: "1",
+        input,
+        output: process.stdout,
+      },
     );
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("キャンセル");

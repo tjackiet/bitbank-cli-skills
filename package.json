@@ -7,7 +7,11 @@
     "bitbank": "./cli/index.ts"
   },
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "lint": "biome check cli/",
+    "lint:fix": "biome check --fix cli/",
+    "format": "biome format --write cli/",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "pubnub": "^10.2.9",
@@ -16,7 +20,9 @@
     "zod": "^3.24.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "1.9.4",
     "@types/node": "^22.0.0",
+    "lefthook": "1.11.5",
     "typescript": "^5.9.0-beta",
     "vitest": "^3.1.0"
   },

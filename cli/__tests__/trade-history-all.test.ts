@@ -1,13 +1,21 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { tradeHistoryAll } from "../commands/private/trade-history-all.js";
 
 const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
 
 function makeTrade(id: number, executedAt: number) {
   return {
-    trade_id: id, pair: "btc_jpy", order_id: id, side: "buy", type: "limit",
-    amount: "0.001", price: "15000000", maker_taker: "maker",
-    fee_amount_base: "0", fee_amount_quote: "0", executed_at: executedAt,
+    trade_id: id,
+    pair: "btc_jpy",
+    order_id: id,
+    side: "buy",
+    type: "limit",
+    amount: "0.001",
+    price: "15000000",
+    maker_taker: "maker",
+    fee_amount_base: "0",
+    fee_amount_quote: "0",
+    executed_at: executedAt,
   };
 }
 

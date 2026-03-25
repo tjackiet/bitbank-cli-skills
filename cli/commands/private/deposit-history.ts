@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { privateGet, type PrivateHttpOptions } from "../../http-private.js";
-import { type Result } from "../../types.js";
+import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
+import type { Result } from "../../types.js";
 
 const DepositSchema = z.object({
   uuid: z.string(),

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock PubNub
 const mockPubnub = {
@@ -25,8 +25,8 @@ vi.mock("../auth.js", () => ({
   loadCredentials: () => ({ apiKey: "key", apiSecret: "secret" }),
 }));
 
-import { startPrivateStream } from "../stream-private.js";
 import { writeStreamMessage } from "../stream-format.js";
+import { startPrivateStream } from "../stream-private.js";
 
 beforeEach(() => {
   vi.clearAllMocks();

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { transactions } from "../commands/public/transactions.js";
 
 const MOCK_DATA = {

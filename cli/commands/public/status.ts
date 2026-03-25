@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { publicGet, type HttpOptions } from "../../http.js";
-import { type Result } from "../../types.js";
+import { type HttpOptions, publicGet } from "../../http.js";
+import type { Result } from "../../types.js";
 
 const StatusItemSchema = z.object({
   pair: z.string(),

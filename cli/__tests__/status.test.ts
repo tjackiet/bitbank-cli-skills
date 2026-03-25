@@ -1,10 +1,8 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { status } from "../commands/public/status.js";
 
 const MOCK_DATA = {
-  statuses: [
-    { pair: "btc_jpy", status: "NORMAL", min_amount: "0.0001" },
-  ],
+  statuses: [{ pair: "btc_jpy", status: "NORMAL", min_amount: "0.0001" }],
 };
 
 function mockFetch(): typeof globalThis.fetch {

@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { publicGet, type HttpOptions } from "../../http.js";
-import { type Result } from "../../types.js";
+import { type HttpOptions, publicGet } from "../../http.js";
+import type { Result } from "../../types.js";
 
 const CircuitBreakSchema = z.object({
   mode: z.string(),
@@ -21,7 +21,10 @@ export async function circuitBreak(
   opts?: HttpOptions,
 ): Promise<Result<CircuitBreak>> {
   if (!pair) {
-    return { success: false, error: "pair is required. Example: npx bitbank circuit-break btc_jpy" };
+    return {
+      success: false,
+      error: "pair is required. Example: npx bitbank circuit-break btc_jpy",
+    };
   }
   const result = await publicGet<unknown>(`/${pair}/circuit_break_info`, opts);
   if (!result.success) return result;

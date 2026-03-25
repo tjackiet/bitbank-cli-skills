@@ -1,4 +1,4 @@
-import { type Result } from "./types.js";
+import type { Result } from "./types.js";
 
 const PUBLIC_BASE_URL = "https://public.bitbank.cc";
 
@@ -10,10 +10,7 @@ export type HttpOptions = {
   fetch?: FetchFn;
 };
 
-export async function publicGet<T>(
-  path: string,
-  opts: HttpOptions = {},
-): Promise<Result<T>> {
+export async function publicGet<T>(path: string, opts: HttpOptions = {}): Promise<Result<T>> {
   const { timeoutMs = 5000, retries = 2, fetch: fetchFn = globalThis.fetch } = opts;
   const url = `${PUBLIC_BASE_URL}${path}`;
 

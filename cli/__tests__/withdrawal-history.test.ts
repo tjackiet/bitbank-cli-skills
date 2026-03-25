@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { withdrawalHistory } from "../commands/private/withdrawal-history.js";
 
 const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
@@ -6,9 +6,15 @@ const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
 const MOCK = {
   withdrawals: [
     {
-      uuid: "abc", asset: "btc", amount: "0.1", fee: "0.0005",
-      label: "main", address: "1A1zP1...", txid: "tx123",
-      status: "DONE", requested_at: 1234567890123,
+      uuid: "abc",
+      asset: "btc",
+      amount: "0.1",
+      fee: "0.0005",
+      label: "main",
+      address: "1A1zP1...",
+      txid: "tx123",
+      status: "DONE",
+      requested_at: 1234567890123,
     },
   ],
 };
@@ -25,7 +31,10 @@ describe("withdrawalHistory", () => {
 
   it("returns withdrawal history", async () => {
     const result = await withdrawalHistory("btc", undefined, undefined, undefined, {
-      fetch: mockFetch(), retries: 0, credentials: CREDS, nonce: "1",
+      fetch: mockFetch(),
+      retries: 0,
+      credentials: CREDS,
+      nonce: "1",
     });
     expect(result.success).toBe(true);
     if (result.success) expect(result.data).toHaveLength(1);
