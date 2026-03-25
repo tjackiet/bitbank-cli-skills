@@ -15,6 +15,28 @@ npm install
 npx bitbank --help
 ```
 
+## Private API の設定
+
+Private API（資産残高、注文履歴など）を利用するには、bitbank の API キーが必要です。
+
+```bash
+# .env.example をコピー
+cp .env.example .env
+
+# .env を編集して API キーを設定
+# BITBANK_API_KEY=your_api_key
+# BITBANK_API_SECRET=your_api_secret
+```
+
+実行時に `--env-file` オプションで読み込みます:
+
+```bash
+npx tsx --env-file=.env cli/index.ts assets
+npx tsx --env-file=.env cli/index.ts assets --format=table
+```
+
+> **注意:** `.env` は `.gitignore` に含まれており、コミットされません。API キーは絶対にコミットしないでください。
+
 ---
 
 詳細なドキュメントは今後追加予定です。
