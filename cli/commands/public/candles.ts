@@ -66,6 +66,39 @@ function todayDate(type: string): string {
   return `${y}${m}${d}`;
 }
 
+export function previousDate(dateStr: string, type: string): string {
+  if (YEARLY_TYPES.has(type)) {
+    return String(Number(dateStr) - 1);
+  }
+  const y = Number(dateStr.slice(0, 4));
+  const m = Number(dateStr.slice(4, 6)) - 1;
+  const d = Number(dateStr.slice(6, 8));
+  const prev = new Date(y, m, d - 1);
+  const py = prev.getFullYear();
+  const pm = String(prev.getMonth() + 1).padStart(2, "0");
+  const pd = String(prev.getDate()).padStart(2, "0");
+  return `${py}${pm}${pd}`;
+}
+
+const MAX_FETCHES = 3;
+
+async function fetchOne(
+  pair: string, type: string, dateStr: string, opts?: HttpOptions,
+): Promise<Result<Candle[]>> {
+  const result = await publicGet<unknown>(`/${pair}/candlestick/${type}/${dateStr}`, opts);
+  if (!result.success) return result;
+
+  const parsed = CandlestickSchema.safeParse(result.data);
+  if (!parsed.success) {
+    return { success: false, error: `Invalid response: ${parsed.error.message}` };
+  }
+  const ohlcv = parsed.data.candlestick[0]?.ohlcv ?? [];
+  const rows: Candle[] = ohlcv.map(([open, high, low, close, vol, timestamp]) => ({
+    open, high, low, close, vol, timestamp,
+  }));
+  return { success: true, data: rows };
+}
+
 export async function candles(
   pair: string | undefined,
   type: string | undefined,
@@ -82,6 +115,7 @@ export async function candles(
   if (!type || !VALID_TYPES.includes(type as (typeof VALID_TYPES)[number])) {
     return { success: false, error: `--type is required. Valid: ${VALID_TYPES.join(", ")}` };
   }
+
   const dateStr = date ?? todayDate(type);
   if (date && YEARLY_TYPES.has(type) && date.length !== 4) {
     return {
@@ -95,13 +129,25 @@ export async function candles(
       error: `--type=${type} では日付を指定してください（例: --date=20250301）`,
     };
   }
-  const result = await publicGet<unknown>(`/${pair}/candlestick/${type}/${dateStr}`, opts);
-  if (!result.success) return result;
 
-  const parsed = CandlestickSchema.safeParse(result.data);
-  if (!parsed.success) {
-    return { success: false, error: `Invalid response: ${parsed.error.message}` };
+  const autoMerge = date === undefined;
+  const first = await fetchOne(pair, type, dateStr, opts);
+  if (!first.success) return first;
+
+  let allRows = first.data;
+
+  if (autoMerge) {
+    let currentDate = dateStr;
+    let fetches = 1;
+    while (allRows.length < limit && fetches < MAX_FETCHES) {
+      currentDate = previousDate(currentDate, type);
+      const prev = await fetchOne(pair, type, currentDate, opts);
+      if (!prev.success) break;
+      allRows = [...prev.data, ...allRows];
+      fetches++;
+    }
   }
+<<<<<<< HEAD
   const ohlcv = parsed.data.candlestick[0]?.ohlcv ?? [];
   const rows: Candle[] = ohlcv.map(([open, high, low, close, vol, timestamp]) => ({
     open,
@@ -112,4 +158,8 @@ export async function candles(
     timestamp,
   }));
   return { success: true, data: rows.slice(-limit) };
+=======
+
+  return { success: true, data: allRows.slice(-limit) };
+>>>>>>> 9820689 (feat: candles コマンドの --limit で年跨ぎ自動結合)
 }
