@@ -53,6 +53,12 @@ export async function candles(
     return { success: false, error: `--type is required. Valid: ${VALID_TYPES.join(", ")}` };
   }
   const dateStr = date ?? todayDate(type);
+  if (date && YEARLY_TYPES.has(type) && date.length !== 4) {
+    return { success: false, error: `--type=${type} では年を指定してください（例: --date=2025）。日付単位のデータには 1hour 等を使ってください` };
+  }
+  if (date && !YEARLY_TYPES.has(type) && date.length !== 8) {
+    return { success: false, error: `--type=${type} では日付を指定してください（例: --date=20250301）` };
+  }
   const result = await publicGet<unknown>(`/${pair}/candlestick/${type}/${dateStr}`, opts);
   if (!result.success) return result;
 
