@@ -13,6 +13,7 @@ jobs:
         with:
           node-version: 18
       - run: npm ci
+      - run: npm audit --audit-level=high
       - run: npx biome check cli/
       - run: npx tsc --noEmit
       - run: npx vitest run
