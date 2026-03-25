@@ -10,8 +10,21 @@ import { candles } from "./commands/public/candles.js";
 import { circuitBreak } from "./commands/public/circuit-break.js";
 import { status } from "./commands/public/status.js";
 import { pairs } from "./commands/public/pairs.js";
+import { assets } from "./commands/private/assets.js";
+import { order } from "./commands/private/order.js";
+import { ordersInfo } from "./commands/private/orders-info.js";
+import { activeOrders } from "./commands/private/active-orders.js";
+import { tradeHistory } from "./commands/private/trade-history.js";
+import { depositHistory } from "./commands/private/deposit-history.js";
+import { unconfirmedDeposits } from "./commands/private/unconfirmed-deposits.js";
+import { depositOriginators } from "./commands/private/deposit-originators.js";
+import { withdrawalAccounts } from "./commands/private/withdrawal-accounts.js";
+import { withdrawalHistory } from "./commands/private/withdrawal-history.js";
+import { marginStatus } from "./commands/private/margin-status.js";
+import { marginPositions } from "./commands/private/margin-positions.js";
 
 const COMMANDS: Record<string, string> = {
+  // Public API
   ticker:        "Get ticker for a pair (e.g. btc_jpy)",
   tickers:       "Get tickers for all pairs",
   "tickers-jpy": "Get tickers for all JPY pairs",
@@ -21,13 +34,26 @@ const COMMANDS: Record<string, string> = {
   "circuit-break": "Get circuit breaker info for a pair",
   status:        "Get exchange status for all pairs",
   pairs:         "Get all pair settings",
+  // Private API (read)
+  assets:        "Get your asset balances",
+  order:         "Get a specific order",
+  "orders-info": "Get multiple orders by IDs",
+  "active-orders": "Get active (open) orders",
+  "trade-history": "Get trade execution history",
+  "deposit-history": "Get deposit history",
+  "unconfirmed-deposits": "Get unconfirmed deposits",
+  "deposit-originators": "Get deposit originator addresses",
+  "withdrawal-accounts": "Get registered withdrawal accounts",
+  "withdrawal-history": "Get withdrawal history",
+  "margin-status": "Get margin account status",
+  "margin-positions": "Get open margin positions",
 };
 
 function showHelp(): void {
   console.log("Usage: bitbank <command> [options]\n");
   console.log("Commands:");
   for (const [name, desc] of Object.entries(COMMANDS)) {
-    console.log(`  ${name.padEnd(18)} ${desc}`);
+    console.log(`  ${name.padEnd(24)} ${desc}`);
   }
   console.log("\nOptions:");
   console.log("  --format=json|table|csv  Output format (default: json)");
@@ -43,6 +69,15 @@ async function main(): Promise<void> {
       type: { type: "string" },
       date: { type: "string" },
       limit: { type: "string", default: "100" },
+      pair: { type: "string" },
+      "order-id": { type: "string" },
+      "order-ids": { type: "string" },
+      count: { type: "string" },
+      since: { type: "string" },
+      end: { type: "string" },
+      order: { type: "string" },
+      asset: { type: "string" },
+      all: { type: "boolean", default: false },
     },
     strict: false,
   });
@@ -62,6 +97,7 @@ async function main(): Promise<void> {
   const [command, ...args] = positionals;
 
   switch (command) {
+    // Public API
     case "ticker":
       output(await ticker(args[0]), format);
       break;
@@ -96,6 +132,78 @@ async function main(): Promise<void> {
       break;
     case "pairs":
       output(await pairs(), format);
+      break;
+
+    // Private API (read)
+    case "assets":
+      output(await assets(!!values.all), format);
+      break;
+    case "order":
+      output(await order(values.pair as string, values["order-id"] as string), format);
+      break;
+    case "orders-info":
+      output(await ordersInfo(values.pair as string, values["order-ids"] as string), format);
+      break;
+    case "active-orders":
+      output(
+        await activeOrders(
+          values.pair as string | undefined,
+          values.count as string | undefined,
+          values.since as string | undefined,
+          values.end as string | undefined,
+        ),
+        format,
+      );
+      break;
+    case "trade-history":
+      output(
+        await tradeHistory({
+          pair: values.pair as string | undefined,
+          count: values.count as string | undefined,
+          orderId: values["order-id"] as string | undefined,
+          since: values.since as string | undefined,
+          end: values.end as string | undefined,
+          order: values.order as string | undefined,
+        }),
+        format,
+      );
+      break;
+    case "deposit-history":
+      output(
+        await depositHistory(
+          values.asset as string | undefined,
+          values.count as string | undefined,
+          values.since as string | undefined,
+          values.end as string | undefined,
+        ),
+        format,
+      );
+      break;
+    case "unconfirmed-deposits":
+      output(await unconfirmedDeposits(values.asset as string | undefined), format);
+      break;
+    case "deposit-originators":
+      output(await depositOriginators(values.asset as string | undefined), format);
+      break;
+    case "withdrawal-accounts":
+      output(await withdrawalAccounts(values.asset as string | undefined), format);
+      break;
+    case "withdrawal-history":
+      output(
+        await withdrawalHistory(
+          values.asset as string | undefined,
+          values.count as string | undefined,
+          values.since as string | undefined,
+          values.end as string | undefined,
+        ),
+        format,
+      );
+      break;
+    case "margin-status":
+      output(await marginStatus(), format);
+      break;
+    case "margin-positions":
+      output(await marginPositions(values.pair as string | undefined), format);
       break;
     default:
       process.stderr.write(`Error: Unknown command "${command}". Run with --help for usage.\n`);
