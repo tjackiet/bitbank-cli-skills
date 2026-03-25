@@ -99,14 +99,16 @@ cli/
 
 ## 開発フェーズ
 
+詳細なタスクチェックリストは [`docs/phases.md`](docs/phases.md) を参照。
+
 | Phase | 内容 | 状態 |
 |---|---|---|
-| Phase 0 | プロジェクト初期セットアップ | 進行中 |
-| Phase 1 | Public API コマンド（ticker, candles, depth 等） | 未着手 |
-| Phase 2 | Private API コマンド（assets, trade-history 等） | 未着手 |
-| Phase 3 | 取引コマンド（create-order, withdraw 等） | 未着手 |
-| Phase 4 | Agent Skills 基盤 | 未着手 |
-| Phase 5 | `.claude/skills/` 実装 | 未着手 |
+| Phase 0 | プロジェクト初期セットアップ | ✅ 完了 |
+| Phase 1 | Public API コマンド（9コマンド: ticker, candles, depth 等） | 未着手 |
+| Phase 2 | HMAC認証基盤 + Private API 読み取り系（12コマンド） | 未着手 |
+| Phase 3 | 注文・出金コマンド（6コマンド、安全設計込み） | 未着手 |
+| Phase 4 | Stream — PubNub リアルタイムデータ（2コマンド） | 未着手 |
+| Phase 5 | Agent Skills（3本）+ references + カスタマイズガイド | 未着手 |
 
 ---
 
