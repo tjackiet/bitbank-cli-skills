@@ -118,7 +118,7 @@ npx bitbank candles btc_jpy --type=1day --format=csv > btc_daily.csv
 
 ## Agent Skills
 
-Claude Code / Cursor 等のエージェント環境で自動的にトリガーされる Skill を3つ搭載しています。Skill はモデルへの指示書であり、CLI コマンドを組み合わせて分析を実行します。
+Claude Code / Cursor 等のエージェント環境で自動的にトリガーされる Skill を3つ搭載しています。Skill はモデルへの指示書であり、CLI コマンドを組み合わせて分析や取引を実行します。
 あくまでサンプルですので、ご自身の用途に合わせて追加・編集してください。
 
 ### indicator-analysis
