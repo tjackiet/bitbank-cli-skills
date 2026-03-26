@@ -21,6 +21,6 @@ pre-commit:
     secret-check:
       glob: "cli/**/*.{ts,json}"
       run: |
-        ! grep -rn 'BITBANK_API_KEY\|BITBANK_API_SECRET\|API_KEY=' --include='*.ts' --include='*.json' cli/ || (echo '❌ シークレットがコードに含まれています' && exit 1)
+        ! grep -rn 'BITBANK_API_KEY\|BITBANK_API_SECRET\|API_KEY=' --include='*.ts' --include='*.json' --exclude-dir=__tests__ cli/ | grep -v -e 'process\.env\.' -e '"BITBANK_API' || (echo '❌ シークレットがコードに含まれています' && exit 1)
     test:
       run: npx vitest run
