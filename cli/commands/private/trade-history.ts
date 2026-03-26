@@ -1,3 +1,5 @@
+// 単一ページの約定履歴取得 (GET /user/spot/trade_history)
+// 全件取得が必要な場合は trade-history-all.ts を使う（自動ページング）
 import { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
 import type { Result } from "../../types.js";

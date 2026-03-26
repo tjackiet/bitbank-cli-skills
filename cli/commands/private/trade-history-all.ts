@@ -1,3 +1,5 @@
+// trade-history.ts を自動ページングで全件取得するラッパー
+// CLI では `trade-history --all` で呼び出される
 import type { PrivateHttpOptions } from "../../http-private.js";
 import type { Result } from "../../types.js";
 import { type Trade, tradeHistory } from "./trade-history.js";
