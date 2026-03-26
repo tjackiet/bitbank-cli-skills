@@ -4,7 +4,7 @@ export const streamCommands: Record<string, { description: string; handler: Comm
   stream: {
     description: "Subscribe to real-time stream (public or --private)",
     handler: async (args, values, format) => {
-      const { streamCommand } = await import("./stream.js");
+      const { streamCommand } = await import("./stream/index.js");
       const fmt = format === "csv" ? "json" : (format as "json" | "table");
       const r = await streamCommand({
         pair: args[0],

@@ -1,0 +1,35 @@
+import { describe, expect, it } from "vitest";
+import { depositHistory } from "../../commands/private/deposit-history.js";
+
+const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
+
+const MOCK = {
+  deposits: [
+    {
+      uuid: "abc",
+      asset: "btc",
+      amount: "0.1",
+      txid: "tx123",
+      status: "DONE",
+      found_at: 1234567890123,
+      confirmed_at: 1234567890200,
+    },
+  ],
+};
+
+function mockFetch(data: unknown = MOCK): typeof globalThis.fetch {
+  return async () => new Response(JSON.stringify({ success: 1, data }));
+}
+
+describe("depositHistory", () => {
+  it("returns deposit history", async () => {
+    const result = await depositHistory("btc", undefined, undefined, undefined, {
+      fetch: mockFetch(),
+      retries: 0,
+      credentials: CREDS,
+      nonce: "1",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data).toHaveLength(1);
+  });
+});
