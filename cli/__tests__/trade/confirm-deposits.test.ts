@@ -1,11 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { confirmDeposits } from "../../commands/trade/confirm-deposits.js";
-
-const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
-
-function mockFetch(body: unknown): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify(body));
-}
+import { TEST_CREDS, mockFetchRaw } from "../test-helpers.js";
 
 describe("confirm-deposits", () => {
   it("returns dryRun without --execute", async () => {
@@ -19,9 +14,9 @@ describe("confirm-deposits", () => {
     const result = await confirmDeposits(
       { id: "12345", execute: true },
       {
-        fetch: mockFetch({ success: 1, data: { uuid: "abc", status: "CONFIRMED" } }),
+        fetch: mockFetchRaw({ success: 1, data: { uuid: "abc", status: "CONFIRMED" } }),
         retries: 0,
-        credentials: CREDS,
+        credentials: TEST_CREDS,
         nonce: "1",
       },
     );

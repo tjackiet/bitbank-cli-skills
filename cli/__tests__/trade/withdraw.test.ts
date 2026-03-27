@@ -1,12 +1,7 @@
 import { Readable } from "node:stream";
 import { describe, expect, it, vi } from "vitest";
 import { withdraw } from "../../commands/trade/withdraw.js";
-
-const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
-
-function mockFetch(body: unknown): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify(body));
-}
+import { TEST_CREDS, mockFetchRaw } from "../test-helpers.js";
 
 const VALID_RESPONSE = {
   success: 1,
@@ -42,9 +37,9 @@ describe("withdraw", () => {
     const result = await withdraw(
       { asset: "btc", uuid: "uuid-1", amount: "0.5", execute: true, confirm: true },
       {
-        fetch: mockFetch(VALID_RESPONSE),
+        fetch: mockFetchRaw(VALID_RESPONSE),
         retries: 0,
-        credentials: CREDS,
+        credentials: TEST_CREDS,
         nonce: "1",
         skipConfirmPrompt: true,
       },
@@ -83,9 +78,9 @@ describe("withdraw", () => {
     const result = await withdraw(
       { asset: "btc", uuid: "uuid-1", amount: "0.5", execute: true, confirm: true },
       {
-        fetch: mockFetch(VALID_RESPONSE),
+        fetch: mockFetchRaw(VALID_RESPONSE),
         retries: 0,
-        credentials: CREDS,
+        credentials: TEST_CREDS,
         nonce: "1",
         input,
         output: process.stdout,

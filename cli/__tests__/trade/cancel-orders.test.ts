@@ -1,11 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { cancelOrders } from "../../commands/trade/cancel-orders.js";
-
-const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
-
-function mockFetch(body: unknown): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify(body));
-}
+import { TEST_CREDS, mockFetchRaw } from "../test-helpers.js";
 
 describe("cancel-orders", () => {
   it("returns dryRun without --execute", async () => {
@@ -19,7 +14,7 @@ describe("cancel-orders", () => {
     const result = await cancelOrders(
       { pair: "btc_jpy", orderIds: "1,2", execute: true },
       {
-        fetch: mockFetch({
+        fetch: mockFetchRaw({
           success: 1,
           data: {
             orders: [
@@ -43,7 +38,7 @@ describe("cancel-orders", () => {
           },
         }),
         retries: 0,
-        credentials: CREDS,
+        credentials: TEST_CREDS,
         nonce: "1",
       },
     );

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { tickers, tickersJpy } from "../../commands/public/tickers.js";
+import { mockFetchData } from "../test-helpers.js";
 
 const MOCK_DATA = [
   {
@@ -15,13 +16,9 @@ const MOCK_DATA = [
   },
 ];
 
-function mockFetch(data: unknown = MOCK_DATA): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify({ success: 1, data }));
-}
-
 describe("tickers", () => {
   it("returns parsed tickers", async () => {
-    const result = await tickers({ fetch: mockFetch(), retries: 0 });
+    const result = await tickers({ fetch: mockFetchData(MOCK_DATA), retries: 0 });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data[0].pair).toBe("btc_jpy");
@@ -32,7 +29,7 @@ describe("tickers", () => {
 
 describe("tickersJpy", () => {
   it("returns parsed tickers", async () => {
-    const result = await tickersJpy({ fetch: mockFetch(), retries: 0 });
+    const result = await tickersJpy({ fetch: mockFetchData(MOCK_DATA), retries: 0 });
     expect(result.success).toBe(true);
   });
 });

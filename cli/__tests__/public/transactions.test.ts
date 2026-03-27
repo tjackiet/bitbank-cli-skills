@@ -1,15 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { transactions } from "../../commands/public/transactions.js";
+import { mockFetchData } from "../test-helpers.js";
 
 const MOCK_DATA = {
   transactions: [
     { transaction_id: 1, side: "buy", price: "100", amount: "0.5", executed_at: 1000 },
   ],
 };
-
-function mockFetch(): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify({ success: 1, data: MOCK_DATA }));
-}
 
 describe("transactions", () => {
   it("returns error when pair is missing", async () => {
@@ -18,7 +15,10 @@ describe("transactions", () => {
   });
 
   it("returns parsed transactions", async () => {
-    const result = await transactions("btc_jpy", undefined, { fetch: mockFetch(), retries: 0 });
+    const result = await transactions("btc_jpy", undefined, {
+      fetch: mockFetchData(MOCK_DATA),
+      retries: 0,
+    });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data[0].price).toBe(100);

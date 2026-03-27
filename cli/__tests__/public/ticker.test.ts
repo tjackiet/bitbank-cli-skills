@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ticker } from "../../commands/public/ticker.js";
+import { mockFetchData } from "../test-helpers.js";
 
 const MOCK_TICKER = {
   sell: "15580000",
@@ -12,10 +13,6 @@ const MOCK_TICKER = {
   timestamp: 1234567890123,
 };
 
-function mockFetch(data: unknown = MOCK_TICKER): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify({ success: 1, data }));
-}
-
 describe("ticker", () => {
   it("returns error when pair is missing", async () => {
     const result = await ticker(undefined);
@@ -23,7 +20,7 @@ describe("ticker", () => {
   });
 
   it("returns parsed ticker data", async () => {
-    const result = await ticker("btc_jpy", { fetch: mockFetch(), retries: 0 });
+    const result = await ticker("btc_jpy", { fetch: mockFetchData(MOCK_TICKER), retries: 0 });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.sell).toBe(15580000);
@@ -33,7 +30,7 @@ describe("ticker", () => {
   });
 
   it("returns error on invalid response", async () => {
-    const result = await ticker("btc_jpy", { fetch: mockFetch({ bad: "data" }), retries: 0 });
+    const result = await ticker("btc_jpy", { fetch: mockFetchData({ bad: "data" }), retries: 0 });
     expect(result.success).toBe(false);
   });
 });

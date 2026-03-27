@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { candles, previousDate } from "../../commands/public/candles.js";
+import { mockFetchData } from "../test-helpers.js";
 
 const MOCK_DATA = {
   candlestick: [
@@ -14,10 +15,6 @@ const MOCK_DATA = {
   ],
 };
 
-function mockFetch(): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify({ success: 1, data: MOCK_DATA }));
-}
-
 describe("candles", () => {
   it("returns error when pair is missing", async () => {
     const result = await candles(undefined, "1hour", undefined, 100);
@@ -31,7 +28,7 @@ describe("candles", () => {
 
   it("returns parsed candles", async () => {
     const result = await candles("btc_jpy", "1hour", "20240101", 100, {
-      fetch: mockFetch(),
+      fetch: mockFetchData(MOCK_DATA),
       retries: 0,
     });
     expect(result.success).toBe(true);
@@ -56,7 +53,7 @@ describe("candles", () => {
 
   it("respects limit", async () => {
     const result = await candles("btc_jpy", "1hour", "20240101", 2, {
-      fetch: mockFetch(),
+      fetch: mockFetchData(MOCK_DATA),
       retries: 0,
     });
     expect(result.success).toBe(true);
