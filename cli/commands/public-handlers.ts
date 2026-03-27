@@ -1,77 +1,51 @@
-import { output } from "../output.js";
-import type { Format, Result } from "../types.js";
-import type { CommandHandler } from "./handler-types.js";
+import type { CommandEntry } from "./handler-types.js";
+import { handler } from "./make-handler.js";
 
-export const publicCommands: Record<string, { description: string; handler: CommandHandler }> = {
+const h = handler;
+
+export const publicCommands: Record<string, CommandEntry> = {
   ticker: {
     description: "Get ticker for a pair (e.g. btc_jpy)",
-    handler: async (args, _v, fmt) => {
-      const { ticker } = await import("./public/ticker.js");
-      output(await ticker(args[0]), fmt);
-    },
+    handler: h("./public/ticker.js", "ticker", (a) => [a[0]]),
   },
   tickers: {
     description: "Get tickers for all pairs",
-    handler: async (_a, _v, fmt) => {
-      const { tickers } = await import("./public/tickers.js");
-      output(await tickers(), fmt);
-    },
+    handler: h("./public/tickers.js", "tickers", () => []),
   },
   "tickers-jpy": {
     description: "Get tickers for all JPY pairs",
-    handler: async (_a, _v, fmt) => {
-      const { tickersJpy } = await import("./public/tickers.js");
-      output(await tickersJpy(), fmt);
-    },
+    handler: h("./public/tickers.js", "tickersJpy", () => []),
   },
   depth: {
     description: "Get order book depth for a pair",
-    handler: async (args, _v, fmt) => {
-      const { depth } = await import("./public/depth.js");
-      output(await depth(args[0]), fmt);
-    },
+    handler: h("./public/depth.js", "depth", (a) => [a[0]]),
   },
   transactions: {
     description: "Get recent transactions for a pair",
-    handler: async (args, values, fmt) => {
-      const { transactions } = await import("./public/transactions.js");
-      output(await transactions(args[0], values.date as string | undefined), fmt);
-    },
+    handler: h("./public/transactions.js", "transactions", (a, v) => [
+      a[0],
+      v.date as string | undefined,
+    ]),
   },
   candles: {
     description: "Get candlestick OHLCV data",
-    handler: async (args, values, fmt) => {
-      const { candles } = await import("./public/candles.js");
-      output(
-        await candles(
-          args[0],
-          values.type as string | undefined,
-          values.date as string | undefined,
-          Number(values.limit ?? 100),
-        ),
-        fmt,
-      );
-    },
+    handler: h("./public/candles.js", "candles", (a, v) => [
+      a[0],
+      v.type as string | undefined,
+      v.date as string | undefined,
+      Number(v.limit ?? 100),
+    ]),
   },
   "circuit-break": {
     description: "Get circuit breaker info for a pair",
-    handler: async (args, _v, fmt) => {
-      const { circuitBreak } = await import("./public/circuit-break.js");
-      output(await circuitBreak(args[0]), fmt);
-    },
+    handler: h("./public/circuit-break.js", "circuitBreak", (a) => [a[0]]),
   },
   status: {
     description: "Get exchange status for all pairs",
-    handler: async (_a, _v, fmt) => {
-      const { status } = await import("./public/status.js");
-      output(await status(), fmt);
-    },
+    handler: h("./public/status.js", "status", () => []),
   },
   pairs: {
     description: "Get all pair settings",
-    handler: async (_a, _v, fmt) => {
-      const { pairs } = await import("./public/pairs.js");
-      output(await pairs(), fmt);
-    },
+    handler: h("./public/pairs.js", "pairs", () => []),
   },
 };
