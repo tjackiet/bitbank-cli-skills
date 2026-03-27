@@ -58,7 +58,7 @@ describe("Agent Skills", () => {
           .join("\n")
           .trim();
         expect(description).toBeDefined();
-        expect(description!.length).toBeLessThanOrEqual(1024);
+        expect(description?.length).toBeLessThanOrEqual(1024);
       });
 
       it("references/ files exist", () => {
