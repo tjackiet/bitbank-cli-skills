@@ -40,6 +40,47 @@ describe("privatePost", () => {
     expect(JSON.parse(capturedBody)).toEqual({ pair: "btc_jpy", order_ids: [1] });
   });
 
+  it("sends auth headers on POST request", async () => {
+    let capturedHeaders: Record<string, string> = {};
+    const fetch: typeof globalThis.fetch = async (_input, init) => {
+      capturedHeaders = init?.headers as Record<string, string>;
+      return new Response(JSON.stringify({ success: 1, data: {} }));
+    };
+    await privatePost(
+      "/user/spot/orders_info",
+      { pair: "btc_jpy" },
+      {
+        fetch,
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "123",
+      },
+    );
+    expect(capturedHeaders["ACCESS-KEY"]).toBe("testkey");
+    expect(capturedHeaders["ACCESS-NONCE"]).toBe("123");
+    expect(capturedHeaders["ACCESS-SIGNATURE"]).toBeDefined();
+    expect(capturedHeaders["ACCESS-TIME-WINDOW"]).toBe("5000");
+  });
+
+  it("sends Content-Type application/json on POST", async () => {
+    let capturedContentType = "";
+    const fetch: typeof globalThis.fetch = async (_input, init) => {
+      capturedContentType = (init?.headers as Record<string, string>)["Content-Type"];
+      return new Response(JSON.stringify({ success: 1, data: {} }));
+    };
+    await privatePost(
+      "/user/spot/orders_info",
+      { pair: "btc_jpy" },
+      {
+        fetch,
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "123",
+      },
+    );
+    expect(capturedContentType).toBe("application/json");
+  });
+
   it("returns formatted error on API failure", async () => {
     const fetch = mockFetchRaw({ success: 0, data: { code: 20001 } });
     const result = await privatePost(

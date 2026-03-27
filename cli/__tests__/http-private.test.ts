@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { signGet } from "../auth.js";
 import { privateGet } from "../http-private.js";
 import { TEST_CREDS, mockFetchRaw } from "./test-helpers.js";
 
@@ -83,6 +84,45 @@ describe("privateGet", () => {
     expect(result.success).toBe(false);
     if (origKey) process.env.BITBANK_API_KEY = origKey;
     if (origSecret) process.env.BITBANK_API_SECRET = origSecret;
+  });
+
+  it("sends auth headers on GET request", async () => {
+    let capturedHeaders: Record<string, string> = {};
+    const fetch: typeof globalThis.fetch = async (_input, init) => {
+      const h = init?.headers as Record<string, string>;
+      capturedHeaders = h;
+      return new Response(JSON.stringify({ success: 1, data: {} }));
+    };
+    await privateGet("/user/assets", undefined, {
+      fetch,
+      retries: 0,
+      credentials: TEST_CREDS,
+      nonce: "123",
+    });
+    expect(capturedHeaders["ACCESS-KEY"]).toBe("testkey");
+    expect(capturedHeaders["ACCESS-NONCE"]).toBe("123");
+    expect(capturedHeaders["ACCESS-SIGNATURE"]).toBeDefined();
+    expect(capturedHeaders["ACCESS-TIME-WINDOW"]).toBe("5000");
+  });
+
+  it("produces correct GET signature", async () => {
+    let capturedSig = "";
+    const fetch: typeof globalThis.fetch = async (_input, init) => {
+      capturedSig = (init?.headers as Record<string, string>)["ACCESS-SIGNATURE"];
+      return new Response(JSON.stringify({ success: 1, data: {} }));
+    };
+    await privateGet(
+      "/user/assets",
+      { pair: "btc_jpy" },
+      {
+        fetch,
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "123",
+      },
+    );
+    const expected = signGet("123", "/user/assets", "?pair=btc_jpy", TEST_CREDS.apiSecret);
+    expect(capturedSig).toBe(expected);
   });
 
   it("sends query params in URL", async () => {

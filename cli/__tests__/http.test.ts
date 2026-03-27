@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { publicGet } from "../http.js";
 import { mockFetchRaw } from "./test-helpers.js";
 
@@ -22,6 +22,7 @@ describe("publicGet", () => {
   });
 
   it("retries on API error code 60001", async () => {
+    vi.useFakeTimers();
     let calls = 0;
     const fetch = async () => {
       calls++;
@@ -30,12 +31,15 @@ describe("publicGet", () => {
       }
       return new Response(JSON.stringify({ success: 1, data: { ok: true } }));
     };
-    const result = await publicGet("/test", {
+    const p = publicGet("/test", {
       fetch: fetch as typeof globalThis.fetch,
       retries: 1,
     });
+    await vi.advanceTimersByTimeAsync(5000);
+    const result = await p;
     expect(result).toEqual({ success: true, data: { ok: true } });
     expect(calls).toBe(2);
+    vi.useRealTimers();
   });
 
   it("returns error on network failure", async () => {
@@ -44,5 +48,71 @@ describe("publicGet", () => {
     };
     const result = await publicGet("/x", { fetch: fetch as typeof globalThis.fetch, retries: 0 });
     expect(result).toEqual({ success: false, error: "network error" });
+  });
+
+  it("retries on HTTP 429 then succeeds", async () => {
+    vi.useFakeTimers();
+    let calls = 0;
+    const fetch: typeof globalThis.fetch = async () => {
+      calls++;
+      if (calls === 1) return new Response("", { status: 429 });
+      return new Response(JSON.stringify({ success: 1, data: { ok: true } }));
+    };
+    const p = publicGet("/test", { fetch, retries: 1 });
+    await vi.advanceTimersByTimeAsync(5000);
+    const result = await p;
+    expect(result).toEqual({ success: true, data: { ok: true } });
+    expect(calls).toBe(2);
+    vi.useRealTimers();
+  });
+
+  it("retries on HTTP 500 then succeeds", async () => {
+    vi.useFakeTimers();
+    let calls = 0;
+    const fetch: typeof globalThis.fetch = async () => {
+      calls++;
+      if (calls === 1) return new Response("", { status: 500 });
+      return new Response(JSON.stringify({ success: 1, data: { ok: true } }));
+    };
+    const p = publicGet("/test", { fetch, retries: 1 });
+    await vi.advanceTimersByTimeAsync(5000);
+    const result = await p;
+    expect(result).toEqual({ success: true, data: { ok: true } });
+    expect(calls).toBe(2);
+    vi.useRealTimers();
+  });
+
+  it("returns error when retries exhausted", async () => {
+    vi.useFakeTimers();
+    const fetch = mockFetchRaw({}, 500);
+    const p = publicGet("/test", { fetch, retries: 1 });
+    await vi.advanceTimersByTimeAsync(5000);
+    const result = await p;
+    expect(result.success).toBe(false);
+    vi.useRealTimers();
+  });
+
+  it("returns error on timeout", async () => {
+    const fetch: typeof globalThis.fetch = async (_url, init) => {
+      return new Promise((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () =>
+          reject(new DOMException("The operation was aborted.", "AbortError")),
+        );
+      });
+    };
+    const result = await publicGet("/test", { fetch, retries: 0, timeoutMs: 50 });
+    expect(result.success).toBe(false);
+    expect(result.success === false && result.error).toContain("abort");
+  });
+
+  it("does not retry 60001 when retries is 0", async () => {
+    let calls = 0;
+    const fetch: typeof globalThis.fetch = async () => {
+      calls++;
+      return new Response(JSON.stringify({ success: 0, data: { code: 60001 } }));
+    };
+    const result = await publicGet("/test", { fetch, retries: 0 });
+    expect(result.success).toBe(false);
+    expect(calls).toBe(1);
   });
 });
