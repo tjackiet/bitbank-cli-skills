@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { pairs } from "../../commands/public/pairs.js";
+import { mockFetchData } from "../test-helpers.js";
 
 const MOCK_DATA = {
   pairs: [
@@ -19,13 +20,9 @@ const MOCK_DATA = {
   ],
 };
 
-function mockFetch(): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify({ success: 1, data: MOCK_DATA }));
-}
-
 describe("pairs", () => {
   it("returns parsed pairs", async () => {
-    const result = await pairs({ fetch: mockFetch(), retries: 0 });
+    const result = await pairs({ fetch: mockFetchData(MOCK_DATA), retries: 0 });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data[0].name).toBe("btc_jpy");
