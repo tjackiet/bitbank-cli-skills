@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { depositHistory } from "../../commands/private/deposit-history.js";
-
-const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
+import { TEST_CREDS, mockFetchData } from "../test-helpers.js";
 
 const MOCK = {
   deposits: [
@@ -17,16 +16,12 @@ const MOCK = {
   ],
 };
 
-function mockFetch(data: unknown = MOCK): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify({ success: 1, data }));
-}
-
 describe("depositHistory", () => {
   it("returns deposit history", async () => {
     const result = await depositHistory("btc", undefined, undefined, undefined, {
-      fetch: mockFetch(),
+      fetch: mockFetchData(MOCK),
       retries: 0,
-      credentials: CREDS,
+      credentials: TEST_CREDS,
       nonce: "1",
     });
     expect(result.success).toBe(true);

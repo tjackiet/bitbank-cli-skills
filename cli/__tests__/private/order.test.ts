@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { order } from "../../commands/private/order.js";
-
-const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
+import { TEST_CREDS, mockFetchData } from "../test-helpers.js";
 
 const MOCK_ORDER = {
   order_id: 12345,
@@ -18,10 +17,6 @@ const MOCK_ORDER = {
   status: "UNFILLED",
 };
 
-function mockFetch(data: unknown = MOCK_ORDER): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify({ success: 1, data }));
-}
-
 describe("order", () => {
   it("returns error when pair is missing", async () => {
     const result = await order(undefined, "123");
@@ -35,9 +30,9 @@ describe("order", () => {
 
   it("returns parsed order data", async () => {
     const result = await order("btc_jpy", "12345", {
-      fetch: mockFetch(),
+      fetch: mockFetchData(MOCK_ORDER),
       retries: 0,
-      credentials: CREDS,
+      credentials: TEST_CREDS,
       nonce: "1",
     });
     expect(result.success).toBe(true);

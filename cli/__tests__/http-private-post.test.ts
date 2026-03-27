@@ -1,22 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { privatePost } from "../http-private-post.js";
-
-const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
-
-function mockFetch(body: unknown, status = 200): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify(body), { status });
-}
+import { TEST_CREDS, mockFetchRaw } from "./test-helpers.js";
 
 describe("privatePost", () => {
   it("returns data on success", async () => {
-    const fetch = mockFetch({ success: 1, data: { orders: [] } });
+    const fetch = mockFetchRaw({ success: 1, data: { orders: [] } });
     const result = await privatePost(
       "/user/spot/orders_info",
       { pair: "btc_jpy" },
       {
         fetch,
         retries: 0,
-        credentials: CREDS,
+        credentials: TEST_CREDS,
         nonce: "123",
       },
     );
@@ -37,7 +32,7 @@ describe("privatePost", () => {
       {
         fetch,
         retries: 0,
-        credentials: CREDS,
+        credentials: TEST_CREDS,
         nonce: "123",
       },
     );
@@ -46,14 +41,14 @@ describe("privatePost", () => {
   });
 
   it("returns formatted error on API failure", async () => {
-    const fetch = mockFetch({ success: 0, data: { code: 20001 } });
+    const fetch = mockFetchRaw({ success: 0, data: { code: 20001 } });
     const result = await privatePost(
       "/test",
       {},
       {
         fetch,
         retries: 0,
-        credentials: CREDS,
+        credentials: TEST_CREDS,
         nonce: "123",
       },
     );

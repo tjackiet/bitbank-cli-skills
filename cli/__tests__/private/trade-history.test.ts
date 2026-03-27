@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { tradeHistory } from "../../commands/private/trade-history.js";
-
-const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
+import { TEST_CREDS, mockFetchData } from "../test-helpers.js";
 
 const MOCK = {
   trades: [
@@ -21,10 +20,6 @@ const MOCK = {
   ],
 };
 
-function mockFetch(data: unknown = MOCK): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify({ success: 1, data }));
-}
-
 describe("tradeHistory", () => {
   it("returns error when pair is missing", async () => {
     const result = await tradeHistory({ pair: undefined });
@@ -35,9 +30,9 @@ describe("tradeHistory", () => {
     const result = await tradeHistory(
       { pair: "btc_jpy" },
       {
-        fetch: mockFetch(),
+        fetch: mockFetchData(MOCK),
         retries: 0,
-        credentials: CREDS,
+        credentials: TEST_CREDS,
         nonce: "1",
       },
     );

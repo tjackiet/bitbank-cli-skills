@@ -40,12 +40,19 @@ function printTable(data: unknown): void {
   }
 }
 
+function escapeCsvField(value: string): string {
+  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+}
+
 function printCsv(data: unknown): void {
   const rows = toRows(data);
   if (rows.length === 0) return;
   const keys = Object.keys(rows[0]);
-  process.stdout.write(`${keys.join(",")}\n`);
+  process.stdout.write(`${keys.map(escapeCsvField).join(",")}\n`);
   for (const row of rows) {
-    process.stdout.write(`${keys.map((k) => String(row[k] ?? "")).join(",")}\n`);
+    process.stdout.write(`${keys.map((k) => escapeCsvField(String(row[k] ?? ""))).join(",")}\n`);
   }
 }

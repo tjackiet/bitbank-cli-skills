@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { withdrawalHistory } from "../../commands/private/withdrawal-history.js";
-
-const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
+import { TEST_CREDS, mockFetchData } from "../test-helpers.js";
 
 const MOCK = {
   withdrawals: [
@@ -19,10 +18,6 @@ const MOCK = {
   ],
 };
 
-function mockFetch(data: unknown = MOCK): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify({ success: 1, data }));
-}
-
 describe("withdrawalHistory", () => {
   it("returns error when asset is missing", async () => {
     const result = await withdrawalHistory(undefined, undefined, undefined, undefined);
@@ -31,9 +26,9 @@ describe("withdrawalHistory", () => {
 
   it("returns withdrawal history", async () => {
     const result = await withdrawalHistory("btc", undefined, undefined, undefined, {
-      fetch: mockFetch(),
+      fetch: mockFetchData(MOCK),
       retries: 0,
-      credentials: CREDS,
+      credentials: TEST_CREDS,
       nonce: "1",
     });
     expect(result.success).toBe(true);

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { activeOrders } from "../../commands/private/active-orders.js";
-
-const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
+import { TEST_CREDS, mockFetchData } from "../test-helpers.js";
 
 const MOCK = {
   orders: [
@@ -22,16 +21,12 @@ const MOCK = {
   ],
 };
 
-function mockFetch(data: unknown = MOCK): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify({ success: 1, data }));
-}
-
 describe("activeOrders", () => {
   it("returns active orders", async () => {
     const result = await activeOrders("btc_jpy", undefined, undefined, undefined, {
-      fetch: mockFetch(),
+      fetch: mockFetchData(MOCK),
       retries: 0,
-      credentials: CREDS,
+      credentials: TEST_CREDS,
       nonce: "1",
     });
     expect(result.success).toBe(true);
@@ -40,9 +35,9 @@ describe("activeOrders", () => {
 
   it("works without pair (all pairs)", async () => {
     const result = await activeOrders(undefined, undefined, undefined, undefined, {
-      fetch: mockFetch(),
+      fetch: mockFetchData(MOCK),
       retries: 0,
-      credentials: CREDS,
+      credentials: TEST_CREDS,
       nonce: "1",
     });
     expect(result.success).toBe(true);

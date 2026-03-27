@@ -1,11 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { createOrder } from "../../commands/trade/create-order.js";
-
-const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
-
-function mockFetch(body: unknown): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify(body));
-}
+import { TEST_CREDS, mockFetchRaw } from "../test-helpers.js";
 
 const VALID_RESPONSE = {
   success: 1,
@@ -53,7 +48,7 @@ describe("create-order", () => {
         amount: "0.001",
         execute: true,
       },
-      { fetch: mockFetch(VALID_RESPONSE), retries: 0, credentials: CREDS, nonce: "1" },
+      { fetch: mockFetchRaw(VALID_RESPONSE), retries: 0, credentials: TEST_CREDS, nonce: "1" },
     );
     expect(result.success).toBe(true);
     if (result.success) expect((result.data as Record<string, unknown>).order_id).toBe(123);
