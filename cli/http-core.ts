@@ -68,6 +68,11 @@ export async function fetchWithRetry<T>(
       }
       const body = await res.json();
       if (body.success !== 1) {
+        const code = body.data?.code;
+        if (code === 60001 && attempt < retries) {
+          await retryDelay(null, attempt + 1);
+          continue;
+        }
         return { success: false, error: parseError(body) };
       }
       return { success: true, data: body.data as T };

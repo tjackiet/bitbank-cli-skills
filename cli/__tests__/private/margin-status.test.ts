@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { marginStatus } from "../../commands/private/margin-status.js";
-
-const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
+import { TEST_CREDS, mockFetchData } from "../test-helpers.js";
 
 const MOCK = {
   margin_rate: "300.00",
@@ -13,16 +12,12 @@ const MOCK = {
   margin_available: "900000",
 };
 
-function mockFetch(data: unknown = MOCK): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify({ success: 1, data }));
-}
-
 describe("marginStatus", () => {
   it("returns margin status", async () => {
     const result = await marginStatus({
-      fetch: mockFetch(),
+      fetch: mockFetchData(MOCK),
       retries: 0,
-      credentials: CREDS,
+      credentials: TEST_CREDS,
       nonce: "1",
     });
     expect(result.success).toBe(true);

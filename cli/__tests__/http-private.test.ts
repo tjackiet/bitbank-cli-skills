@@ -1,63 +1,58 @@
 import { describe, expect, it } from "vitest";
 import { privateGet } from "../http-private.js";
-
-const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
-
-function mockFetch(body: unknown, status = 200): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify(body), { status });
-}
+import { TEST_CREDS, mockFetchRaw } from "./test-helpers.js";
 
 describe("privateGet", () => {
   it("returns data on success", async () => {
-    const fetch = mockFetch({ success: 1, data: { assets: [] } });
+    const fetch = mockFetchRaw({ success: 1, data: { assets: [] } });
     const result = await privateGet("/user/assets", undefined, {
       fetch,
       retries: 0,
-      credentials: CREDS,
+      credentials: TEST_CREDS,
       nonce: "123",
     });
     expect(result).toEqual({ success: true, data: { assets: [] } });
   });
 
   it("returns formatted error on API failure", async () => {
-    const fetch = mockFetch({ success: 0, data: { code: 20001 } });
+    const fetch = mockFetchRaw({ success: 0, data: { code: 20001 } });
     const result = await privateGet("/user/assets", undefined, {
       fetch,
       retries: 0,
-      credentials: CREDS,
+      credentials: TEST_CREDS,
       nonce: "123",
     });
     expect(result).toEqual({ success: false, error: "20001: API認証失敗" });
   });
 
   it("returns error on permission failure", async () => {
-    const fetch = mockFetch({ success: 0, data: { code: 20003 } });
+    const fetch = mockFetchRaw({ success: 0, data: { code: 20003 } });
     const result = await privateGet("/user/assets", undefined, {
       fetch,
       retries: 0,
-      credentials: CREDS,
+      credentials: TEST_CREDS,
       nonce: "123",
     });
     expect(result).toEqual({ success: false, error: "20003: APIキー権限不足" });
   });
 
   it("returns error on rate limit", async () => {
-    const fetch = mockFetch({ success: 0, data: { code: 60001 } });
+    const fetch = mockFetchRaw({ success: 0, data: { code: 60001 } });
     const result = await privateGet("/user/assets", undefined, {
       fetch,
       retries: 0,
-      credentials: CREDS,
+      credentials: TEST_CREDS,
       nonce: "123",
     });
     expect(result).toEqual({ success: false, error: "60001: レート制限" });
   });
 
   it("returns error on HTTP failure", async () => {
-    const fetch = mockFetch({}, 500);
+    const fetch = mockFetchRaw({}, 500);
     const result = await privateGet("/user/assets", undefined, {
       fetch,
       retries: 0,
-      credentials: CREDS,
+      credentials: TEST_CREDS,
       nonce: "123",
     });
     expect(result.success).toBe(false);
@@ -70,7 +65,7 @@ describe("privateGet", () => {
     const result = await privateGet("/user/assets", undefined, {
       fetch: fetch as typeof globalThis.fetch,
       retries: 0,
-      credentials: CREDS,
+      credentials: TEST_CREDS,
       nonce: "123",
     });
     expect(result).toEqual({ success: false, error: "network error" });
@@ -83,7 +78,7 @@ describe("privateGet", () => {
     delete process.env.BITBANK_API_KEY;
     // biome-ignore lint/performance/noDelete: process.env requires delete
     delete process.env.BITBANK_API_SECRET;
-    const fetch = mockFetch({ success: 1, data: {} });
+    const fetch = mockFetchRaw({ success: 1, data: {} });
     const result = await privateGet("/user/assets", undefined, { fetch, retries: 0 });
     expect(result.success).toBe(false);
     if (origKey) process.env.BITBANK_API_KEY = origKey;
@@ -102,7 +97,7 @@ describe("privateGet", () => {
       {
         fetch,
         retries: 0,
-        credentials: CREDS,
+        credentials: TEST_CREDS,
         nonce: "123",
       },
     );

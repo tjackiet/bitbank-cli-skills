@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { marginPositions } from "../../commands/private/margin-positions.js";
-
-const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
+import { TEST_CREDS, mockFetchData } from "../test-helpers.js";
 
 const MOCK = {
   positions: [
@@ -19,16 +18,12 @@ const MOCK = {
   ],
 };
 
-function mockFetch(data: unknown = MOCK): typeof globalThis.fetch {
-  return async () => new Response(JSON.stringify({ success: 1, data }));
-}
-
 describe("marginPositions", () => {
   it("returns margin positions", async () => {
     const result = await marginPositions("btc_jpy", {
-      fetch: mockFetch(),
+      fetch: mockFetchData(MOCK),
       retries: 0,
-      credentials: CREDS,
+      credentials: TEST_CREDS,
       nonce: "1",
     });
     expect(result.success).toBe(true);
@@ -37,9 +32,9 @@ describe("marginPositions", () => {
 
   it("works without pair filter", async () => {
     const result = await marginPositions(undefined, {
-      fetch: mockFetch(),
+      fetch: mockFetchData(MOCK),
       retries: 0,
-      credentials: CREDS,
+      credentials: TEST_CREDS,
       nonce: "1",
     });
     expect(result.success).toBe(true);

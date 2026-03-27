@@ -37,6 +37,25 @@ describe("output", () => {
     expect(lines[1]).toBe("100,99");
   });
 
+  it("escapes CSV fields containing commas", () => {
+    output({ success: true, data: { name: "a,b", value: 1 } }, "csv");
+    const lines = stdout.trim().split("\n");
+    expect(lines[1]).toBe('"a,b",1');
+  });
+
+  it("escapes CSV fields containing double quotes", () => {
+    output({ success: true, data: { name: 'say "hi"', value: 2 } }, "csv");
+    const lines = stdout.trim().split("\n");
+    expect(lines[1]).toBe('"say ""hi""",2');
+  });
+
+  it("escapes CSV fields containing newlines", () => {
+    output({ success: true, data: { name: "line1\nline2", value: 3 } }, "csv");
+    const lines = stdout.split("\n");
+    // header + quoted field spans line, so raw split produces more lines
+    expect(stdout).toContain('"line1\nline2"');
+  });
+
   it("outputs error to stderr", () => {
     output({ success: false, error: "fail" }, "json");
     expect(stderr).toContain("fail");

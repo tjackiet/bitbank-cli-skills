@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { tradeHistoryAll } from "../../commands/private/trade-history-all.js";
-
-const CREDS = { apiKey: "testkey", apiSecret: "testsecret" };
+import { TEST_CREDS, mockFetchData } from "../test-helpers.js";
 
 function makeTrade(id: number, executedAt: number) {
   return {
@@ -27,12 +26,10 @@ describe("tradeHistoryAll", () => {
 
   it("fetches single page when fewer than 1000", async () => {
     const trades = Array.from({ length: 3 }, (_, i) => makeTrade(i + 1, 1000 + i));
-    const fetch: typeof globalThis.fetch = async () =>
-      new Response(JSON.stringify({ success: 1, data: { trades } }));
 
     const result = await tradeHistoryAll(
       { pair: "btc_jpy" },
-      { fetch, retries: 0, credentials: CREDS, nonce: "1" },
+      { fetch: mockFetchData({ trades }), retries: 0, credentials: TEST_CREDS, nonce: "1" },
     );
     expect(result.success).toBe(true);
     if (result.success) expect(result.data).toHaveLength(3);
@@ -49,7 +46,7 @@ describe("tradeHistoryAll", () => {
 
     const result = await tradeHistoryAll(
       { pair: "btc_jpy" },
-      { fetch, retries: 0, credentials: CREDS, nonce: "1" },
+      { fetch, retries: 0, credentials: TEST_CREDS, nonce: "1" },
     );
     expect(result.success).toBe(true);
     if (result.success) expect(result.data).toHaveLength(1500);
@@ -67,7 +64,7 @@ describe("tradeHistoryAll", () => {
 
     const result = await tradeHistoryAll(
       { pair: "btc_jpy" },
-      { fetch, retries: 0, credentials: CREDS, nonce: "1" },
+      { fetch, retries: 0, credentials: TEST_CREDS, nonce: "1" },
     );
     expect(result.success).toBe(true);
     if (result.success) expect(result.data).toHaveLength(1001);
