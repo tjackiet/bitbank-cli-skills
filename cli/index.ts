@@ -7,6 +7,7 @@ import type { Format } from "./types.js";
 function showHelp(): void {
   console.log("Usage: bitbank <command> [options]\n");
   console.log("Commands:");
+  console.log(`  ${"schema".padEnd(24)} Show command schemas (JSON Schema format)`);
   for (const [name, { description }] of Object.entries(COMMANDS)) {
     console.log(`  ${name.padEnd(24)} ${description}`);
   }
@@ -67,6 +68,20 @@ async function main(): Promise<void> {
   }
 
   const [command, ...args] = positionals;
+
+  if (command === "schema") {
+    const { buildSchemaHandler } = await import("./commands/schema/handler.js");
+    const descriptions = Object.fromEntries(
+      Object.entries(COMMANDS).map(([k, v]) => [k, v.description]),
+    );
+    await buildSchemaHandler(descriptions)(
+      args,
+      values as Record<string, string | boolean | undefined>,
+      format,
+    );
+    return;
+  }
+
   const entry = COMMANDS[command];
 
   if (!entry) {
