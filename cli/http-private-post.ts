@@ -1,4 +1,5 @@
 import { type ApiCredentials, authHeadersPost, loadCredentials } from "./auth.js";
+import { EXIT } from "./exit-codes.js";
 import { type BaseFetchOptions, fetchWithRetry, formatApiError } from "./http-core.js";
 import type { Result } from "./types.js";
 
@@ -15,7 +16,7 @@ export async function privatePost<T>(
   opts: PrivatePostOptions = {},
 ): Promise<Result<T>> {
   const creds = opts.credentials ?? loadCredentials();
-  if ("error" in creds) return { success: false, error: creds.error };
+  if ("error" in creds) return { success: false, error: creds.error, exitCode: EXIT.AUTH };
 
   const url = `${PRIVATE_BASE_URL}${path}`;
   const jsonBody = body ? JSON.stringify(body) : "";

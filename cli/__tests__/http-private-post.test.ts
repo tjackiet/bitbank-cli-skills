@@ -93,6 +93,6 @@ describe("privatePost", () => {
         nonce: "123",
       },
     );
-    expect(result).toEqual({ success: false, error: "20001: API認証失敗" });
+    expect(result).toMatchObject({ success: false, error: "20001: API認証失敗" });
   });
 });

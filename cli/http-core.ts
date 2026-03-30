@@ -1,3 +1,4 @@
+import { EXIT, type ExitCode } from "./exit-codes.js";
 import type { Result } from "./types.js";
 
 export const ERROR_CODES: Record<number, string> = {
@@ -16,6 +17,13 @@ export const ERROR_CODES: Record<number, string> = {
   60001: "レート制限",
   70001: "システムエラー",
 };
+
+export function apiErrorExitCode(code: number): (typeof EXIT)[keyof typeof EXIT] {
+  if (code >= 20001 && code <= 20003) return EXIT.AUTH;
+  if (code === 60001) return EXIT.RATE_LIMIT;
+  if (code >= 30001 && code <= 40001) return EXIT.PARAM;
+  return EXIT.GENERAL;
+}
 
 export function formatApiError(code: number): string {
   const msg = ERROR_CODES[code];
@@ -51,6 +59,7 @@ export async function fetchWithRetry<T>(
   const { timeoutMs = 5000, retries = 2, fetch: fetchFn = globalThis.fetch } = opts;
 
   let lastError = "";
+  let lastExitCode: ExitCode = EXIT.GENERAL;
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       const controller = new AbortController();
@@ -64,24 +73,26 @@ export async function fetchWithRetry<T>(
           continue;
         }
         lastError = `HTTP ${res.status}: ${res.statusText}`;
+        lastExitCode = res.status === 401 || res.status === 403 ? EXIT.AUTH : EXIT.GENERAL;
         continue;
       }
       const body = await res.json();
       if (body.success !== 1) {
-        const code = body.data?.code;
+        const code = body.data?.code ?? 0;
         if (code === 60001 && attempt < retries) {
           await retryDelay(null, attempt + 1);
           continue;
         }
-        return { success: false, error: parseError(body) };
+        return { success: false, error: parseError(body), exitCode: apiErrorExitCode(code) };
       }
       return { success: true, data: body.data as T };
     } catch (e) {
       lastError = e instanceof Error ? e.message : String(e);
+      lastExitCode = EXIT.NETWORK;
       if (attempt < retries) {
         await retryDelay(null, attempt + 1);
       }
     }
   }
-  return { success: false, error: lastError };
+  return { success: false, error: lastError, exitCode: lastExitCode };
 }

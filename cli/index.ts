@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 import { parseArgs } from "node:util";
 import { COMMANDS } from "./commands/registry.js";
+import { EXIT } from "./exit-codes.js";
 import type { Format } from "./types.js";
 
 function showHelp(): void {
@@ -45,6 +46,8 @@ async function main(): Promise<void> {
       private: { type: "boolean", default: false },
       channel: { type: "string" },
       filter: { type: "string" },
+      from: { type: "string" },
+      to: { type: "string" },
     },
     strict: false,
   });
@@ -57,7 +60,7 @@ async function main(): Promise<void> {
   const format = (values.format ?? "json") as Format;
   if (!["json", "table", "csv"].includes(format)) {
     process.stderr.write(`Error: Unknown format "${format}". Use json, table, or csv.\n`);
-    process.exitCode = 1;
+    process.exitCode = EXIT.PARAM;
     return;
   }
 
@@ -66,7 +69,7 @@ async function main(): Promise<void> {
 
   if (!entry) {
     process.stderr.write(`Error: Unknown command "${command}". Run with --help for usage.\n`);
-    process.exitCode = 1;
+    process.exitCode = EXIT.PARAM;
     return;
   }
 

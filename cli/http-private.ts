@@ -1,4 +1,5 @@
 import { type ApiCredentials, authHeadersGet, loadCredentials } from "./auth.js";
+import { EXIT } from "./exit-codes.js";
 import { type BaseFetchOptions, ERROR_CODES, fetchWithRetry, formatApiError } from "./http-core.js";
 import type { Result } from "./types.js";
 
@@ -17,7 +18,7 @@ export async function privateGet<T>(
   opts: PrivateHttpOptions = {},
 ): Promise<Result<T>> {
   const creds = opts.credentials ?? loadCredentials();
-  if ("error" in creds) return { success: false, error: creds.error };
+  if ("error" in creds) return { success: false, error: creds.error, exitCode: EXIT.AUTH };
 
   const qs =
     params && Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : "";

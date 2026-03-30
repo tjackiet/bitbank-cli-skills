@@ -3,7 +3,7 @@ import type { Format, Result } from "./types.js";
 export function output<T>(result: Result<T>, format: Format): void {
   if (!result.success) {
     process.stderr.write(`Error: ${result.error}\n`);
-    process.exitCode = 1;
+    process.exitCode = result.exitCode ?? 1;
     return;
   }
   const data = result.data;
