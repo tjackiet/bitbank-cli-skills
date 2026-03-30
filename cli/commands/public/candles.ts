@@ -18,11 +18,9 @@ function todayDate(type: string): string {
 
 const MAX_FETCHES = 3;
 
-function validateType(type: string | undefined): Result<string> {
-  if (!type || !VALID_TYPES.includes(type as (typeof VALID_TYPES)[number])) {
-    return { success: false, error: `--type is required. Valid: ${VALID_TYPES.join(", ")}` };
-  }
-  return { success: true, data: type };
+function validateType(type: string | undefined): string | null {
+  if (!type || !VALID_TYPES.includes(type as (typeof VALID_TYPES)[number])) return null;
+  return type;
 }
 
 function validateDateFormat(date: string, type: string, label: string): Result<string> {
@@ -53,8 +51,10 @@ export async function candles(
       error: "pair is required. Example: npx bitbank candles btc_jpy --type=1hour",
     };
   }
-  const tv = validateType(type);
-  if (!tv.success) return tv;
+  const validType = validateType(type);
+  if (!validType) {
+    return { success: false, error: `--type is required. Valid: ${VALID_TYPES.join(", ")}` };
+  }
 
   if ((from || to) && date) {
     return { success: false, error: "--date と --from/--to は同時に指定できません" };
@@ -64,23 +64,23 @@ export async function candles(
   }
 
   if (from && to) {
-    const fv = validateDateFormat(from, type!, "--from");
+    const fv = validateDateFormat(from, validType, "--from");
     if (!fv.success) return fv;
-    const tov = validateDateFormat(to, type!, "--to");
+    const tov = validateDateFormat(to, validType, "--to");
     if (!tov.success) return tov;
     if (from > to) return { success: false, error: "--from は --to 以前の日付にしてください" };
-    return candlesRange(pair, type!, from, to, opts);
+    return candlesRange(pair, validType, from, to, opts);
   }
 
   const effectiveLimit = limit ?? 100;
-  const dateStr = date ?? todayDate(type!);
+  const dateStr = date ?? todayDate(validType);
   if (date) {
-    const dv = validateDateFormat(date, type!, "--date");
+    const dv = validateDateFormat(date, validType, "--date");
     if (!dv.success) return dv;
   }
 
   const autoMerge = date === undefined;
-  const first = await fetchOne(pair, type!, dateStr, opts);
+  const first = await fetchOne(pair, validType, dateStr, opts);
   if (!first.success) return first;
 
   let allRows = first.data;
@@ -88,8 +88,8 @@ export async function candles(
     let currentDate = dateStr;
     let fetches = 1;
     while (allRows.length < effectiveLimit && fetches < MAX_FETCHES) {
-      currentDate = previousDate(currentDate, type!);
-      const prev = await fetchOne(pair, type!, currentDate, opts);
+      currentDate = previousDate(currentDate, validType);
+      const prev = await fetchOne(pair, validType, currentDate, opts);
       if (!prev.success) break;
       allRows = [...prev.data, ...allRows];
       fetches++;
