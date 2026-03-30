@@ -1,4 +1,5 @@
 import { output } from "../output.js";
+import { buildLogRecord, writeTradeLog } from "../trade-log.js";
 import type { CommandHandler, ParsedValues } from "./handler-types.js";
 
 /** Public/Private 用: module を動的 import して fn(...extractedArgs) → output */
@@ -17,7 +18,7 @@ function isDryRun(r: { success: boolean; data?: unknown }): boolean {
   return r.success && typeof r.data === "object" && r.data !== null && "dryRun" in r.data;
 }
 
-/** Trade 用: module を動的 import して fn(params) → isDryRun check → output */
+/** Trade 用: module を動的 import して fn(params) → isDryRun check → output + log */
 export function tradeHandler(
   modulePath: string,
   fnName: string,
@@ -25,7 +26,11 @@ export function tradeHandler(
 ): CommandHandler {
   return async (_a, values, fmt) => {
     const mod = await import(modulePath);
-    const r = await mod[fnName](extract(values));
-    if (!isDryRun(r)) output(r, fmt, values.raw === true);
+    const params = extract(values);
+    const r = await mod[fnName](params);
+    if (isDryRun(r)) return;
+    output(r, fmt, values.raw === true);
+    const logFile = values["log-file"] as string | undefined;
+    if (logFile) writeTradeLog(logFile, buildLogRecord(fnName, params, r));
   };
 }
