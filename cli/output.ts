@@ -1,6 +1,6 @@
 import type { Format, Result } from "./types.js";
 
-export function output<T>(result: Result<T>, format: Format): void {
+export function output<T>(result: Result<T>, format: Format, raw = false): void {
   if (!result.success) {
     process.stderr.write(`Error: ${result.error}\n`);
     process.exitCode = result.exitCode ?? 1;
@@ -9,7 +9,9 @@ export function output<T>(result: Result<T>, format: Format): void {
   const data = result.data;
   switch (format) {
     case "json":
-      process.stdout.write(`${JSON.stringify(data, null, 2)}\n`);
+      process.stdout.write(
+        `${JSON.stringify(data, raw ? undefined : null, raw ? undefined : 2)}\n`,
+      );
       break;
     case "table":
       printTable(data);

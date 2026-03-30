@@ -56,6 +56,16 @@ describe("output", () => {
     expect(stdout).toContain('"line1\nline2"');
   });
 
+  it("outputs compact JSON when raw=true", () => {
+    output({ success: true, data: { a: 1, b: 2 } }, "json", true);
+    expect(stdout).toBe('{"a":1,"b":2}\n');
+  });
+
+  it("outputs pretty JSON when raw=false", () => {
+    output({ success: true, data: { a: 1 } }, "json", false);
+    expect(stdout).toContain("\n  ");
+  });
+
   it("outputs error to stderr", () => {
     output({ success: false, error: "fail" }, "json");
     expect(stderr).toContain("fail");
