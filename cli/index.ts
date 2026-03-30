@@ -51,6 +51,7 @@ async function main(): Promise<void> {
       to: { type: "string" },
       raw: { type: "boolean", default: false },
       "no-cache": { type: "boolean", default: false },
+      "log-file": { type: "string" },
     },
     strict: false,
   });
