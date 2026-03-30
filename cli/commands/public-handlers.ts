@@ -36,6 +36,7 @@ export const publicCommands: Record<string, CommandEntry> = {
       v.from || v.to ? undefined : Number(v.limit ?? 100),
       v.from as string | undefined,
       v.to as string | undefined,
+      v["no-cache"] === true,
     ]),
   },
   "circuit-break": {

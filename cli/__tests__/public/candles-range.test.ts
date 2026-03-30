@@ -74,7 +74,7 @@ describe("candles --from/--to", () => {
       return new Response(JSON.stringify({ success: 1, data }));
     };
 
-    const result = await candles("btc_jpy", "1day", undefined, undefined, "2024", "2026", {
+    const result = await candles("btc_jpy", "1day", undefined, undefined, "2024", "2026", true, {
       fetch: rangeFetch,
       retries: 0,
     });
@@ -98,10 +98,19 @@ describe("candles --from/--to", () => {
       return new Response(JSON.stringify({ success: 1, data }));
     };
 
-    const result = await candles("btc_jpy", "1hour", undefined, undefined, "20260329", "20260330", {
-      fetch: rangeFetch,
-      retries: 0,
-    });
+    const result = await candles(
+      "btc_jpy",
+      "1hour",
+      undefined,
+      undefined,
+      "20260329",
+      "20260330",
+      true,
+      {
+        fetch: rangeFetch,
+        retries: 0,
+      },
+    );
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toHaveLength(2);
@@ -113,7 +122,7 @@ describe("candles --from/--to", () => {
     const errorFetch: typeof globalThis.fetch = async () =>
       new Response(JSON.stringify({ success: 0, data: { code: 10000 } }), { status: 404 });
 
-    const result = await candles("btc_jpy", "1day", undefined, undefined, "2024", "2026", {
+    const result = await candles("btc_jpy", "1day", undefined, undefined, "2024", "2026", true, {
       fetch: errorFetch,
       retries: 0,
     });

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isCompletePeriod, readCache, writeCache } from "../../cache.js";
 import { type HttpOptions, publicGet } from "../../http.js";
 import type { Result } from "../../types.js";
 
@@ -18,24 +19,8 @@ export const VALID_TYPES = [
 
 export const YEARLY_TYPES = new Set(["4hour", "8hour", "12hour", "1day", "1week", "1month"]);
 
-const CandleSchema = z.tuple([
-  z
-    .string()
-    .transform(Number), // open
-  z
-    .string()
-    .transform(Number), // high
-  z
-    .string()
-    .transform(Number), // low
-  z
-    .string()
-    .transform(Number), // close
-  z
-    .string()
-    .transform(Number), // vol
-  z.number(), // timestamp
-]);
+const Num = z.string().transform(Number);
+const CandleSchema = z.tuple([Num, Num, Num, Num, Num, z.number()]);
 
 const CandlestickSchema = z.object({
   candlestick: z.array(
@@ -72,7 +57,13 @@ export async function fetchOne(
   type: string,
   dateStr: string,
   opts?: HttpOptions,
+  noCache?: boolean,
 ): Promise<Result<Candle[]>> {
+  if (!noCache) {
+    const cached = readCache<Candle[]>(pair, type, dateStr);
+    if (cached) return { success: true, data: cached };
+  }
+
   const result = await publicGet<unknown>(`/${pair}/candlestick/${type}/${dateStr}`, opts);
   if (!result.success) return result;
 
@@ -89,5 +80,6 @@ export async function fetchOne(
     vol,
     timestamp,
   }));
+  if (!noCache && isCompletePeriod(dateStr)) writeCache(pair, type, dateStr, rows);
   return { success: true, data: rows };
 }

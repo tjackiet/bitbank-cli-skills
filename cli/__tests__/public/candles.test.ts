@@ -27,7 +27,7 @@ describe("candles", () => {
   });
 
   it("returns parsed candles", async () => {
-    const result = await candles("btc_jpy", "1hour", "20240101", 100, undefined, undefined, {
+    const result = await candles("btc_jpy", "1hour", "20240101", 100, undefined, undefined, true, {
       fetch: mockFetchData(MOCK_DATA),
       retries: 0,
     });
@@ -52,7 +52,7 @@ describe("candles", () => {
   });
 
   it("respects limit", async () => {
-    const result = await candles("btc_jpy", "1hour", "20240101", 2, undefined, undefined, {
+    const result = await candles("btc_jpy", "1hour", "20240101", 2, undefined, undefined, true, {
       fetch: mockFetchData(MOCK_DATA),
       retries: 0,
     });
@@ -69,7 +69,7 @@ describe("candles", () => {
       callCount++;
       return new Response(JSON.stringify({ success: 1, data: MOCK_DATA }));
     };
-    const result = await candles("btc_jpy", "1day", "2026", 10, undefined, undefined, {
+    const result = await candles("btc_jpy", "1day", "2026", 10, undefined, undefined, true, {
       fetch: countingFetch,
       retries: 0,
     });
@@ -129,7 +129,7 @@ describe("candles auto-merge", () => {
       return new Response(JSON.stringify({ success: 1, data }));
     };
 
-    const result = await candles("btc_jpy", "1day", undefined, 5, undefined, undefined, {
+    const result = await candles("btc_jpy", "1day", undefined, 5, undefined, undefined, true, {
       fetch: mergeFetch,
       retries: 0,
     });
@@ -163,7 +163,7 @@ describe("candles auto-merge", () => {
       return new Response(JSON.stringify({ success: 0, data: { code: 10000 } }), { status: 404 });
     };
 
-    const result = await candles("btc_jpy", "1day", undefined, 10, undefined, undefined, {
+    const result = await candles("btc_jpy", "1day", undefined, 10, undefined, undefined, true, {
       fetch: errorFetch,
       retries: 0,
     });
@@ -190,7 +190,7 @@ describe("candles auto-merge", () => {
       return new Response(JSON.stringify({ success: 1, data: smallData }));
     };
 
-    const result = await candles("btc_jpy", "1day", undefined, 100, undefined, undefined, {
+    const result = await candles("btc_jpy", "1day", undefined, 100, undefined, undefined, true, {
       fetch: manyFetch,
       retries: 0,
     });
