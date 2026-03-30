@@ -9,7 +9,7 @@ export function handler(
 ): CommandHandler {
   return async (args, values, fmt) => {
     const mod = await import(modulePath);
-    output(await mod[fnName](...extract(args, values)), fmt);
+    output(await mod[fnName](...extract(args, values)), fmt, values.raw === true);
   };
 }
 
@@ -26,6 +26,6 @@ export function tradeHandler(
   return async (_a, values, fmt) => {
     const mod = await import(modulePath);
     const r = await mod[fnName](extract(values));
-    if (!isDryRun(r)) output(r, fmt);
+    if (!isDryRun(r)) output(r, fmt, values.raw === true);
   };
 }

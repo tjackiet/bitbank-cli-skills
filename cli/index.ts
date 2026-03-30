@@ -48,6 +48,7 @@ async function main(): Promise<void> {
       filter: { type: "string" },
       from: { type: "string" },
       to: { type: "string" },
+      raw: { type: "boolean", default: false },
     },
     strict: false,
   });
