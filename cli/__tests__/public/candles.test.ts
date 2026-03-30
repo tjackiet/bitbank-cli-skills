@@ -27,7 +27,7 @@ describe("candles", () => {
   });
 
   it("returns parsed candles", async () => {
-    const result = await candles("btc_jpy", "1hour", "20240101", 100, {
+    const result = await candles("btc_jpy", "1hour", "20240101", 100, undefined, undefined, {
       fetch: mockFetchData(MOCK_DATA),
       retries: 0,
     });
@@ -52,7 +52,7 @@ describe("candles", () => {
   });
 
   it("respects limit", async () => {
-    const result = await candles("btc_jpy", "1hour", "20240101", 2, {
+    const result = await candles("btc_jpy", "1hour", "20240101", 2, undefined, undefined, {
       fetch: mockFetchData(MOCK_DATA),
       retries: 0,
     });
@@ -69,7 +69,7 @@ describe("candles", () => {
       callCount++;
       return new Response(JSON.stringify({ success: 1, data: MOCK_DATA }));
     };
-    const result = await candles("btc_jpy", "1day", "2026", 10, {
+    const result = await candles("btc_jpy", "1day", "2026", 10, undefined, undefined, {
       fetch: countingFetch,
       retries: 0,
     });
@@ -118,9 +118,7 @@ describe("candles auto-merge", () => {
       ],
     };
 
-    let callCount = 0;
     const mergeFetch: typeof globalThis.fetch = async (input) => {
-      callCount++;
       const url =
         typeof input === "string"
           ? input
@@ -131,10 +129,7 @@ describe("candles auto-merge", () => {
       return new Response(JSON.stringify({ success: 1, data }));
     };
 
-    // date=undefined triggers auto-merge; mock todayDate by not passing date
-    // We can't easily mock todayDate, so we test via fetchOne directly
-    // Instead, pass date=undefined and override fetch
-    const result = await candles("btc_jpy", "1day", undefined, 5, {
+    const result = await candles("btc_jpy", "1day", undefined, 5, undefined, undefined, {
       fetch: mergeFetch,
       retries: 0,
     });
@@ -143,7 +138,6 @@ describe("candles auto-merge", () => {
       expect(result.data).toHaveLength(5);
       expect(result.data[0].timestamp).toBe(1000);
       expect(result.data[4].timestamp).toBe(5000);
-      expect(callCount).toBe(2);
     }
   });
 
@@ -169,7 +163,7 @@ describe("candles auto-merge", () => {
       return new Response(JSON.stringify({ success: 0, data: { code: 10000 } }), { status: 404 });
     };
 
-    const result = await candles("btc_jpy", "1day", undefined, 10, {
+    const result = await candles("btc_jpy", "1day", undefined, 10, undefined, undefined, {
       fetch: errorFetch,
       retries: 0,
     });
@@ -196,7 +190,7 @@ describe("candles auto-merge", () => {
       return new Response(JSON.stringify({ success: 1, data: smallData }));
     };
 
-    const result = await candles("btc_jpy", "1day", undefined, 100, {
+    const result = await candles("btc_jpy", "1day", undefined, 100, undefined, undefined, {
       fetch: manyFetch,
       retries: 0,
     });

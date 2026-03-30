@@ -33,7 +33,9 @@ export const publicCommands: Record<string, CommandEntry> = {
       a[0],
       v.type as string | undefined,
       v.date as string | undefined,
-      Number(v.limit ?? 100),
+      v.from || v.to ? undefined : Number(v.limit ?? 100),
+      v.from as string | undefined,
+      v.to as string | undefined,
     ]),
   },
   "circuit-break": {
