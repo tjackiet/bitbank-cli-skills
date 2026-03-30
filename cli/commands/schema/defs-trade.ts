@@ -1,0 +1,91 @@
+import { type SchemaDef, p } from "./types.js";
+
+const pair = p("string", "Trading pair (e.g. btc_jpy)");
+const execute = p("boolean", "Execute for real (default: dry-run)");
+const n = { type: "number" };
+const s = { type: "string" };
+const sn = { type: ["string", "null"] };
+const b = { type: "boolean" };
+
+export const tradeSchemas: Record<string, SchemaDef> = {
+  "create-order": {
+    category: "trade",
+    params: {
+      pair,
+      side: p("string", "Order side", { enum: ["buy", "sell"] }),
+      type: p("string", "Order type", { enum: ["limit", "market", "stop", "stop_limit"] }),
+      price: p("string", "Price (required for limit/stop_limit)"),
+      amount: p("string", "Order amount"),
+      "trigger-price": p("string", "Trigger price (required for stop/stop_limit)"),
+      "post-only": p("boolean", "Post-only flag"),
+      execute,
+    },
+    output: {
+      type: "object",
+      properties: {
+        order_id: n,
+        pair: s,
+        side: s,
+        type: s,
+        start_amount: sn,
+        remaining_amount: sn,
+        executed_amount: s,
+        price: sn,
+        post_only: b,
+        status: s,
+        ordered_at: n,
+      },
+    },
+  },
+  "cancel-order": {
+    category: "trade",
+    params: { pair, "order-id": p("string", "Order ID to cancel"), execute },
+    output: { type: "object", properties: { order_id: n, pair: s, side: s, type: s, status: s } },
+  },
+  "cancel-orders": {
+    category: "trade",
+    params: { pair, "order-ids": p("string", "Comma-separated order IDs"), execute },
+    output: {
+      type: "array",
+      items: { type: "object", properties: { order_id: n, pair: s, status: s } },
+    },
+  },
+  "confirm-deposits": {
+    category: "trade",
+    params: { id: p("string", "Deposit ID to confirm"), execute },
+    output: { type: "object", properties: { id: n, status: s } },
+  },
+  "confirm-deposits-all": {
+    category: "trade",
+    params: { execute },
+    output: { type: "object", properties: { status: s } },
+  },
+  withdraw: {
+    category: "trade",
+    params: {
+      asset: p("string", "Asset to withdraw (e.g. btc)"),
+      uuid: p("string", "Withdrawal account UUID"),
+      amount: p("string", "Withdrawal amount"),
+      token: p("string", "OTP token"),
+      execute,
+      confirm: p("boolean", "Additional confirmation (required for withdraw)"),
+    },
+    output: {
+      type: "object",
+      properties: { uuid: s, asset: s, amount: s, fee: s, status: s, requested_at: n },
+    },
+  },
+};
+
+export const streamSchemas: Record<string, SchemaDef> = {
+  stream: {
+    category: "stream",
+    params: {
+      pair,
+      private: p("boolean", "Use private channel (requires auth)"),
+      channel: p("string", "Channel name override"),
+      filter: p("string", "JSON path filter"),
+    },
+    output: { type: "object", description: "Real-time event data (varies by channel)" },
+  },
+};
