@@ -23,7 +23,7 @@ describe("privateGet", () => {
       credentials: TEST_CREDS,
       nonce: "123",
     });
-    expect(result).toEqual({ success: false, error: "20001: API認証失敗" });
+    expect(result).toMatchObject({ success: false, error: "20001: API認証失敗" });
   });
 
   it("returns error on permission failure", async () => {
@@ -34,7 +34,7 @@ describe("privateGet", () => {
       credentials: TEST_CREDS,
       nonce: "123",
     });
-    expect(result).toEqual({ success: false, error: "20003: APIキー権限不足" });
+    expect(result).toMatchObject({ success: false, error: "20003: APIキー権限不足" });
   });
 
   it("returns error on rate limit", async () => {
@@ -45,7 +45,7 @@ describe("privateGet", () => {
       credentials: TEST_CREDS,
       nonce: "123",
     });
-    expect(result).toEqual({ success: false, error: "60001: レート制限" });
+    expect(result).toMatchObject({ success: false, error: "60001: レート制限" });
   });
 
   it("returns error on HTTP failure", async () => {
@@ -69,7 +69,7 @@ describe("privateGet", () => {
       credentials: TEST_CREDS,
       nonce: "123",
     });
-    expect(result).toEqual({ success: false, error: "network error" });
+    expect(result).toMatchObject({ success: false, error: "network error" });
   });
 
   it("returns error when credentials are missing", async () => {

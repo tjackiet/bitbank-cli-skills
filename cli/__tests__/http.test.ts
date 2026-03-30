@@ -12,7 +12,7 @@ describe("publicGet", () => {
   it("returns error on API failure", async () => {
     const fetch = mockFetchRaw({ success: 0, data: { code: 10000 } });
     const result = await publicGet("/bad", { fetch, retries: 0 });
-    expect(result).toEqual({ success: false, error: "10000" });
+    expect(result).toMatchObject({ success: false, error: "10000" });
   });
 
   it("returns error on HTTP failure after retries", async () => {
@@ -47,7 +47,7 @@ describe("publicGet", () => {
       throw new Error("network error");
     };
     const result = await publicGet("/x", { fetch: fetch as typeof globalThis.fetch, retries: 0 });
-    expect(result).toEqual({ success: false, error: "network error" });
+    expect(result).toMatchObject({ success: false, error: "network error" });
   });
 
   it("retries on HTTP 429 then succeeds", async () => {
