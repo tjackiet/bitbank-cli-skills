@@ -1,4 +1,5 @@
 import { EXIT, type ExitCode } from "./exit-codes.js";
+import { extractRateLimit } from "./rate-limit.js";
 import type { Result } from "./types.js";
 
 export const ERROR_CODES: Record<number, string> = {
@@ -85,7 +86,8 @@ export async function fetchWithRetry<T>(
         }
         return { success: false, error: parseError(body), exitCode: apiErrorExitCode(code) };
       }
-      return { success: true, data: body.data as T };
+      const rl = extractRateLimit(res.headers);
+      return { success: true, data: body.data as T, ...(rl && { meta: { rateLimit: rl } }) };
     } catch (e) {
       lastError = e instanceof Error ? e.message : String(e);
       lastExitCode = EXIT.NETWORK;
