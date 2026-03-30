@@ -49,6 +49,7 @@ async function main(): Promise<void> {
       from: { type: "string" },
       to: { type: "string" },
       raw: { type: "boolean", default: false },
+      "no-cache": { type: "boolean", default: false },
     },
     strict: false,
   });

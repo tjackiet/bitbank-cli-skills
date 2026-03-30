@@ -24,13 +24,14 @@ export async function candlesRange(
   from: string,
   to: string,
   opts?: HttpOptions,
+  noCache?: boolean,
 ): Promise<Result<Candle[]>> {
   const allRows: Candle[] = [];
   let current = from;
   let fetches = 0;
 
   while (current <= to && fetches < MAX_RANGE_FETCHES) {
-    const result = await fetchOne(pair, type, current, opts);
+    const result = await fetchOne(pair, type, current, opts, noCache);
     if (!result.success) {
       if (fetches === 0) return result;
       break;

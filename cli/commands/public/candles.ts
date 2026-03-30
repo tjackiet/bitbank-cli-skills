@@ -43,14 +43,14 @@ export async function candles(
   limit: number | undefined,
   from?: string,
   to?: string,
+  noCache?: boolean,
   opts?: HttpOptions,
 ): Promise<Result<Candle[]>> {
-  if (!pair) {
+  if (!pair)
     return {
       success: false,
       error: "pair is required. Example: npx bitbank candles btc_jpy --type=1hour",
     };
-  }
   const validType = validateType(type);
   if (!validType) {
     return { success: false, error: `--type is required. Valid: ${VALID_TYPES.join(", ")}` };
@@ -69,7 +69,7 @@ export async function candles(
     const tov = validateDateFormat(to, validType, "--to");
     if (!tov.success) return tov;
     if (from > to) return { success: false, error: "--from は --to 以前の日付にしてください" };
-    return candlesRange(pair, validType, from, to, opts);
+    return candlesRange(pair, validType, from, to, opts, noCache);
   }
 
   const effectiveLimit = limit ?? 100;
@@ -80,7 +80,7 @@ export async function candles(
   }
 
   const autoMerge = date === undefined;
-  const first = await fetchOne(pair, validType, dateStr, opts);
+  const first = await fetchOne(pair, validType, dateStr, opts, noCache);
   if (!first.success) return first;
 
   let allRows = first.data;
@@ -89,7 +89,7 @@ export async function candles(
     let fetches = 1;
     while (allRows.length < effectiveLimit && fetches < MAX_FETCHES) {
       currentDate = previousDate(currentDate, validType);
-      const prev = await fetchOne(pair, validType, currentDate, opts);
+      const prev = await fetchOne(pair, validType, currentDate, opts, noCache);
       if (!prev.success) break;
       allRows = [...prev.data, ...allRows];
       fetches++;
