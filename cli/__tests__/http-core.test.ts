@@ -1,0 +1,126 @@
+import { describe, expect, it, vi } from "vitest";
+import { EXIT } from "../exit-codes.js";
+import {
+  ERROR_CODES,
+  apiErrorExitCode,
+  fetchWithRetry,
+  formatApiError,
+  retryDelay,
+  shouldRetry,
+} from "../http-core.js";
+
+describe("ERROR_CODES", () => {
+  it("maps known codes", () => {
+    expect(ERROR_CODES[20001]).toBe("API認証失敗");
+    expect(ERROR_CODES[60001]).toBe("レート制限");
+  });
+});
+
+describe("apiErrorExitCode", () => {
+  it("returns AUTH for 20001-20003", () => {
+    expect(apiErrorExitCode(20001)).toBe(EXIT.AUTH);
+    expect(apiErrorExitCode(20002)).toBe(EXIT.AUTH);
+    expect(apiErrorExitCode(20003)).toBe(EXIT.AUTH);
+  });
+
+  it("returns RATE_LIMIT for 60001", () => {
+    expect(apiErrorExitCode(60001)).toBe(EXIT.RATE_LIMIT);
+  });
+
+  it("returns PARAM for 30001-40001", () => {
+    expect(apiErrorExitCode(30001)).toBe(EXIT.PARAM);
+    expect(apiErrorExitCode(40001)).toBe(EXIT.PARAM);
+  });
+
+  it("returns GENERAL for unknown codes", () => {
+    expect(apiErrorExitCode(99999)).toBe(EXIT.GENERAL);
+  });
+});
+
+describe("formatApiError", () => {
+  it("formats known error code with message", () => {
+    expect(formatApiError(20001)).toBe("20001: API認証失敗");
+  });
+
+  it("formats unknown error code", () => {
+    expect(formatApiError(12345)).toBe("API error: 12345");
+  });
+});
+
+describe("shouldRetry", () => {
+  it("retries on 429", () => expect(shouldRetry(429)).toBe(true));
+  it("retries on 500", () => expect(shouldRetry(500)).toBe(true));
+  it("retries on 503", () => expect(shouldRetry(503)).toBe(true));
+  it("does not retry on 400", () => expect(shouldRetry(400)).toBe(false));
+  it("does not retry on 200", () => expect(shouldRetry(200)).toBe(false));
+});
+
+describe("retryDelay", () => {
+  it("uses Retry-After header on 429", async () => {
+    vi.useFakeTimers();
+    const headers = new Headers({ "Retry-After": "1" });
+    const res = new Response("", { status: 429, headers });
+    const p = retryDelay(res, 1);
+    await vi.advanceTimersByTimeAsync(1000);
+    await p;
+    vi.useRealTimers();
+  });
+
+  it("uses exponential backoff when no Retry-After", async () => {
+    vi.useFakeTimers();
+    const p = retryDelay(null, 2);
+    await vi.advanceTimersByTimeAsync(2000);
+    await p;
+    vi.useRealTimers();
+  });
+});
+
+describe("fetchWithRetry", () => {
+  const parseError = (body: { data?: { code?: number } }) => String(body.data?.code ?? "unknown");
+
+  it("returns data on success", async () => {
+    const fetch = async () => new Response(JSON.stringify({ success: 1, data: { ok: true } }));
+    const result = await fetchWithRetry<{ ok: boolean }>(
+      "http://test",
+      {},
+      { fetch: fetch as typeof globalThis.fetch, retries: 0 },
+      parseError,
+    );
+    expect(result).toMatchObject({ success: true, data: { ok: true } });
+  });
+
+  it("returns error on API failure", async () => {
+    const fetch = async () => new Response(JSON.stringify({ success: 0, data: { code: 20001 } }));
+    const result = await fetchWithRetry(
+      "http://test",
+      {},
+      { fetch: fetch as typeof globalThis.fetch, retries: 0 },
+      parseError,
+    );
+    expect(result).toMatchObject({ success: false, exitCode: EXIT.AUTH });
+  });
+
+  it("returns error on HTTP failure", async () => {
+    const fetch = async () => new Response("", { status: 400, statusText: "Bad Request" });
+    const result = await fetchWithRetry(
+      "http://test",
+      {},
+      { fetch: fetch as typeof globalThis.fetch, retries: 0 },
+      parseError,
+    );
+    expect(result).toMatchObject({ success: false, error: "HTTP 400: Bad Request" });
+  });
+
+  it("returns NETWORK exit code on exception", async () => {
+    const fetch = async () => {
+      throw new Error("connection refused");
+    };
+    const result = await fetchWithRetry(
+      "http://test",
+      {},
+      { fetch: fetch as typeof globalThis.fetch, retries: 0 },
+      parseError,
+    );
+    expect(result).toMatchObject({ success: false, exitCode: EXIT.NETWORK });
+  });
+});
