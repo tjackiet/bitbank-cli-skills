@@ -10,7 +10,7 @@ describe("subcommand help", () => {
   });
 
   it("lists parameters with type and description", () => {
-    const text = buildHelp("candles", "Get candlestick OHLCV data")!;
+    const text = buildHelp("candles", "Get candlestick OHLCV data");
     expect(text).toContain("--pair");
     expect(text).toContain("Trading pair");
     expect(text).toContain("--type");
@@ -18,25 +18,25 @@ describe("subcommand help", () => {
   });
 
   it("shows enum values", () => {
-    const text = buildHelp("candles", "Get candlestick OHLCV data")!;
+    const text = buildHelp("candles", "Get candlestick OHLCV data");
     expect(text).toContain("Values: 1min,");
     expect(text).toContain("1hour");
   });
 
   it("shows default values", () => {
-    const text = buildHelp("candles", "Get candlestick OHLCV data")!;
+    const text = buildHelp("candles", "Get candlestick OHLCV data");
     expect(text).toContain("Default: 100");
   });
 
   it("shows examples", () => {
-    const text = buildHelp("candles", "Get candlestick OHLCV data")!;
+    const text = buildHelp("candles", "Get candlestick OHLCV data");
     expect(text).toContain("Examples:");
     expect(text).toContain("bitbank candles --pair=btc_jpy");
     expect(text).toContain("--format=table");
   });
 
   it("shows (none) for commands without parameters", () => {
-    const text = buildHelp("status", "Get exchange status")!;
+    const text = buildHelp("status", "Get exchange status");
     expect(text).toContain("Parameters: (none)");
   });
 
@@ -45,7 +45,7 @@ describe("subcommand help", () => {
   });
 
   it("works for trade commands with execute flag", () => {
-    const text = buildHelp("create-order", "Create a spot order")!;
+    const text = buildHelp("create-order", "Create a spot order");
     expect(text).toContain("--side");
     expect(text).toContain("Values: buy, sell");
     expect(text).toContain("--execute");
@@ -53,7 +53,7 @@ describe("subcommand help", () => {
   });
 
   it("works for private commands", () => {
-    const text = buildHelp("assets", "Get your asset balances")!;
+    const text = buildHelp("assets", "Get your asset balances");
     expect(text).toContain("Category: private");
     expect(text).toContain("--all");
   });
