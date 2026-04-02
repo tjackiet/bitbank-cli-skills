@@ -2,6 +2,7 @@
 import { parseArgs } from "node:util";
 import { COMMANDS } from "./commands/registry.js";
 import { EXIT } from "./exit-codes.js";
+import { machineOutput } from "./output.js";
 import { applyProfile } from "./profile.js";
 import type { Format } from "./types.js";
 
@@ -16,6 +17,7 @@ function showHelp(): void {
   console.log("\nOptions:");
   console.log("  --profile=<name>         Use .env.<name> for credentials");
   console.log("  --format=json|table|csv  Output format (default: json)");
+  console.log("  --machine                Machine-readable JSON envelope on stdout");
   console.log("  --help                   Show this help");
 }
 
@@ -54,6 +56,7 @@ async function main(): Promise<void> {
       from: { type: "string" },
       to: { type: "string" },
       raw: { type: "boolean", default: false },
+      machine: { type: "boolean", default: false },
       "no-cache": { type: "boolean", default: false },
       "log-file": { type: "string" },
     },
@@ -65,19 +68,30 @@ async function main(): Promise<void> {
     return;
   }
 
+  const machine = values.machine === true;
+
   if (typeof values.profile === "string") {
     const profileResult = applyProfile(values.profile);
     if (!profileResult.success) {
-      process.stderr.write(`Error: ${profileResult.error}\n`);
-      process.exitCode = profileResult.exitCode;
+      if (machine) {
+        machineOutput(profileResult);
+      } else {
+        process.stderr.write(`Error: ${profileResult.error}\n`);
+        process.exitCode = profileResult.exitCode;
+      }
       return;
     }
   }
 
   const format = (values.format ?? "json") as Format;
   if (!["json", "table", "csv"].includes(format)) {
-    process.stderr.write(`Error: Unknown format "${format}". Use json, table, or csv.\n`);
-    process.exitCode = EXIT.PARAM;
+    const msg = `Unknown format "${format}". Use json, table, or csv.`;
+    if (machine) {
+      machineOutput({ success: false, error: msg, exitCode: EXIT.PARAM });
+    } else {
+      process.stderr.write(`Error: ${msg}\n`);
+      process.exitCode = EXIT.PARAM;
+    }
     return;
   }
 
@@ -105,8 +119,13 @@ async function main(): Promise<void> {
   const entry = COMMANDS[command];
 
   if (!entry) {
-    process.stderr.write(`Error: Unknown command "${command}". Run with --help for usage.\n`);
-    process.exitCode = EXIT.PARAM;
+    const msg = `Unknown command "${command}". Run with --help for usage.`;
+    if (machine) {
+      machineOutput({ success: false, error: msg, exitCode: EXIT.PARAM });
+    } else {
+      process.stderr.write(`Error: ${msg}\n`);
+      process.exitCode = EXIT.PARAM;
+    }
     return;
   }
 
