@@ -10,7 +10,12 @@ export function handler(
 ): CommandHandler {
   return async (args, values, fmt) => {
     const mod = await import(modulePath);
-    output(await mod[fnName](...extract(args, values)), fmt, values.raw === true);
+    output(
+      await mod[fnName](...extract(args, values)),
+      fmt,
+      values.raw === true,
+      values.machine === true,
+    );
   };
 }
 
@@ -29,7 +34,7 @@ export function tradeHandler(
     const params = extract(values);
     const r = await mod[fnName](params);
     if (isDryRun(r)) return;
-    output(r, fmt, values.raw === true);
+    output(r, fmt, values.raw === true, values.machine === true);
     const logFile = values["log-file"] as string | undefined;
     if (logFile) writeTradeLog(logFile, buildLogRecord(fnName, params, r));
   };
