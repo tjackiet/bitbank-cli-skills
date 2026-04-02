@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { depth } from "../../commands/public/depth.js";
-import { mockFetchData } from "../test-helpers.js";
+import { mockFetchData, mockFetchRaw } from "../test-helpers.js";
 
 const MOCK_DEPTH = {
   asks: [
@@ -24,5 +24,19 @@ describe("depth", () => {
       expect(result.data.asks).toHaveLength(2);
       expect(result.data.bids).toHaveLength(1);
     }
+  });
+
+  it("propagates API error", async () => {
+    const result = await depth("btc_jpy", {
+      fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
+      retries: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("returns error on invalid response shape", async () => {
+    const result = await depth("btc_jpy", { fetch: mockFetchData("invalid"), retries: 0 });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("Invalid response");
   });
 });

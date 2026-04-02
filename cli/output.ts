@@ -1,6 +1,10 @@
 import type { Format, Result } from "./types.js";
 
-export function output<T>(result: Result<T>, format: Format, raw = false): void {
+export function output<T>(result: Result<T>, format: Format, raw = false, machine = false): void {
+  if (machine) {
+    machineOutput(result);
+    return;
+  }
   if (!result.success) {
     process.stderr.write(`Error: ${result.error}\n`);
     process.exitCode = result.exitCode ?? 1;
@@ -19,6 +23,18 @@ export function output<T>(result: Result<T>, format: Format, raw = false): void 
     case "csv":
       printCsv(data);
       break;
+  }
+}
+
+export function machineOutput<T>(result: Result<T>): void {
+  if (result.success) {
+    const envelope: Record<string, unknown> = { success: true, data: result.data };
+    if (result.meta) envelope.meta = result.meta;
+    process.stdout.write(`${JSON.stringify(envelope)}\n`);
+  } else {
+    const exitCode = result.exitCode ?? 1;
+    process.stdout.write(`${JSON.stringify({ success: false, error: result.error, exitCode })}\n`);
+    process.exitCode = exitCode;
   }
 }
 

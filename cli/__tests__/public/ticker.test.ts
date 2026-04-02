@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ticker } from "../../commands/public/ticker.js";
-import { mockFetchData } from "../test-helpers.js";
+import { mockFetchData, mockFetchRaw } from "../test-helpers.js";
 
 const MOCK_TICKER = {
   sell: "15580000",
@@ -31,6 +31,33 @@ describe("ticker", () => {
 
   it("returns error on invalid response", async () => {
     const result = await ticker("btc_jpy", { fetch: mockFetchData({ bad: "data" }), retries: 0 });
+    expect(result.success).toBe(false);
+  });
+
+  it("handles null values in ticker fields", async () => {
+    const nullTicker = {
+      ...MOCK_TICKER,
+      sell: null,
+      buy: null,
+      high: null,
+      low: null,
+      open: null,
+      last: null,
+      vol: null,
+    };
+    const result = await ticker("btc_jpy", { fetch: mockFetchData(nullTicker), retries: 0 });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.sell).toBeNull();
+      expect(result.data.buy).toBeNull();
+    }
+  });
+
+  it("propagates API error", async () => {
+    const result = await ticker("btc_jpy", {
+      fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
+      retries: 0,
+    });
     expect(result.success).toBe(false);
   });
 });

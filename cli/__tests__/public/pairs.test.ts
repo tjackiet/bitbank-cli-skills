@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { pairs } from "../../commands/public/pairs.js";
-import { mockFetchData } from "../test-helpers.js";
+import { mockFetchData, mockFetchRaw } from "../test-helpers.js";
 
 const MOCK_DATA = {
   pairs: [
@@ -28,5 +28,19 @@ describe("pairs", () => {
       expect(result.data[0].name).toBe("btc_jpy");
       expect(result.data[0].is_enabled).toBe(true);
     }
+  });
+
+  it("propagates API error", async () => {
+    const result = await pairs({
+      fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
+      retries: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("returns error on invalid response shape", async () => {
+    const result = await pairs({ fetch: mockFetchData("invalid"), retries: 0 });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("Invalid response");
   });
 });

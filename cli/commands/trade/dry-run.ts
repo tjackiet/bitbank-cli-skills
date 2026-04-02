@@ -12,8 +12,10 @@ export function printDryRun(info: DryRunInfo): void {
     `  エンドポイント: POST ${info.endpoint}`,
     "  ボディ:",
   ];
+  const sensitiveKeys = new Set(["token", "otp_token"]);
   for (const [k, v] of Object.entries(info.body)) {
-    lines.push(`    ${k}: ${JSON.stringify(v)}`);
+    const display = sensitiveKeys.has(k) ? '"***"' : JSON.stringify(v);
+    lines.push(`    ${k}: ${display}`);
   }
   lines.push("");
   lines.push("実行するには --execute を付けてください:");

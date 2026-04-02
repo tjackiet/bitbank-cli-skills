@@ -48,6 +48,24 @@ describe("withdraw", () => {
     if (result.success) expect((result.data as Record<string, unknown>).uuid).toBe("withdraw-uuid");
   });
 
+  it("masks --token value in dry-run hint", async () => {
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    await withdraw({ asset: "btc", uuid: "uuid-1", amount: "0.5", token: "secret123" });
+    const output = writeSpy.mock.calls.map((c) => c[0]).join("");
+    expect(output).toContain("--token=***");
+    expect(output).not.toContain("secret123");
+    writeSpy.mockRestore();
+  });
+
+  it("masks token field in dry-run body", async () => {
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    await withdraw({ asset: "btc", uuid: "uuid-1", amount: "0.5", token: "secret123" });
+    const output = writeSpy.mock.calls.map((c) => c[0]).join("");
+    expect(output).toContain('token: "***"');
+    expect(output).not.toContain("secret123");
+    writeSpy.mockRestore();
+  });
+
   it("requires asset", async () => {
     const result = await withdraw({ uuid: "u", amount: "1" });
     expect(result.success).toBe(false);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ordersInfo } from "../../commands/private/orders-info.js";
-import { TEST_CREDS, mockFetchData } from "../test-helpers.js";
+import { TEST_CREDS, mockFetchData, mockFetchRaw } from "../test-helpers.js";
 
 const MOCK_ORDERS = {
   orders: [
@@ -43,5 +43,26 @@ describe("ordersInfo", () => {
     if (result.success) {
       expect(result.data).toHaveLength(1);
     }
+  });
+
+  it("propagates API error", async () => {
+    const result = await ordersInfo("btc_jpy", "1", {
+      fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
+      retries: 0,
+      credentials: TEST_CREDS,
+      nonce: "1",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("returns error on invalid response shape", async () => {
+    const result = await ordersInfo("btc_jpy", "1", {
+      fetch: mockFetchData("invalid"),
+      retries: 0,
+      credentials: TEST_CREDS,
+      nonce: "1",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("Invalid response");
   });
 });
