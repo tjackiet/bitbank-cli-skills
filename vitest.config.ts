@@ -8,7 +8,7 @@ export default defineConfig({
 			exclude: ["cli/__tests__/**"],
 			thresholds: {
 				statements: 70,
-				branches: 50,
+				branches: 70,
 				lines: 70,
 			},
 		},

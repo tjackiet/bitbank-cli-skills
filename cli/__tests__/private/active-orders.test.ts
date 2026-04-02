@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { activeOrders } from "../../commands/private/active-orders.js";
-import { TEST_CREDS, mockFetchData } from "../test-helpers.js";
+import { TEST_CREDS, mockFetchData, mockFetchRaw } from "../test-helpers.js";
 
 const MOCK = {
   orders: [
@@ -41,5 +41,36 @@ describe("activeOrders", () => {
       nonce: "1",
     });
     expect(result.success).toBe(true);
+  });
+
+  it("passes optional params (count, since, end)", async () => {
+    const result = await activeOrders("btc_jpy", "10", "1000", "2000", {
+      fetch: mockFetchData(MOCK),
+      retries: 0,
+      credentials: TEST_CREDS,
+      nonce: "1",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("propagates API error", async () => {
+    const result = await activeOrders("btc_jpy", undefined, undefined, undefined, {
+      fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
+      retries: 0,
+      credentials: TEST_CREDS,
+      nonce: "1",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("returns error on invalid response shape", async () => {
+    const result = await activeOrders("btc_jpy", undefined, undefined, undefined, {
+      fetch: mockFetchData("invalid"),
+      retries: 0,
+      credentials: TEST_CREDS,
+      nonce: "1",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("Invalid response");
   });
 });

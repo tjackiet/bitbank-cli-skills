@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { transactions } from "../../commands/public/transactions.js";
-import { mockFetchData } from "../test-helpers.js";
+import { mockFetchData, mockFetchRaw } from "../test-helpers.js";
 
 const MOCK_DATA = {
   transactions: [
@@ -24,5 +24,22 @@ describe("transactions", () => {
       expect(result.data[0].price).toBe(100);
       expect(result.data[0].side).toBe("buy");
     }
+  });
+
+  it("propagates API error", async () => {
+    const result = await transactions("btc_jpy", undefined, {
+      fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
+      retries: 0,
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("returns error on invalid response shape", async () => {
+    const result = await transactions("btc_jpy", undefined, {
+      fetch: mockFetchData("invalid"),
+      retries: 0,
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("Invalid response");
   });
 });
