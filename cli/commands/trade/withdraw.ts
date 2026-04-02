@@ -58,7 +58,7 @@ export async function withdraw(
   if (args.token) body.token = args.token;
 
   if (!args.execute) {
-    const tokenHint = args.token ? ` --token=${args.token}` : "";
+    const tokenHint = args.token ? " --token=***" : "";
     printDryRun({
       endpoint: "/v1/user/request_withdrawal",
       body,
