@@ -20,6 +20,21 @@ describe("printDryRun", () => {
     writeSpy.mockRestore();
   });
 
+  it("masks token and otp_token in body", () => {
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    printDryRun({
+      endpoint: "/v1/user/request_withdrawal",
+      body: { asset: "btc", token: "secret-otp", otp_token: "secret-otp2" },
+      executeHint: "npx withdraw --execute",
+    });
+    const output = writeSpy.mock.calls.map((c) => c[0]).join("");
+    expect(output).toContain('token: "***"');
+    expect(output).toContain('otp_token: "***"');
+    expect(output).not.toContain("secret-otp");
+    expect(output).not.toContain("secret-otp2");
+    writeSpy.mockRestore();
+  });
+
   it("prints empty body correctly", () => {
     const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     printDryRun({ endpoint: "/test", body: {}, executeHint: "run --execute" });
