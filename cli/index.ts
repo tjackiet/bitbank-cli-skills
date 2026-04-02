@@ -60,7 +60,7 @@ async function main(): Promise<void> {
     strict: false,
   });
 
-  if (values.help || positionals.length === 0) {
+  if (positionals.length === 0) {
     showHelp();
     return;
   }
@@ -108,6 +108,11 @@ async function main(): Promise<void> {
     process.stderr.write(`Error: Unknown command "${command}". Run with --help for usage.\n`);
     process.exitCode = EXIT.PARAM;
     return;
+  }
+
+  if (values.help) {
+    const { showCommandHelp } = await import("./commands/schema/help.js");
+    if (showCommandHelp(command, entry.description)) return;
   }
 
   await entry.handler(args, values as Record<string, string | boolean | undefined>, format);
