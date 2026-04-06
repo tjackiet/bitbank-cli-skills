@@ -57,7 +57,7 @@ npx tsx --env-file=.env cli/index.ts active-orders --pair=btc_jpy
 
 Claude Code でこのリポを開くと、Agent Skills が自動で有効になります。
 
-```
+```text
 「BTC の RSI を見て」
 「ポートフォリオの状況を見せて」
 「SMA クロス戦略をバックテストして」
