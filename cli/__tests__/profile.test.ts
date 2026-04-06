@@ -68,6 +68,17 @@ describe("applyProfile", () => {
     }
   });
 
+  it("rejects profile names with path traversal", () => {
+    for (const name of ["../etc/passwd", "..\\foo", "sub/dir", "a\\b"]) {
+      const result = applyProfile(name);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Invalid profile name");
+        expect(result.exitCode).toBe(4);
+      }
+    }
+  });
+
   it("does not affect env when profile is not specified (backward compat)", () => {
     // biome-ignore lint/performance/noDelete: process.env requires delete
     delete process.env.BITBANK_API_KEY;

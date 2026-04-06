@@ -38,6 +38,18 @@ describe("buildLogRecord", () => {
     expect(TradeLogRecordSchema.safeParse(r).success).toBe(true);
   });
 
+  it("masks sensitive keys (token, otp_token)", () => {
+    const r = buildLogRecord(
+      "withdraw",
+      { asset: "btc", amount: "0.5", token: "123456", otp_token: "abcdef" },
+      { success: true, data: { uuid: "u1" } },
+    );
+    expect(r.params.token).toBe("***");
+    expect(r.params.otp_token).toBe("***");
+    expect(r.params.asset).toBe("btc");
+    expect(r.params.amount).toBe("0.5");
+  });
+
   it("builds a failure record", () => {
     const r = buildLogRecord(
       "cancelOrder",
