@@ -24,6 +24,9 @@ export function parseEnvFile(content: string): Record<string, string> {
 
 /** プロファイル用 .env ファイルを読み込み process.env に反映する */
 export function applyProfile(profile: string): Result<string> {
+  if (/[/\\]|\.\./.test(profile)) {
+    return { success: false, error: "Invalid profile name", exitCode: EXIT.PARAM };
+  }
   const filename = `.env.${profile}`;
   const filepath = resolve(process.cwd(), filename);
   if (!existsSync(filepath)) {
