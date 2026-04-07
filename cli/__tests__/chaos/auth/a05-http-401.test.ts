@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { privatePost } from "../../../http-private-post.js";
 import { privateGet } from "../../../http-private.js";
 import { TEST_CREDS, mockFetchRaw } from "../../test-helpers.js";
@@ -43,15 +43,23 @@ describe("Chaos A-05: HTTP 401 returns { success: false }", () => {
   });
 
   it("missing credentials returns auth error without calling fetch", async () => {
-    const fetchSpy = (await import("vitest")).vi.fn();
-    const r = await privateGet("/user/assets", undefined, {
-      fetch: fetchSpy,
-      retries: 0,
-      // credentials intentionally omitted → loadCredentials() from env
-    });
-    // If env vars are not set, should fail before fetching
-    if (!r.success) {
+    const origKey = process.env.BITBANK_API_KEY;
+    const origSecret = process.env.BITBANK_API_SECRET;
+    // biome-ignore lint/performance/noDelete: process.env requires delete
+    delete process.env.BITBANK_API_KEY;
+    // biome-ignore lint/performance/noDelete: process.env requires delete
+    delete process.env.BITBANK_API_SECRET;
+    try {
+      const fetchSpy = vi.fn();
+      const r = await privateGet("/user/assets", undefined, {
+        fetch: fetchSpy,
+        retries: 0,
+      });
+      expect(r.success).toBe(false);
       expect(fetchSpy).not.toHaveBeenCalled();
+    } finally {
+      if (origKey !== undefined) process.env.BITBANK_API_KEY = origKey;
+      if (origSecret !== undefined) process.env.BITBANK_API_SECRET = origSecret;
     }
   });
 });
