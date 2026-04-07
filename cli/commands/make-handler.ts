@@ -36,6 +36,6 @@ export function tradeHandler(
     if (isDryRun(r)) return;
     output(r, fmt, values.raw === true, values.machine === true);
     const logFile = values["log-file"] as string | undefined;
-    if (logFile) writeTradeLog(logFile, buildLogRecord(fnName, params, r));
+    if (logFile) await writeTradeLog(logFile, buildLogRecord(fnName, params, r));
   };
 }

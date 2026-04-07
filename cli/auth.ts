@@ -30,13 +30,22 @@ export function signPost(nonce: string, body: string, secret: string): string {
 
 const TIME_WINDOW = "5000";
 
+let lastNonce = 0;
+
+/** 単調増加する nonce を生成。同一ミリ秒の連続リクエストでも衝突しない */
+export function generateNonce(): string {
+  const now = Date.now();
+  lastNonce = now > lastNonce ? now : lastNonce + 1;
+  return lastNonce.toString();
+}
+
 export function authHeadersGet(
   creds: ApiCredentials,
   path: string,
   queryString: string,
   nonce?: string,
 ): Record<string, string> {
-  const n = nonce ?? Date.now().toString();
+  const n = nonce ?? generateNonce();
   return {
     "ACCESS-KEY": creds.apiKey,
     "ACCESS-NONCE": n,
@@ -50,7 +59,7 @@ export function authHeadersPost(
   body: string,
   nonce?: string,
 ): Record<string, string> {
-  const n = nonce ?? Date.now().toString();
+  const n = nonce ?? generateNonce();
   return {
     "ACCESS-KEY": creds.apiKey,
     "ACCESS-NONCE": n,
