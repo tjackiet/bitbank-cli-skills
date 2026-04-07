@@ -11,7 +11,7 @@ describe("Chaos T-02: create-order --execute with missing required params", () =
       execute: true,
     });
     expect(r.success).toBe(false);
-    if (!r.success) expect(r.error).toMatch(/pair|Required/i);
+    if (!r.success) expect(r.error).toContain("pair is required");
   });
 
   it("rejects when side is missing", async () => {

@@ -8,7 +8,7 @@ const TypeEnum = z.enum(["limit", "market", "stop", "stop_limit"]);
 
 const CreateOrderInputSchema = z
   .object({
-    pair: z.string().min(1, "pair is required"),
+    pair: z.string({ required_error: "pair is required" }).min(1, "pair is required"),
     side: SideEnum,
     type: TypeEnum,
     price: z.string().optional(),
