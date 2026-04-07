@@ -64,7 +64,7 @@ describe("buildLogRecord", () => {
 });
 
 describe("writeTradeLog", () => {
-  it("creates file and appends NDJSON line", () => {
+  it("creates file and appends NDJSON line", async () => {
     const f = tmpFile();
     cleanup.push(f);
     const record = buildLogRecord(
@@ -72,14 +72,14 @@ describe("writeTradeLog", () => {
       { pair: "btc_jpy" },
       { success: true, data: { id: 1 } },
     );
-    const result = writeTradeLog(f, record);
+    const result = await writeTradeLog(f, record);
     expect(result.success).toBe(true);
     const lines = readFileSync(f, "utf8").trim().split("\n");
     expect(lines).toHaveLength(1);
     expect(TradeLogRecordSchema.parse(JSON.parse(lines[0]))).toBeTruthy();
   });
 
-  it("appends multiple records without overwriting", () => {
+  it("appends multiple records without overwriting", async () => {
     const f = tmpFile();
     cleanup.push(f);
     const r1 = buildLogRecord(
@@ -92,16 +92,16 @@ describe("writeTradeLog", () => {
       { pair: "btc_jpy" },
       { success: true, data: { id: 2 } },
     );
-    writeTradeLog(f, r1);
-    writeTradeLog(f, r2);
+    await writeTradeLog(f, r1);
+    await writeTradeLog(f, r2);
     const lines = readFileSync(f, "utf8").trim().split("\n");
     expect(lines).toHaveLength(2);
     expect(JSON.parse(lines[0]).command).toBe("createOrder");
     expect(JSON.parse(lines[1]).command).toBe("cancelOrder");
   });
 
-  it("returns error for invalid path", () => {
-    const result = writeTradeLog(
+  it("returns error for invalid path", async () => {
+    const result = await writeTradeLog(
       "/nonexistent/dir/log.jsonl",
       buildLogRecord("x", {}, { success: true, data: {} }),
     );

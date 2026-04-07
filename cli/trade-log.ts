@@ -1,11 +1,14 @@
-import { appendFileSync } from "node:fs";
+import { appendFile } from "node:fs/promises";
 import type { TradeLogRecord } from "./trade-log-schema.js";
 import type { Result } from "./types.js";
 
-/** NDJSON 形式でログレコードをファイルに追記 */
-export function writeTradeLog(logFile: string, record: TradeLogRecord): Result<{ written: true }> {
+/** NDJSON 形式でログレコードをファイルに非同期追記 */
+export async function writeTradeLog(
+  logFile: string,
+  record: TradeLogRecord,
+): Promise<Result<{ written: true }>> {
   try {
-    appendFileSync(logFile, `${JSON.stringify(record)}\n`, "utf8");
+    await appendFile(logFile, `${JSON.stringify(record)}\n`, "utf8");
     return { success: true, data: { written: true } };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);

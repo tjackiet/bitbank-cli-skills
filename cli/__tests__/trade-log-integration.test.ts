@@ -64,7 +64,7 @@ describe("trade log integration", () => {
 
     // Simulate what tradeHandler does: log only when not dry-run
     if (result.success && !("dryRun" in result.data)) {
-      writeTradeLog(f, buildLogRecord("createOrder", { pair: "btc_jpy" }, result));
+      await writeTradeLog(f, buildLogRecord("createOrder", { pair: "btc_jpy" }, result));
     }
 
     expect(existsSync(f)).toBe(true);
@@ -92,7 +92,7 @@ describe("trade log integration", () => {
 
     // Simulate tradeHandler: isDryRun check prevents logging
     if (result.success && !("dryRun" in result.data)) {
-      writeTradeLog(f, buildLogRecord("createOrder", { pair: "btc_jpy" }, result));
+      await writeTradeLog(f, buildLogRecord("createOrder", { pair: "btc_jpy" }, result));
     }
 
     writeSpy.mockRestore();
@@ -129,7 +129,7 @@ describe("trade log integration", () => {
         "dryRun" in result.data
       )
     ) {
-      writeTradeLog(f, buildLogRecord("createOrder", { pair: "btc_jpy" }, result));
+      await writeTradeLog(f, buildLogRecord("createOrder", { pair: "btc_jpy" }, result));
     }
 
     expect(existsSync(f)).toBe(true);
