@@ -46,11 +46,7 @@ export async function candles(
   noCache?: boolean,
   opts?: HttpOptions,
 ): Promise<Result<Candle[]>> {
-  if (!pair)
-    return {
-      success: false,
-      error: "pair is required. Example: npx bitbank candles btc_jpy --type=1hour",
-    };
+  if (!pair) return { success: false, error: "pair is required. Example: --pair=btc_jpy" };
   const validType = validateType(type);
   if (!validType) {
     return { success: false, error: `--type is required. Valid: ${VALID_TYPES.join(", ")}` };
@@ -83,18 +79,21 @@ export async function candles(
   const first = await fetchOne(pair, validType, dateStr, opts, noCache);
   if (!first.success) return first;
 
-  let allRows = first.data;
+  const chunks: Candle[][] = [first.data];
   if (autoMerge) {
     let currentDate = dateStr;
     let fetches = 1;
-    while (allRows.length < effectiveLimit && fetches < MAX_FETCHES) {
+    let total = first.data.length;
+    while (total < effectiveLimit && fetches < MAX_FETCHES) {
       currentDate = previousDate(currentDate, validType);
       const prev = await fetchOne(pair, validType, currentDate, opts, noCache);
       if (!prev.success) break;
-      allRows = [...prev.data, ...allRows];
+      chunks.unshift(prev.data);
+      total += prev.data.length;
       fetches++;
     }
   }
 
+  const allRows = chunks.length === 1 ? chunks[0] : ([] as Candle[]).concat(...chunks);
   return { success: true, data: allRows.slice(-effectiveLimit) };
 }

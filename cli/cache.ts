@@ -3,25 +3,42 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 
 const CACHE_BASE = join(homedir(), ".bitbank-cache");
+const memCache = new Map<string, unknown>();
+
+function cacheKey(pair: string, type: string, date: string): string {
+  return `${pair}/${type}/${date}`;
+}
 
 function cachePath(pair: string, type: string, date: string): string {
   return join(CACHE_BASE, pair, type, `${date}.json`);
 }
 
 export function readCache<T>(pair: string, type: string, date: string): T | null {
+  const key = cacheKey(pair, type, date);
+  const mem = memCache.get(key);
+  if (mem !== undefined) return mem as T;
+
   const p = cachePath(pair, type, date);
   if (!existsSync(p)) return null;
   try {
-    return JSON.parse(readFileSync(p, "utf-8")) as T;
+    const data = JSON.parse(readFileSync(p, "utf-8")) as T;
+    memCache.set(key, data);
+    return data;
   } catch {
     return null;
   }
 }
 
 export function writeCache(pair: string, type: string, date: string, data: unknown): void {
+  memCache.set(cacheKey(pair, type, date), data);
   const p = cachePath(pair, type, date);
   mkdirSync(join(CACHE_BASE, pair, type), { recursive: true });
   writeFileSync(p, JSON.stringify(data));
+}
+
+/** テスト用: インメモリキャッシュをクリア */
+export function clearMemCache(): void {
+  memCache.clear();
 }
 
 /** 期間が完了済み（不変データ）ならキャッシュ対象 */

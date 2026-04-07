@@ -3,6 +3,7 @@ import type { Result } from "../../types.js";
 import { type Candle, YEARLY_TYPES, fetchOne } from "./candles-fetch.js";
 
 const MAX_RANGE_FETCHES = 366;
+const BATCH_SIZE = 10;
 
 export function nextDate(dateStr: string, type: string): string {
   if (YEARLY_TYPES.has(type)) {
@@ -18,6 +19,16 @@ export function nextDate(dateStr: string, type: string): string {
   return `${ny}${nm}${nd}`;
 }
 
+function buildDateList(from: string, to: string, type: string): string[] {
+  const dates: string[] = [];
+  let current = from;
+  while (current <= to && dates.length < MAX_RANGE_FETCHES) {
+    dates.push(current);
+    current = nextDate(current, type);
+  }
+  return dates;
+}
+
 export async function candlesRange(
   pair: string,
   type: string,
@@ -26,19 +37,19 @@ export async function candlesRange(
   opts?: HttpOptions,
   noCache?: boolean,
 ): Promise<Result<Candle[]>> {
+  const dates = buildDateList(from, to, type);
   const allRows: Candle[] = [];
-  let current = from;
-  let fetches = 0;
 
-  while (current <= to && fetches < MAX_RANGE_FETCHES) {
-    const result = await fetchOne(pair, type, current, opts, noCache);
-    if (!result.success) {
-      if (fetches === 0) return result;
-      break;
+  for (let i = 0; i < dates.length; i += BATCH_SIZE) {
+    const batch = dates.slice(i, i + BATCH_SIZE);
+    const results = await Promise.all(batch.map((d) => fetchOne(pair, type, d, opts, noCache)));
+    for (const result of results) {
+      if (!result.success) {
+        if (allRows.length === 0) return result;
+        return { success: true, data: allRows };
+      }
+      allRows.push(...result.data);
     }
-    allRows.push(...result.data);
-    current = nextDate(current, type);
-    fetches++;
   }
 
   return { success: true, data: allRows };
