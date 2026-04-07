@@ -48,14 +48,27 @@ function printTable(data: unknown): void {
   const rows = toRows(data);
   if (rows.length === 0) return;
   const keys = Object.keys(rows[0]);
-  const widths = keys.map((k) => Math.max(k.length, ...rows.map((r) => String(r[k] ?? "").length)));
-  const header = keys.map((k, i) => k.padEnd(widths[i])).join("  ");
-  const sep = widths.map((w) => "-".repeat(w)).join("  ");
-  process.stdout.write(`${header}\n${sep}\n`);
+
+  // 列幅を1パスで計算
+  const widths = keys.map((k) => k.length);
+  const cells: string[][] = [];
   for (const row of rows) {
-    const line = keys.map((k, i) => String(row[k] ?? "").padEnd(widths[i])).join("  ");
-    process.stdout.write(`${line}\n`);
+    const rowCells: string[] = [];
+    for (let i = 0; i < keys.length; i++) {
+      const s = String(row[keys[i]] ?? "");
+      if (s.length > widths[i]) widths[i] = s.length;
+      rowCells.push(s);
+    }
+    cells.push(rowCells);
   }
+
+  const parts: string[] = [];
+  parts.push(keys.map((k, i) => k.padEnd(widths[i])).join("  "));
+  parts.push(widths.map((w) => "-".repeat(w)).join("  "));
+  for (const rowCells of cells) {
+    parts.push(rowCells.map((s, i) => s.padEnd(widths[i])).join("  "));
+  }
+  process.stdout.write(`${parts.join("\n")}\n`);
 }
 
 function escapeCsvField(value: string): string {
@@ -69,8 +82,9 @@ function printCsv(data: unknown): void {
   const rows = toRows(data);
   if (rows.length === 0) return;
   const keys = Object.keys(rows[0]);
-  process.stdout.write(`${keys.map(escapeCsvField).join(",")}\n`);
+  const parts: string[] = [keys.map(escapeCsvField).join(",")];
   for (const row of rows) {
-    process.stdout.write(`${keys.map((k) => escapeCsvField(String(row[k] ?? ""))).join(",")}\n`);
+    parts.push(keys.map((k) => escapeCsvField(String(row[k] ?? ""))).join(","));
   }
+  process.stdout.write(`${parts.join("\n")}\n`);
 }

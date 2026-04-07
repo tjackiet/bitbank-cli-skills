@@ -6,10 +6,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const TEST_CACHE = join(import.meta.dirname, ".bitbank-cache");
 vi.mock("node:os", () => ({ homedir: () => join(import.meta.dirname) }));
 
-import { isCompletePeriod, readCache, writeCache } from "../cache.js";
+import { clearMemCache, isCompletePeriod, readCache, writeCache } from "../cache.js";
 
 describe("cache", () => {
   beforeEach(() => {
+    clearMemCache();
     if (existsSync(TEST_CACHE)) rmSync(TEST_CACHE, { recursive: true });
   });
 
