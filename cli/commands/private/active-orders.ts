@@ -25,12 +25,10 @@ const ActiveOrdersResponseSchema = z.object({
 export type ActiveOrder = z.infer<typeof OrderSchema>;
 
 export async function activeOrders(
-  pair: string | undefined,
-  count: string | undefined,
-  since: string | undefined,
-  end: string | undefined,
+  args: { pair?: string; count?: string; since?: string; end?: string },
   opts?: PrivateHttpOptions,
 ): Promise<Result<ActiveOrder[]>> {
+  const { pair, count, since, end } = args;
   const params: Record<string, string> = {};
   if (pair) params.pair = pair;
   if (count) params.count = count;

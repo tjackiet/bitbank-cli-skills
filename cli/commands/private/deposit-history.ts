@@ -19,12 +19,10 @@ const DepositHistoryResponseSchema = z.object({
 export type Deposit = z.infer<typeof DepositSchema>;
 
 export async function depositHistory(
-  asset: string | undefined,
-  count: string | undefined,
-  since: string | undefined,
-  end: string | undefined,
+  args: { asset?: string; count?: string; since?: string; end?: string },
   opts?: PrivateHttpOptions,
 ): Promise<Result<Deposit[]>> {
+  const { asset, count, since, end } = args;
   const params: Record<string, string> = {};
   if (asset) params.asset = asset;
   if (count) params.count = count;

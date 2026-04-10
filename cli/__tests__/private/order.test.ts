@@ -19,22 +19,25 @@ const MOCK_ORDER = {
 
 describe("order", () => {
   it("returns error when pair is missing", async () => {
-    const result = await order(undefined, "123");
+    const result = await order({ pair: undefined, orderId: "123" });
     expect(result.success).toBe(false);
   });
 
   it("returns error when order-id is missing", async () => {
-    const result = await order("btc_jpy", undefined);
+    const result = await order({ pair: "btc_jpy", orderId: undefined });
     expect(result.success).toBe(false);
   });
 
   it("returns parsed order data", async () => {
-    const result = await order("btc_jpy", "12345", {
-      fetch: mockFetchData(MOCK_ORDER),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await order(
+      { pair: "btc_jpy", orderId: "12345" },
+      {
+        fetch: mockFetchData(MOCK_ORDER),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.order_id).toBe(12345);
@@ -43,22 +46,28 @@ describe("order", () => {
   });
 
   it("propagates API error", async () => {
-    const result = await order("btc_jpy", "12345", {
-      fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await order(
+      { pair: "btc_jpy", orderId: "12345" },
+      {
+        fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(false);
   });
 
   it("returns error on invalid response shape", async () => {
-    const result = await order("btc_jpy", "12345", {
-      fetch: mockFetchData("invalid"),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await order(
+      { pair: "btc_jpy", orderId: "12345" },
+      {
+        fetch: mockFetchData("invalid"),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("Invalid response");
   });

@@ -10,12 +10,15 @@ const MOCK_DATA = {
 
 describe("circuitBreak", () => {
   it("returns error when pair is missing", async () => {
-    const result = await circuitBreak(undefined);
+    const result = await circuitBreak({ pair: undefined });
     expect(result.success).toBe(false);
   });
 
   it("returns parsed circuit break info", async () => {
-    const result = await circuitBreak("btc_jpy", { fetch: mockFetchData(MOCK_DATA), retries: 0 });
+    const result = await circuitBreak(
+      { pair: "btc_jpy" },
+      { fetch: mockFetchData(MOCK_DATA), retries: 0 },
+    );
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.mode).toBe("NORMAL");
@@ -23,15 +26,21 @@ describe("circuitBreak", () => {
   });
 
   it("propagates API error", async () => {
-    const result = await circuitBreak("btc_jpy", {
-      fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
-      retries: 0,
-    });
+    const result = await circuitBreak(
+      { pair: "btc_jpy" },
+      {
+        fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
+        retries: 0,
+      },
+    );
     expect(result.success).toBe(false);
   });
 
   it("returns error on invalid response shape", async () => {
-    const result = await circuitBreak("btc_jpy", { fetch: mockFetchData("invalid"), retries: 0 });
+    const result = await circuitBreak(
+      { pair: "btc_jpy" },
+      { fetch: mockFetchData("invalid"), retries: 0 },
+    );
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("Invalid response");
   });

@@ -8,7 +8,7 @@ describe("handler", () => {
     const h = handler(
       new URL("../commands/public/ticker.js", import.meta.url).pathname,
       "ticker",
-      (a) => [a[0]],
+      (a) => ({ pair: a[0] }),
     );
 
     const mod = await import("../commands/public/ticker.js");

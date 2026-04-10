@@ -21,10 +21,10 @@ const OrderSchema = z.object({
 export type Order = z.infer<typeof OrderSchema>;
 
 export async function order(
-  pair: string | undefined,
-  orderId: string | undefined,
+  args: { pair: string | undefined; orderId: string | undefined },
   opts?: PrivateHttpOptions,
 ): Promise<Result<Order>> {
+  const { pair, orderId } = args;
   if (!pair) {
     return { success: false, error: "pair is required. Example: --pair=btc_jpy" };
   }

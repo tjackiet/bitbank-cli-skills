@@ -17,9 +17,10 @@ const CircuitBreakSchema = z.object({
 export type CircuitBreak = z.infer<typeof CircuitBreakSchema>;
 
 export async function circuitBreak(
-  pair: string | undefined,
+  args: { pair: string | undefined },
   opts?: HttpOptions,
 ): Promise<Result<CircuitBreak>> {
+  const { pair } = args;
   if (!pair) {
     return {
       success: false,

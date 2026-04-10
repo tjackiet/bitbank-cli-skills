@@ -17,9 +17,10 @@ const TickerSchema = z.object({
 export type Ticker = z.infer<typeof TickerSchema>;
 
 export async function ticker(
-  pair: string | undefined,
+  args: { pair: string | undefined },
   opts?: HttpOptions,
 ): Promise<Result<Ticker>> {
+  const { pair } = args;
   if (!pair) {
     return { success: false, error: "pair is required. Example: npx bitbank ticker btc_jpy" };
   }

@@ -15,12 +15,15 @@ const MOCK_TICKER = {
 
 describe("ticker", () => {
   it("returns error when pair is missing", async () => {
-    const result = await ticker(undefined);
+    const result = await ticker({ pair: undefined });
     expect(result.success).toBe(false);
   });
 
   it("returns parsed ticker data", async () => {
-    const result = await ticker("btc_jpy", { fetch: mockFetchData(MOCK_TICKER), retries: 0 });
+    const result = await ticker(
+      { pair: "btc_jpy" },
+      { fetch: mockFetchData(MOCK_TICKER), retries: 0 },
+    );
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.sell).toBe(15580000);
@@ -30,7 +33,10 @@ describe("ticker", () => {
   });
 
   it("returns error on invalid response", async () => {
-    const result = await ticker("btc_jpy", { fetch: mockFetchData({ bad: "data" }), retries: 0 });
+    const result = await ticker(
+      { pair: "btc_jpy" },
+      { fetch: mockFetchData({ bad: "data" }), retries: 0 },
+    );
     expect(result.success).toBe(false);
   });
 
@@ -45,7 +51,10 @@ describe("ticker", () => {
       last: null,
       vol: null,
     };
-    const result = await ticker("btc_jpy", { fetch: mockFetchData(nullTicker), retries: 0 });
+    const result = await ticker(
+      { pair: "btc_jpy" },
+      { fetch: mockFetchData(nullTicker), retries: 0 },
+    );
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.sell).toBeNull();
@@ -54,10 +63,13 @@ describe("ticker", () => {
   });
 
   it("propagates API error", async () => {
-    const result = await ticker("btc_jpy", {
-      fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
-      retries: 0,
-    });
+    const result = await ticker(
+      { pair: "btc_jpy" },
+      {
+        fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
+        retries: 0,
+      },
+    );
     expect(result.success).toBe(false);
   });
 });

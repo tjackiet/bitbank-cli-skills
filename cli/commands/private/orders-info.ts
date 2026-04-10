@@ -25,10 +25,10 @@ const OrdersInfoResponseSchema = z.object({
 export type OrderInfo = z.infer<typeof OrderSchema>;
 
 export async function ordersInfo(
-  pair: string | undefined,
-  orderIds: string | undefined,
+  args: { pair: string | undefined; orderIds: string | undefined },
   opts?: PrivatePostOptions,
 ): Promise<Result<OrderInfo[]>> {
+  const { pair, orderIds } = args;
   if (!pair) {
     return { success: false, error: "pair is required. Example: --pair=btc_jpy" };
   }

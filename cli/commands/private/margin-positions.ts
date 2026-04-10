@@ -21,9 +21,10 @@ const ResponseSchema = z.object({
 export type MarginPosition = z.infer<typeof PositionSchema>;
 
 export async function marginPositions(
-  pair: string | undefined,
+  args: { pair?: string },
   opts?: PrivateHttpOptions,
 ): Promise<Result<MarginPosition[]>> {
+  const { pair } = args;
   const params: Record<string, string> = {};
   if (pair) params.pair = pair;
 

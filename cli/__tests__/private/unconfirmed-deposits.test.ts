@@ -8,43 +8,55 @@ const MOCK = {
 
 describe("unconfirmedDeposits", () => {
   it("returns unconfirmed deposits", async () => {
-    const result = await unconfirmedDeposits("btc", {
-      fetch: mockFetchData(MOCK),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await unconfirmedDeposits(
+      { asset: "btc" },
+      {
+        fetch: mockFetchData(MOCK),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(true);
     if (result.success) expect(result.data).toHaveLength(1);
   });
 
   it("works without asset filter", async () => {
-    const result = await unconfirmedDeposits(undefined, {
-      fetch: mockFetchData(MOCK),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await unconfirmedDeposits(
+      {},
+      {
+        fetch: mockFetchData(MOCK),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(true);
   });
 
   it("propagates API error", async () => {
-    const result = await unconfirmedDeposits("btc", {
-      fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await unconfirmedDeposits(
+      { asset: "btc" },
+      {
+        fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(false);
   });
 
   it("returns error on invalid response shape", async () => {
-    const result = await unconfirmedDeposits("btc", {
-      fetch: mockFetchData("invalid"),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await unconfirmedDeposits(
+      { asset: "btc" },
+      {
+        fetch: mockFetchData("invalid"),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("Invalid response");
   });

@@ -21,37 +21,48 @@ describe("nextDate", () => {
 
 describe("candles --from/--to", () => {
   it("returns error when only --from is given", async () => {
-    const result = await candles("btc_jpy", "1day", undefined, undefined, "2024");
+    const result = await candles({ pair: "btc_jpy", type: "1day", from: "2024" });
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("両方指定");
   });
 
   it("returns error when only --to is given", async () => {
-    const result = await candles("btc_jpy", "1day", undefined, undefined, undefined, "2026");
+    const result = await candles({ pair: "btc_jpy", type: "1day", to: "2026" });
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("両方指定");
   });
 
   it("returns error when --date and --from/--to are combined", async () => {
-    const result = await candles("btc_jpy", "1day", "2025", undefined, "2024", "2026");
+    const result = await candles({
+      pair: "btc_jpy",
+      type: "1day",
+      date: "2025",
+      from: "2024",
+      to: "2026",
+    });
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("同時に指定");
   });
 
   it("returns error when --from > --to", async () => {
-    const result = await candles("btc_jpy", "1day", undefined, undefined, "2026", "2024");
+    const result = await candles({ pair: "btc_jpy", type: "1day", from: "2026", to: "2024" });
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("以前の日付");
   });
 
   it("returns error when format is wrong for yearly type", async () => {
-    const result = await candles("btc_jpy", "1day", undefined, undefined, "20240101", "20260101");
+    const result = await candles({
+      pair: "btc_jpy",
+      type: "1day",
+      from: "20240101",
+      to: "20260101",
+    });
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("年を指定");
   });
 
   it("returns error when format is wrong for daily type", async () => {
-    const result = await candles("btc_jpy", "1hour", undefined, undefined, "2024", "2026");
+    const result = await candles({ pair: "btc_jpy", type: "1hour", from: "2024", to: "2026" });
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("日付を指定");
   });
@@ -74,10 +85,10 @@ describe("candles --from/--to", () => {
       return new Response(JSON.stringify({ success: 1, data }));
     };
 
-    const result = await candles("btc_jpy", "1day", undefined, undefined, "2024", "2026", true, {
-      fetch: rangeFetch,
-      retries: 0,
-    });
+    const result = await candles(
+      { pair: "btc_jpy", type: "1day", from: "2024", to: "2026", noCache: true },
+      { fetch: rangeFetch, retries: 0 },
+    );
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toHaveLength(3);
@@ -99,17 +110,8 @@ describe("candles --from/--to", () => {
     };
 
     const result = await candles(
-      "btc_jpy",
-      "1hour",
-      undefined,
-      undefined,
-      "20260329",
-      "20260330",
-      true,
-      {
-        fetch: rangeFetch,
-        retries: 0,
-      },
+      { pair: "btc_jpy", type: "1hour", from: "20260329", to: "20260330", noCache: true },
+      { fetch: rangeFetch, retries: 0 },
     );
     expect(result.success).toBe(true);
     if (result.success) {
@@ -122,10 +124,10 @@ describe("candles --from/--to", () => {
     const errorFetch: typeof globalThis.fetch = async () =>
       new Response(JSON.stringify({ success: 0, data: { code: 10000 } }), { status: 404 });
 
-    const result = await candles("btc_jpy", "1day", undefined, undefined, "2024", "2026", true, {
-      fetch: errorFetch,
-      retries: 0,
-    });
+    const result = await candles(
+      { pair: "btc_jpy", type: "1day", from: "2024", to: "2026", noCache: true },
+      { fetch: errorFetch, retries: 0 },
+    );
     expect(result.success).toBe(false);
   });
 });

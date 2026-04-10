@@ -30,12 +30,15 @@ const MOCK_ASSETS = {
 
 describe("assets", () => {
   it("returns non-zero assets by default", async () => {
-    const result = await assets(false, {
-      fetch: mockFetchData(MOCK_ASSETS),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await assets(
+      { showAll: false },
+      {
+        fetch: mockFetchData(MOCK_ASSETS),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toHaveLength(2);
@@ -44,12 +47,15 @@ describe("assets", () => {
   });
 
   it("returns all assets with showAll=true", async () => {
-    const result = await assets(true, {
-      fetch: mockFetchData(MOCK_ASSETS),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await assets(
+      { showAll: true },
+      {
+        fetch: mockFetchData(MOCK_ASSETS),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toHaveLength(3);
@@ -57,12 +63,15 @@ describe("assets", () => {
   });
 
   it("returns error on invalid response", async () => {
-    const result = await assets(false, {
-      fetch: mockFetchData({ bad: "data" }),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await assets(
+      { showAll: false },
+      {
+        fetch: mockFetchData({ bad: "data" }),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(false);
   });
 });
