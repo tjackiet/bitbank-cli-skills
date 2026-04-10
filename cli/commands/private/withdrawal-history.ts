@@ -21,12 +21,10 @@ const ResponseSchema = z.object({
 export type Withdrawal = z.infer<typeof WithdrawalSchema>;
 
 export async function withdrawalHistory(
-  asset: string | undefined,
-  count: string | undefined,
-  since: string | undefined,
-  end: string | undefined,
+  args: { asset: string | undefined; count?: string; since?: string; end?: string },
   opts?: PrivateHttpOptions,
 ): Promise<Result<Withdrawal[]>> {
+  const { asset, count, since, end } = args;
   if (!asset) {
     return { success: false, error: "asset is required. Example: --asset=btc" };
   }

@@ -17,10 +17,13 @@ const MOCK_DEPTH = {
 
 describe("Chaos P-09: depth output in all formats", () => {
   it("json format does not crash", async () => {
-    const r = await depth("btc_jpy", {
-      fetch: mockFetchData(MOCK_DEPTH),
-      retries: 0,
-    });
+    const r = await depth(
+      { pair: "btc_jpy" },
+      {
+        fetch: mockFetchData(MOCK_DEPTH),
+        retries: 0,
+      },
+    );
     expect(r.success).toBe(true);
     const spy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     output(r, "json");
@@ -30,10 +33,13 @@ describe("Chaos P-09: depth output in all formats", () => {
   });
 
   it("table format does not crash", async () => {
-    const r = await depth("btc_jpy", {
-      fetch: mockFetchData(MOCK_DEPTH),
-      retries: 0,
-    });
+    const r = await depth(
+      { pair: "btc_jpy" },
+      {
+        fetch: mockFetchData(MOCK_DEPTH),
+        retries: 0,
+      },
+    );
     expect(r.success).toBe(true);
     const spy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     output(r, "table");
@@ -43,10 +49,13 @@ describe("Chaos P-09: depth output in all formats", () => {
   });
 
   it("csv format does not crash", async () => {
-    const r = await depth("btc_jpy", {
-      fetch: mockFetchData(MOCK_DEPTH),
-      retries: 0,
-    });
+    const r = await depth(
+      { pair: "btc_jpy" },
+      {
+        fetch: mockFetchData(MOCK_DEPTH),
+        retries: 0,
+      },
+    );
     expect(r.success).toBe(true);
     const spy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     output(r, "csv");

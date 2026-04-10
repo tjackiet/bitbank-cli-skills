@@ -17,9 +17,10 @@ const ResponseSchema = z.object({
 export type UnconfirmedDeposit = z.infer<typeof UnconfirmedDepositSchema>;
 
 export async function unconfirmedDeposits(
-  asset: string | undefined,
+  args: { asset?: string },
   opts?: PrivateHttpOptions,
 ): Promise<Result<UnconfirmedDeposit[]>> {
+  const { asset } = args;
   const params: Record<string, string> = {};
   if (asset) params.asset = asset;
 

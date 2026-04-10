@@ -10,7 +10,11 @@ const DepthSchema = z.object({
 
 export type Depth = z.infer<typeof DepthSchema>;
 
-export async function depth(pair: string | undefined, opts?: HttpOptions): Promise<Result<Depth>> {
+export async function depth(
+  args: { pair: string | undefined },
+  opts?: HttpOptions,
+): Promise<Result<Depth>> {
+  const { pair } = args;
   if (!pair) {
     return { success: false, error: "pair is required. Example: npx bitbank depth btc_jpy" };
   }

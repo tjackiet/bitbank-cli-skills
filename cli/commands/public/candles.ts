@@ -6,7 +6,6 @@ import { candlesRange } from "./candles-range.js";
 export type { Candle };
 export { VALID_TYPES, previousDate } from "./candles-fetch.js";
 export { nextDate } from "./candles-range.js";
-
 function todayDate(type: string): string {
   const now = new Date();
   if (YEARLY_TYPES.has(type)) return String(now.getFullYear());
@@ -17,7 +16,6 @@ function todayDate(type: string): string {
 }
 
 const MAX_FETCHES = 3;
-
 function validateType(type: string | undefined): string | null {
   if (!type || !VALID_TYPES.includes(type as (typeof VALID_TYPES)[number])) return null;
   return type;
@@ -36,16 +34,18 @@ function validateDateFormat(date: string, type: string, label: string): Result<s
   return { success: true, data: date };
 }
 
-export async function candles(
-  pair: string | undefined,
-  type: string | undefined,
-  date: string | undefined,
-  limit: number | undefined,
-  from?: string,
-  to?: string,
-  noCache?: boolean,
-  opts?: HttpOptions,
-): Promise<Result<Candle[]>> {
+type CandlesArgs = {
+  pair: string | undefined;
+  type: string | undefined;
+  date?: string;
+  limit?: number;
+  from?: string;
+  to?: string;
+  noCache?: boolean;
+};
+
+export async function candles(args: CandlesArgs, opts?: HttpOptions): Promise<Result<Candle[]>> {
+  const { pair, type, date, limit, from, to, noCache } = args;
   if (!pair) return { success: false, error: "pair is required. Example: --pair=btc_jpy" };
   const validType = validateType(type);
   if (!validType) {

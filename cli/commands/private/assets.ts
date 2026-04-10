@@ -17,9 +17,10 @@ const AssetsResponseSchema = z.object({
 export type Asset = z.infer<typeof AssetSchema>;
 
 export async function assets(
-  showAll: boolean,
+  args: { showAll: boolean },
   opts?: PrivateHttpOptions,
 ): Promise<Result<Asset[]>> {
+  const { showAll } = args;
   const result = await privateGet<unknown>("/user/assets", undefined, opts);
   if (!result.success) return result;
 

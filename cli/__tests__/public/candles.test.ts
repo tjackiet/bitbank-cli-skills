@@ -17,20 +17,20 @@ const MOCK_DATA = {
 
 describe("candles", () => {
   it("returns error when pair is missing", async () => {
-    const result = await candles(undefined, "1hour", undefined, 100);
+    const result = await candles({ pair: undefined, type: "1hour", limit: 100 });
     expect(result.success).toBe(false);
   });
 
   it("returns error when type is missing", async () => {
-    const result = await candles("btc_jpy", undefined, undefined, 100);
+    const result = await candles({ pair: "btc_jpy", type: undefined, limit: 100 });
     expect(result.success).toBe(false);
   });
 
   it("returns parsed candles", async () => {
-    const result = await candles("btc_jpy", "1hour", "20240101", 100, undefined, undefined, true, {
-      fetch: mockFetchData(MOCK_DATA),
-      retries: 0,
-    });
+    const result = await candles(
+      { pair: "btc_jpy", type: "1hour", date: "20240101", limit: 100, noCache: true },
+      { fetch: mockFetchData(MOCK_DATA), retries: 0 },
+    );
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toHaveLength(3);
@@ -40,22 +40,22 @@ describe("candles", () => {
   });
 
   it("returns error when yearly type gets daily date", async () => {
-    const result = await candles("btc_jpy", "1day", "20250301", 100);
+    const result = await candles({ pair: "btc_jpy", type: "1day", date: "20250301", limit: 100 });
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("年を指定");
   });
 
   it("returns error when daily type gets yearly date", async () => {
-    const result = await candles("btc_jpy", "1hour", "2025", 100);
+    const result = await candles({ pair: "btc_jpy", type: "1hour", date: "2025", limit: 100 });
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("日付を指定");
   });
 
   it("respects limit", async () => {
-    const result = await candles("btc_jpy", "1hour", "20240101", 2, undefined, undefined, true, {
-      fetch: mockFetchData(MOCK_DATA),
-      retries: 0,
-    });
+    const result = await candles(
+      { pair: "btc_jpy", type: "1hour", date: "20240101", limit: 2, noCache: true },
+      { fetch: mockFetchData(MOCK_DATA), retries: 0 },
+    );
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toHaveLength(2);
@@ -69,10 +69,10 @@ describe("candles", () => {
       callCount++;
       return new Response(JSON.stringify({ success: 1, data: MOCK_DATA }));
     };
-    const result = await candles("btc_jpy", "1day", "2026", 10, undefined, undefined, true, {
-      fetch: countingFetch,
-      retries: 0,
-    });
+    const result = await candles(
+      { pair: "btc_jpy", type: "1day", date: "2026", limit: 10, noCache: true },
+      { fetch: countingFetch, retries: 0 },
+    );
     expect(result.success).toBe(true);
     expect(callCount).toBe(1);
   });
@@ -129,10 +129,10 @@ describe("candles auto-merge", () => {
       return new Response(JSON.stringify({ success: 1, data }));
     };
 
-    const result = await candles("btc_jpy", "1day", undefined, 5, undefined, undefined, true, {
-      fetch: mergeFetch,
-      retries: 0,
-    });
+    const result = await candles(
+      { pair: "btc_jpy", type: "1day", limit: 5, noCache: true },
+      { fetch: mergeFetch, retries: 0 },
+    );
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toHaveLength(5);
@@ -163,10 +163,10 @@ describe("candles auto-merge", () => {
       return new Response(JSON.stringify({ success: 0, data: { code: 10000 } }), { status: 404 });
     };
 
-    const result = await candles("btc_jpy", "1day", undefined, 10, undefined, undefined, true, {
-      fetch: errorFetch,
-      retries: 0,
-    });
+    const result = await candles(
+      { pair: "btc_jpy", type: "1day", limit: 10, noCache: true },
+      { fetch: errorFetch, retries: 0 },
+    );
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data).toHaveLength(2);
@@ -190,10 +190,10 @@ describe("candles auto-merge", () => {
       return new Response(JSON.stringify({ success: 1, data: smallData }));
     };
 
-    const result = await candles("btc_jpy", "1day", undefined, 100, undefined, undefined, true, {
-      fetch: manyFetch,
-      retries: 0,
-    });
+    const result = await candles(
+      { pair: "btc_jpy", type: "1day", limit: 100, noCache: true },
+      { fetch: manyFetch, retries: 0 },
+    );
     expect(result.success).toBe(true);
     expect(callCount).toBe(3); // MAX_FETCHES = 3
   });

@@ -2,20 +2,17 @@ import { output } from "../output.js";
 import { buildLogRecord, writeTradeLog } from "../trade-log.js";
 import type { CommandHandler, ParsedValues } from "./handler-types.js";
 
-/** Public/Private 用: module を動的 import して fn(...extractedArgs) → output */
+/** Public/Private 用: module を動的 import して fn(params) → output */
 export function handler(
   modulePath: string,
   fnName: string,
-  extract: (args: string[], values: ParsedValues) => unknown[],
+  extract: (args: string[], values: ParsedValues) => Record<string, unknown>,
 ): CommandHandler {
   return async (args, values, fmt) => {
     const mod = await import(modulePath);
-    output(
-      await mod[fnName](...extract(args, values)),
-      fmt,
-      values.raw === true,
-      values.machine === true,
-    );
+    const params = extract(args, values);
+    const result = Object.keys(params).length > 0 ? await mod[fnName](params) : await mod[fnName]();
+    output(result, fmt, values.raw === true, values.machine === true);
   };
 }
 

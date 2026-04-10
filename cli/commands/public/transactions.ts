@@ -18,10 +18,10 @@ const TransactionsSchema = z.object({
 export type Transaction = z.infer<typeof TransactionSchema>;
 
 export async function transactions(
-  pair: string | undefined,
-  date?: string,
+  args: { pair: string | undefined; date?: string },
   opts?: HttpOptions,
 ): Promise<Result<Transaction[]>> {
+  const { pair, date } = args;
   if (!pair) {
     return { success: false, error: "pair is required. Example: npx bitbank transactions btc_jpy" };
   }

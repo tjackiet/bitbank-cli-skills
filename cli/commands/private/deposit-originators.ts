@@ -17,9 +17,10 @@ const ResponseSchema = z.object({
 export type DepositOriginator = z.infer<typeof OriginatorSchema>;
 
 export async function depositOriginators(
-  asset: string | undefined,
+  args: { asset: string | undefined },
   opts?: PrivateHttpOptions,
 ): Promise<Result<DepositOriginator[]>> {
+  const { asset } = args;
   if (!asset) {
     return { success: false, error: "asset is required. Example: --asset=btc" };
   }

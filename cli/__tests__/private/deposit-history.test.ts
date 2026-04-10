@@ -18,53 +18,68 @@ const MOCK = {
 
 describe("depositHistory", () => {
   it("returns deposit history", async () => {
-    const result = await depositHistory("btc", undefined, undefined, undefined, {
-      fetch: mockFetchData(MOCK),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await depositHistory(
+      { asset: "btc" },
+      {
+        fetch: mockFetchData(MOCK),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(true);
     if (result.success) expect(result.data).toHaveLength(1);
   });
 
   it("passes optional params (count, since, end)", async () => {
-    const result = await depositHistory("btc", "10", "1000", "2000", {
-      fetch: mockFetchData(MOCK),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await depositHistory(
+      { asset: "btc", count: "10", since: "1000", end: "2000" },
+      {
+        fetch: mockFetchData(MOCK),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(true);
   });
 
   it("works without asset filter", async () => {
-    const result = await depositHistory(undefined, undefined, undefined, undefined, {
-      fetch: mockFetchData(MOCK),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await depositHistory(
+      {},
+      {
+        fetch: mockFetchData(MOCK),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(true);
   });
 
   it("propagates API error", async () => {
-    const result = await depositHistory("btc", undefined, undefined, undefined, {
-      fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await depositHistory(
+      { asset: "btc" },
+      {
+        fetch: mockFetchRaw({ success: 0, data: { code: 70001 } }),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(false);
   });
 
   it("returns error on invalid response shape", async () => {
-    const result = await depositHistory("btc", undefined, undefined, undefined, {
-      fetch: mockFetchData("invalid"),
-      retries: 0,
-      credentials: TEST_CREDS,
-      nonce: "1",
-    });
+    const result = await depositHistory(
+      { asset: "btc" },
+      {
+        fetch: mockFetchData("invalid"),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("Invalid response");
   });
