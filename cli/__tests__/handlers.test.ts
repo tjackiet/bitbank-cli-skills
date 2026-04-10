@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { privateCommands } from "../commands/private-handlers.js";
+import { privateTransferCommands } from "../commands/private-transfer-handlers.js";
 import { publicCommands } from "../commands/public-handlers.js";
 import { streamCommands } from "../commands/stream-handler.js";
 import { tradeCommands } from "../commands/trade-handlers.js";
@@ -32,8 +33,6 @@ describe("privateCommands", () => {
     expect(names).toContain("order");
     expect(names).toContain("active-orders");
     expect(names).toContain("trade-history");
-    expect(names).toContain("deposit-history");
-    expect(names).toContain("withdrawal-accounts");
     expect(names).toContain("margin-status");
     expect(names).toContain("margin-positions");
   });
@@ -41,6 +40,17 @@ describe("privateCommands", () => {
   it("trade-history uses custom handler (not generic handler)", () => {
     // tradeHistoryHandler is directly assigned, not via handler()
     expect(privateCommands["trade-history"].handler).toBeDefined();
+  });
+});
+
+describe("privateTransferCommands", () => {
+  it("registers expected commands", () => {
+    const names = Object.keys(privateTransferCommands);
+    expect(names).toContain("deposit-history");
+    expect(names).toContain("unconfirmed-deposits");
+    expect(names).toContain("deposit-originators");
+    expect(names).toContain("withdrawal-accounts");
+    expect(names).toContain("withdrawal-history");
   });
 });
 

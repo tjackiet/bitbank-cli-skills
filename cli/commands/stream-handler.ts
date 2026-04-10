@@ -1,8 +1,12 @@
-import type { CommandHandler } from "./handler-types.js";
+import type { CommandEntry } from "./handler-types.js";
 
-export const streamCommands: Record<string, { description: string; handler: CommandHandler }> = {
+const str = { type: "string" as const };
+const bool = (d = false) => ({ type: "boolean" as const, default: d });
+
+export const streamCommands: Record<string, CommandEntry> = {
   stream: {
     description: "Subscribe to real-time stream (public or --private)",
+    options: { private: bool(), channel: str, filter: str },
     handler: async (args, values, format) => {
       const { streamCommand } = await import("./stream/index.js");
       const fmt = format === "csv" ? "json" : (format as "json" | "table");

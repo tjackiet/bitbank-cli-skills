@@ -8,7 +8,15 @@ export type CommandHandler = (
   format: Format,
 ) => Promise<void>;
 
+export type CliOptionConfig = {
+  type: "string" | "boolean";
+  default?: string | boolean;
+};
+
+export type CliOptions = Record<string, CliOptionConfig>;
+
 export type CommandEntry = {
   description: string;
   handler: CommandHandler;
+  options?: CliOptions;
 };

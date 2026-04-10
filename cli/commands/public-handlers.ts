@@ -2,6 +2,7 @@ import type { CommandEntry } from "./handler-types.js";
 import { handler } from "./make-handler.js";
 
 const h = handler;
+const str = { type: "string" as const };
 
 export const publicCommands: Record<string, CommandEntry> = {
   ticker: {
@@ -22,6 +23,7 @@ export const publicCommands: Record<string, CommandEntry> = {
   },
   transactions: {
     description: "Get recent transactions for a pair",
+    options: { date: str },
     handler: h("./public/transactions.js", "transactions", (a, v) => ({
       pair: a[0],
       date: v.date as string | undefined,
@@ -29,6 +31,14 @@ export const publicCommands: Record<string, CommandEntry> = {
   },
   candles: {
     description: "Get candlestick OHLCV data",
+    options: {
+      type: str,
+      date: str,
+      limit: { type: "string", default: "100" },
+      from: str,
+      to: str,
+      "no-cache": { type: "boolean", default: false },
+    },
     handler: h("./public/candles.js", "candles", (a, v) => ({
       pair: a[0],
       type: v.type as string | undefined,

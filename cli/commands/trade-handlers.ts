@@ -2,10 +2,22 @@ import type { CommandEntry } from "./handler-types.js";
 import { tradeHandler } from "./make-handler.js";
 
 const th = tradeHandler;
+const str = { type: "string" as const };
+const bool = (d = false) => ({ type: "boolean" as const, default: d });
 
 export const tradeCommands: Record<string, CommandEntry> = {
   "create-order": {
     description: "Create a spot order (dry-run default)",
+    options: {
+      pair: str,
+      side: str,
+      type: str,
+      price: str,
+      amount: str,
+      "trigger-price": str,
+      "post-only": bool(),
+      execute: bool(),
+    },
     handler: th("./trade/create-order.js", "createOrder", (v) => ({
       pair: v.pair as string | undefined,
       side: v.side as string | undefined,
@@ -19,6 +31,7 @@ export const tradeCommands: Record<string, CommandEntry> = {
   },
   "cancel-order": {
     description: "Cancel a spot order (dry-run default)",
+    options: { pair: str, "order-id": str, execute: bool() },
     handler: th("./trade/cancel-order.js", "cancelOrder", (v) => ({
       pair: v.pair as string | undefined,
       orderId: v["order-id"] as string | undefined,
@@ -27,6 +40,7 @@ export const tradeCommands: Record<string, CommandEntry> = {
   },
   "cancel-orders": {
     description: "Cancel multiple spot orders (dry-run default)",
+    options: { pair: str, "order-ids": str, execute: bool() },
     handler: th("./trade/cancel-orders.js", "cancelOrders", (v) => ({
       pair: v.pair as string | undefined,
       orderIds: v["order-ids"] as string | undefined,
@@ -35,6 +49,7 @@ export const tradeCommands: Record<string, CommandEntry> = {
   },
   "confirm-deposits": {
     description: "Confirm a deposit (dry-run default)",
+    options: { id: str, execute: bool() },
     handler: th("./trade/confirm-deposits.js", "confirmDeposits", (v) => ({
       id: v.id as string | undefined,
       execute: !!v.execute,
@@ -42,12 +57,14 @@ export const tradeCommands: Record<string, CommandEntry> = {
   },
   "confirm-deposits-all": {
     description: "Confirm all deposits (dry-run default)",
+    options: { execute: bool() },
     handler: th("./trade/confirm-deposits-all.js", "confirmDepositsAll", (v) => ({
       execute: !!v.execute,
     })),
   },
   withdraw: {
     description: "Request withdrawal (dry-run default, requires --confirm)",
+    options: { asset: str, uuid: str, amount: str, token: str, execute: bool(), confirm: bool() },
     handler: th("./trade/withdraw.js", "withdraw", (v) => ({
       asset: v.asset as string | undefined,
       uuid: v.uuid as string | undefined,
