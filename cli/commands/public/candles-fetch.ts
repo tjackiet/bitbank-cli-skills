@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { isCompletePeriod, readCache, writeCache } from "../../cache.js";
 import { type HttpOptions, publicGet } from "../../http.js";
+import { numStr } from "../../schema-helpers.js";
 import type { Result } from "../../types.js";
 
 export const VALID_TYPES = [
@@ -19,8 +20,7 @@ export const VALID_TYPES = [
 
 export const YEARLY_TYPES = new Set(["4hour", "8hour", "12hour", "1day", "1week", "1month"]);
 
-const Num = z.string().transform(Number);
-const CandleSchema = z.tuple([Num, Num, Num, Num, Num, z.number()]);
+const CandleSchema = z.tuple([numStr, numStr, numStr, numStr, numStr, z.number()]);
 
 const CandlestickSchema = z.object({
   candlestick: z.array(
