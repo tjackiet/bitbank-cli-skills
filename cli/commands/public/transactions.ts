@@ -1,12 +1,13 @@
 import { z } from "zod";
 import { type HttpOptions, publicGet } from "../../http.js";
+import { numStr } from "../../schema-helpers.js";
 import type { Result } from "../../types.js";
 
 const TransactionSchema = z.object({
   transaction_id: z.number(),
   side: z.string(),
-  price: z.string().transform(Number),
-  amount: z.string().transform(Number),
+  price: numStr,
+  amount: numStr,
   executed_at: z.number(),
 });
 
