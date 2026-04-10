@@ -1,7 +1,8 @@
 #!/usr/bin/env tsx
 import { parseArgs } from "node:util";
 import { COMMANDS } from "./commands/registry.js";
-import { EXIT } from "./exit-codes.js";
+import { COMMON_OPTIONS } from "./common-options.js";
+import { EXIT, type ExitCode } from "./exit-codes.js";
 import { machineOutput } from "./output.js";
 import { applyProfile } from "./profile.js";
 import type { Format } from "./types.js";
@@ -21,94 +22,60 @@ function showHelp(): void {
   console.log("  --help                   Show this help");
 }
 
+function fail(machine: boolean, msg: string, code: ExitCode): void {
+  if (machine) machineOutput({ success: false, error: msg, exitCode: code });
+  else {
+    process.stderr.write(`Error: ${msg}\n`);
+    process.exitCode = code;
+  }
+}
+
 async function main(): Promise<void> {
-  const { values, positionals } = parseArgs({
+  const { positionals: p1 } = parseArgs({
     allowPositionals: true,
-    options: {
-      profile: { type: "string" },
-      format: { type: "string", default: "json" },
-      help: { type: "boolean", default: false },
-      type: { type: "string" },
-      date: { type: "string" },
-      limit: { type: "string", default: "100" },
-      pair: { type: "string" },
-      "order-id": { type: "string" },
-      "order-ids": { type: "string" },
-      count: { type: "string" },
-      since: { type: "string" },
-      end: { type: "string" },
-      order: { type: "string" },
-      asset: { type: "string" },
-      all: { type: "boolean", default: false },
-      side: { type: "string" },
-      price: { type: "string" },
-      amount: { type: "string" },
-      "trigger-price": { type: "string" },
-      "post-only": { type: "boolean", default: false },
-      execute: { type: "boolean", default: false },
-      confirm: { type: "boolean", default: false },
-      uuid: { type: "string" },
-      token: { type: "string" },
-      id: { type: "string" },
-      private: { type: "boolean", default: false },
-      channel: { type: "string" },
-      filter: { type: "string" },
-      from: { type: "string" },
-      to: { type: "string" },
-      raw: { type: "boolean", default: false },
-      machine: { type: "boolean", default: false },
-      "no-cache": { type: "boolean", default: false },
-      "log-file": { type: "string" },
-    },
+    options: COMMON_OPTIONS,
     strict: false,
   });
-
-  if (positionals.length === 0) {
+  if (p1.length === 0) {
     showHelp();
     return;
   }
 
+  const [command] = p1;
+  const entry = COMMANDS[command];
+  const merged = { ...COMMON_OPTIONS, ...(entry?.options ?? {}) };
+  const { values, positionals } = parseArgs({
+    allowPositionals: true,
+    options: merged,
+    strict: false,
+  });
   const machine = values.machine === true;
 
   if (typeof values.profile === "string") {
-    const profileResult = applyProfile(values.profile);
-    if (!profileResult.success) {
-      if (machine) {
-        machineOutput(profileResult);
-      } else {
-        process.stderr.write(`Error: ${profileResult.error}\n`);
-        process.exitCode = profileResult.exitCode;
-      }
+    const r = applyProfile(values.profile);
+    if (!r.success) {
+      fail(machine, r.error, r.exitCode ?? EXIT.GENERAL);
       return;
     }
   }
 
   const format = (values.format ?? "json") as Format;
   if (!["json", "table", "csv"].includes(format)) {
-    const msg = `Unknown format "${format}". Use json, table, or csv.`;
-    if (machine) {
-      machineOutput({ success: false, error: msg, exitCode: EXIT.PARAM });
-    } else {
-      process.stderr.write(`Error: ${msg}\n`);
-      process.exitCode = EXIT.PARAM;
-    }
+    fail(machine, `Unknown format "${format}". Use json, table, or csv.`, EXIT.PARAM);
     return;
   }
 
-  const [command, ...args] = positionals;
+  const [, ...args] = positionals;
 
   if (command === "profiles") {
     const { profilesHandler } = await import("./commands/profiles.js");
     await profilesHandler(args, values as Record<string, string | boolean | undefined>, format);
     return;
   }
-
   if (command === "schema") {
     const { buildSchemaHandler } = await import("./commands/schema/handler.js");
-    const descriptions = Object.fromEntries(
-      Object.entries(COMMANDS).map(([k, v]) => [k, v.description]),
-    );
-    await buildSchemaHandler(descriptions)(
+    const desc = Object.fromEntries(Object.entries(COMMANDS).map(([k, v]) => [k, v.description]));
+    await buildSchemaHandler(desc)(
       args,
       values as Record<string, string | boolean | undefined>,
       format,
@@ -116,16 +83,8 @@ async function main(): Promise<void> {
     return;
   }
 
-  const entry = COMMANDS[command];
-
   if (!entry) {
-    const msg = `Unknown command "${command}". Run with --help for usage.`;
-    if (machine) {
-      machineOutput({ success: false, error: msg, exitCode: EXIT.PARAM });
-    } else {
-      process.stderr.write(`Error: ${msg}\n`);
-      process.exitCode = EXIT.PARAM;
-    }
+    fail(machine, `Unknown command "${command}". Run with --help for usage.`, EXIT.PARAM);
     return;
   }
 
