@@ -1,5 +1,6 @@
 import { output } from "../output.js";
 import type { CommandHandler } from "./handler-types.js";
+import { valStr } from "./handler-types.js";
 
 /** trade-history は --all フラグで分岐するためカスタムハンドラー */
 export const tradeHistoryHandler: CommandHandler = async (_a, values, fmt) => {
@@ -7,9 +8,9 @@ export const tradeHistoryHandler: CommandHandler = async (_a, values, fmt) => {
     const { tradeHistoryAll } = await import("./private/trade-history-all.js");
     output(
       await tradeHistoryAll({
-        pair: values.pair as string | undefined,
-        since: values.since as string | undefined,
-        end: values.end as string | undefined,
+        pair: valStr(values, "pair"),
+        since: valStr(values, "since"),
+        end: valStr(values, "end"),
       }),
       fmt,
     );
@@ -17,12 +18,12 @@ export const tradeHistoryHandler: CommandHandler = async (_a, values, fmt) => {
     const { tradeHistory } = await import("./private/trade-history.js");
     output(
       await tradeHistory({
-        pair: values.pair as string | undefined,
-        count: values.count as string | undefined,
-        orderId: values["order-id"] as string | undefined,
-        since: values.since as string | undefined,
-        end: values.end as string | undefined,
-        order: values.order as string | undefined,
+        pair: valStr(values, "pair"),
+        count: valStr(values, "count"),
+        orderId: valStr(values, "order-id"),
+        since: valStr(values, "since"),
+        end: valStr(values, "end"),
+        order: valStr(values, "order"),
       }),
       fmt,
     );

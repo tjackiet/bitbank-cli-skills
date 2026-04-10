@@ -1,6 +1,7 @@
 import { output } from "../output.js";
 import { buildLogRecord, writeTradeLog } from "../trade-log.js";
 import type { CommandHandler, ParsedValues } from "./handler-types.js";
+import { valStr } from "./handler-types.js";
 
 /** Public/Private 用: module を動的 import して fn(params) → output */
 export function handler(
@@ -32,7 +33,7 @@ export function tradeHandler(
     const r = await mod[fnName](params);
     if (isDryRun(r)) return;
     output(r, fmt, values.raw === true, values.machine === true);
-    const logFile = values["log-file"] as string | undefined;
+    const logFile = valStr(values, "log-file");
     if (logFile) await writeTradeLog(logFile, buildLogRecord(fnName, params, r));
   };
 }
