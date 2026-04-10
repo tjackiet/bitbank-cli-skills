@@ -1,4 +1,5 @@
 import type { CommandEntry } from "./handler-types.js";
+import { valStr } from "./handler-types.js";
 
 const str = { type: "string" as const };
 const bool = (d = false) => ({ type: "boolean" as const, default: d });
@@ -9,12 +10,12 @@ export const streamCommands: Record<string, CommandEntry> = {
     options: { private: bool(), channel: str, filter: str },
     handler: async (args, values, format) => {
       const { streamCommand } = await import("./stream/index.js");
-      const fmt = format === "csv" ? "json" : (format as "json" | "table");
+      const fmt = format === "csv" ? "json" : format;
       const r = await streamCommand({
         pair: args[0],
         isPrivate: !!values.private,
-        channel: values.channel as string | undefined,
-        filter: values.filter as string | undefined,
+        channel: valStr(values, "channel"),
+        filter: valStr(values, "filter"),
         format: fmt,
       });
       if (!r.success) {
