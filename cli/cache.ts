@@ -1,16 +1,29 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 const CACHE_BASE = join(homedir(), ".bitbank-cache");
 const memCache = new Map<string, unknown>();
+
+/** パストラバーサルを防止: セグメントに / \ .. を含む場合 null を返す */
+function sanitizeSegment(s: string): string | null {
+  if (/[/\\]|\.\./.test(s) || s.length === 0) return null;
+  return s;
+}
 
 function cacheKey(pair: string, type: string, date: string): string {
   return `${pair}/${type}/${date}`;
 }
 
-function cachePath(pair: string, type: string, date: string): string {
-  return join(CACHE_BASE, pair, type, `${date}.json`);
+function cachePath(pair: string, type: string, date: string): string | null {
+  const sp = sanitizeSegment(pair);
+  const st = sanitizeSegment(type);
+  const sd = sanitizeSegment(date);
+  if (!sp || !st || !sd) return null;
+  const p = join(CACHE_BASE, sp, st, `${sd}.json`);
+  // resolve して CACHE_BASE 配下であることを二重確認
+  if (!resolve(p).startsWith(resolve(CACHE_BASE))) return null;
+  return p;
 }
 
 export function readCache<T>(pair: string, type: string, date: string): T | null {
@@ -19,7 +32,7 @@ export function readCache<T>(pair: string, type: string, date: string): T | null
   if (mem !== undefined) return mem as T;
 
   const p = cachePath(pair, type, date);
-  if (!existsSync(p)) return null;
+  if (!p || !existsSync(p)) return null;
   try {
     const data = JSON.parse(readFileSync(p, "utf-8")) as T;
     memCache.set(key, data);
@@ -30,9 +43,11 @@ export function readCache<T>(pair: string, type: string, date: string): T | null
 }
 
 export function writeCache(pair: string, type: string, date: string, data: unknown): void {
-  memCache.set(cacheKey(pair, type, date), data);
   const p = cachePath(pair, type, date);
-  mkdirSync(join(CACHE_BASE, pair, type), { recursive: true });
+  if (!p) return;
+  memCache.set(cacheKey(pair, type, date), data);
+  const dir = join(p, "..");
+  mkdirSync(dir, { recursive: true });
   writeFileSync(p, JSON.stringify(data));
 }
 

@@ -1,10 +1,19 @@
-import type { z } from "zod";
+import { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
-import { MSG_ORDER_ID, MSG_PAIR } from "../../validators.js";
 import { CancelOrderSchema } from "../shared-schemas.js";
 import { printDryRun } from "./dry-run.js";
+
+const CancelOrderInputSchema = z.object({
+  pair: z
+    .string({ required_error: "pair is required. Example: --pair=btc_jpy" })
+    .min(1, "pair is required. Example: --pair=btc_jpy"),
+  orderId: z
+    .string({ required_error: "order-id is required. Example: --order-id=12345" })
+    .min(1, "order-id is required. Example: --order-id=12345")
+    .refine((v) => !Number.isNaN(Number(v)), "order-id must be a number"),
+});
 
 export type CancelOrderResponse = z.infer<typeof CancelOrderSchema>;
 
@@ -18,16 +27,19 @@ export async function cancelOrder(
   args: CancelOrderArgs,
   opts?: PrivatePostOptions,
 ): Promise<Result<CancelOrderResponse | { dryRun: true }>> {
-  if (!args.pair) return { success: false, error: MSG_PAIR };
-  if (!args.orderId) return { success: false, error: MSG_ORDER_ID };
+  const parsed = CancelOrderInputSchema.safeParse({ pair: args.pair, orderId: args.orderId });
+  if (!parsed.success) {
+    const msg = parsed.error.issues.map((i) => i.message).join("; ");
+    return { success: false, error: msg };
+  }
 
-  const body = { pair: args.pair, order_id: Number(args.orderId) };
+  const body = { pair: parsed.data.pair, order_id: Number(parsed.data.orderId) };
 
   if (!args.execute) {
     printDryRun({
       endpoint: "/v1/user/spot/cancel_order",
       body,
-      executeHint: `npx bitbank cancel-order --pair=${args.pair} --order-id=${args.orderId} --execute`,
+      executeHint: `npx bitbank cancel-order --pair=${parsed.data.pair} --order-id=${parsed.data.orderId} --execute`,
     });
     return { success: true, data: { dryRun: true } };
   }

@@ -17,11 +17,14 @@ export async function writeTradeLog(
 }
 
 const SENSITIVE_KEYS = new Set(["token", "otp_token"]);
+const SENSITIVE_PATTERN = /secret|password|credential|auth_token/i;
 
 function maskSensitive(params: Record<string, unknown>): Record<string, unknown> {
   const masked = { ...params };
-  for (const key of SENSITIVE_KEYS) {
-    if (key in masked) masked[key] = "***";
+  for (const key of Object.keys(masked)) {
+    if (SENSITIVE_KEYS.has(key) || SENSITIVE_PATTERN.test(key)) {
+      masked[key] = "***";
+    }
   }
   return masked;
 }
