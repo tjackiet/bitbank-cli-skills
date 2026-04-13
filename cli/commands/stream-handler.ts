@@ -1,3 +1,4 @@
+import { output } from "../output.js";
 import type { CommandEntry } from "./handler-types.js";
 import { bool, str, valStr } from "./handler-types.js";
 
@@ -15,10 +16,7 @@ export const streamCommands: Record<string, CommandEntry> = {
         filter: valStr(values, "filter"),
         format: fmt,
       });
-      if (!r.success) {
-        process.stderr.write(`Error: ${r.error}\n`);
-        process.exitCode = 1;
-      }
+      if (!r.success) output(r, format);
     },
   },
 };

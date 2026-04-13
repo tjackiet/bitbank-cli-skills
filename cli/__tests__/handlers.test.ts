@@ -37,9 +37,9 @@ describe("privateCommands", () => {
     expect(names).toContain("margin-positions");
   });
 
-  it("trade-history uses custom handler (not generic handler)", () => {
-    // tradeHistoryHandler is directly assigned, not via handler()
+  it("trade-history uses handler() factory", () => {
     expect(privateCommands["trade-history"].handler).toBeDefined();
+    expect(typeof privateCommands["trade-history"].handler).toBe("function");
   });
 });
 
