@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type HttpOptions, publicGet } from "../../http.js";
+import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 
 const CircuitBreakSchema = z.object({
@@ -28,11 +29,5 @@ export async function circuitBreak(
     };
   }
   const result = await publicGet<unknown>(`/${pair}/circuit_break_info`, opts);
-  if (!result.success) return result;
-
-  const parsed = CircuitBreakSchema.safeParse(result.data);
-  if (!parsed.success) {
-    return { success: false, error: `Invalid response: ${parsed.error.message}` };
-  }
-  return { success: true, data: parsed.data };
+  return parseResponse(result, CircuitBreakSchema);
 }

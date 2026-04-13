@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type HttpOptions, publicGet } from "../../http.js";
+import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 
 const PairSchema = z
@@ -26,11 +27,5 @@ export type Pair = z.infer<typeof PairSchema>;
 
 export async function pairs(opts?: HttpOptions): Promise<Result<Pair[]>> {
   const result = await publicGet<unknown>("/v1/spot/pairs", opts);
-  if (!result.success) return result;
-
-  const parsed = PairsSchema.safeParse(result.data);
-  if (!parsed.success) {
-    return { success: false, error: `Invalid response: ${parsed.error.message}` };
-  }
-  return { success: true, data: parsed.data.pairs };
+  return parseResponse(result, PairsSchema, "pairs");
 }

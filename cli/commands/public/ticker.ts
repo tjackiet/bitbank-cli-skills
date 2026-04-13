@@ -1,5 +1,6 @@
 import type { z } from "zod";
 import { type HttpOptions, publicGet } from "../../http.js";
+import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 import { TickerSchema } from "../shared-schemas.js";
 
@@ -14,11 +15,5 @@ export async function ticker(
     return { success: false, error: "pair is required. Example: npx bitbank ticker btc_jpy" };
   }
   const result = await publicGet<unknown>(`/${pair}/ticker`, opts);
-  if (!result.success) return result;
-
-  const parsed = TickerSchema.safeParse(result.data);
-  if (!parsed.success) {
-    return { success: false, error: `Invalid response: ${parsed.error.message}` };
-  }
-  return { success: true, data: parsed.data };
+  return parseResponse(result, TickerSchema);
 }

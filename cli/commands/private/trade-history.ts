@@ -2,6 +2,7 @@
 // 全件取得が必要な場合は trade-history-all.ts を使う（自動ページング）
 import { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
+import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 
 const TradeSchema = z.object({
@@ -48,11 +49,5 @@ export async function tradeHistory(
   if (args.order) params.order = args.order;
 
   const result = await privateGet<unknown>("/user/spot/trade_history", params, opts);
-  if (!result.success) return result;
-
-  const parsed = TradeHistoryResponseSchema.safeParse(result.data);
-  if (!parsed.success) {
-    return { success: false, error: `Invalid response: ${parsed.error.message}` };
-  }
-  return { success: true, data: parsed.data.trades };
+  return parseResponse(result, TradeHistoryResponseSchema, "trades");
 }

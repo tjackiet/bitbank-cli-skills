@@ -1,5 +1,6 @@
 import type { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
+import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 import { OrderSchema } from "../shared-schemas.js";
 
@@ -18,11 +19,5 @@ export async function order(
   }
   const params: Record<string, string> = { pair, order_id: orderId };
   const result = await privateGet<unknown>("/user/spot/order", params, opts);
-  if (!result.success) return result;
-
-  const parsed = OrderSchema.safeParse(result.data);
-  if (!parsed.success) {
-    return { success: false, error: `Invalid response: ${parsed.error.message}` };
-  }
-  return { success: true, data: parsed.data };
+  return parseResponse(result, OrderSchema);
 }
