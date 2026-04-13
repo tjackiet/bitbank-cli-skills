@@ -1,20 +1,17 @@
 import type { CommandEntry } from "./handler-types.js";
 import { bool, str, valStr } from "./handler-types.js";
 import { handler } from "./make-handler.js";
-import { tradeHistoryHandler } from "./private-trade-history-handler.js";
-
-const h = handler;
 
 export const privateCommands: Record<string, CommandEntry> = {
   assets: {
     description: "Get your asset balances",
     options: { all: bool() },
-    handler: h("./private/assets.js", "assets", (_a, v) => ({ showAll: !!v.all })),
+    handler: handler("./private/assets.js", "assets", (_a, v) => ({ showAll: !!v.all })),
   },
   order: {
     description: "Get a specific order",
     options: { pair: str, "order-id": str },
-    handler: h("./private/order.js", "order", (_a, v) => ({
+    handler: handler("./private/order.js", "order", (_a, v) => ({
       pair: valStr(v, "pair"),
       orderId: valStr(v, "order-id"),
     })),
@@ -22,7 +19,7 @@ export const privateCommands: Record<string, CommandEntry> = {
   "orders-info": {
     description: "Get multiple orders by IDs",
     options: { pair: str, "order-ids": str },
-    handler: h("./private/orders-info.js", "ordersInfo", (_a, v) => ({
+    handler: handler("./private/orders-info.js", "ordersInfo", (_a, v) => ({
       pair: valStr(v, "pair"),
       orderIds: valStr(v, "order-ids"),
     })),
@@ -30,7 +27,7 @@ export const privateCommands: Record<string, CommandEntry> = {
   "active-orders": {
     description: "Get active (open) orders",
     options: { pair: str, count: str, since: str, end: str },
-    handler: h("./private/active-orders.js", "activeOrders", (_a, v) => ({
+    handler: handler("./private/active-orders.js", "activeOrders", (_a, v) => ({
       pair: valStr(v, "pair"),
       count: valStr(v, "count"),
       since: valStr(v, "since"),
@@ -48,12 +45,20 @@ export const privateCommands: Record<string, CommandEntry> = {
       order: str,
       all: bool(),
     },
-    handler: tradeHistoryHandler,
+    handler: handler("./private/trade-history.js", "tradeHistoryDispatch", (_a, v) => ({
+      pair: valStr(v, "pair"),
+      count: valStr(v, "count"),
+      orderId: valStr(v, "order-id"),
+      since: valStr(v, "since"),
+      end: valStr(v, "end"),
+      order: valStr(v, "order"),
+      all: !!v.all,
+    })),
   },
   "trade-history-all": {
     description: "Get all trade history (paginated)",
     options: { pair: str, since: str, end: str },
-    handler: h("./private/trade-history-all.js", "tradeHistoryAll", (_a, v) => ({
+    handler: handler("./private/trade-history-all.js", "tradeHistoryAll", (_a, v) => ({
       pair: valStr(v, "pair"),
       since: valStr(v, "since"),
       end: valStr(v, "end"),
@@ -61,12 +66,12 @@ export const privateCommands: Record<string, CommandEntry> = {
   },
   "margin-status": {
     description: "Get margin account status",
-    handler: h("./private/margin-status.js", "marginStatus", () => ({})),
+    handler: handler("./private/margin-status.js", "marginStatus", () => ({})),
   },
   "margin-positions": {
     description: "Get open margin positions",
     options: { pair: str },
-    handler: h("./private/margin-positions.js", "marginPositions", (_a, v) => ({
+    handler: handler("./private/margin-positions.js", "marginPositions", (_a, v) => ({
       pair: valStr(v, "pair"),
     })),
   },
