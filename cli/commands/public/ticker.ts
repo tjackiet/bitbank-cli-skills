@@ -1,18 +1,7 @@
-import { z } from "zod";
+import type { z } from "zod";
 import { type HttpOptions, publicGet } from "../../http.js";
-import { nullableNumStr } from "../../schema-helpers.js";
 import type { Result } from "../../types.js";
-
-const TickerSchema = z.object({
-  sell: nullableNumStr,
-  buy: nullableNumStr,
-  high: nullableNumStr,
-  low: nullableNumStr,
-  open: nullableNumStr,
-  last: nullableNumStr,
-  vol: nullableNumStr,
-  timestamp: z.number(),
-});
+import { TickerSchema } from "../shared-schemas.js";
 
 export type Ticker = z.infer<typeof TickerSchema>;
 

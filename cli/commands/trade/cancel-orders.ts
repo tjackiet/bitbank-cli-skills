@@ -1,19 +1,11 @@
 import { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
 import type { Result } from "../../types.js";
+import { CancelOrderSchema } from "../shared-schemas.js";
 import { printDryRun } from "./dry-run.js";
 
-const CancelOrderItemSchema = z.object({
-  order_id: z.number(),
-  pair: z.string(),
-  side: z.string(),
-  type: z.string(),
-  price: z.string().nullable(),
-  status: z.string(),
-});
-
 const CancelOrdersResponseSchema = z.object({
-  orders: z.array(CancelOrderItemSchema),
+  orders: z.array(CancelOrderSchema),
 });
 
 export type CancelOrdersResponse = z.infer<typeof CancelOrdersResponseSchema>;

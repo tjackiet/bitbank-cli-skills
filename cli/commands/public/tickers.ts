@@ -1,22 +1,10 @@
 import { z } from "zod";
 import { type HttpOptions, publicGet } from "../../http.js";
-import { nullableNumStr } from "../../schema-helpers.js";
 import type { Result } from "../../types.js";
+import { TickerWithPairSchema } from "../shared-schemas.js";
 
-const TickerItemSchema = z.object({
-  pair: z.string(),
-  sell: nullableNumStr,
-  buy: nullableNumStr,
-  high: nullableNumStr,
-  low: nullableNumStr,
-  open: nullableNumStr,
-  last: nullableNumStr,
-  vol: nullableNumStr,
-  timestamp: z.number(),
-});
-
-const TickersSchema = z.array(TickerItemSchema);
-export type TickerItem = z.infer<typeof TickerItemSchema>;
+const TickersSchema = z.array(TickerWithPairSchema);
+export type TickerItem = z.infer<typeof TickerWithPairSchema>;
 
 export async function tickers(opts?: HttpOptions): Promise<Result<TickerItem[]>> {
   const result = await publicGet<unknown>("/tickers", opts);
