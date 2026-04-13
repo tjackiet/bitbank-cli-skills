@@ -60,17 +60,29 @@ describe("retryDelay", () => {
     vi.useFakeTimers();
     const headers = new Headers({ "Retry-After": "1" });
     const res = new Response("", { status: 429, headers });
-    const p = retryDelay(res, 1);
-    await vi.advanceTimersByTimeAsync(1000);
+    let done = false;
+    const p = retryDelay(res, 1).then(() => {
+      done = true;
+    });
+    await vi.advanceTimersByTimeAsync(999);
+    expect(done).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
     await p;
+    expect(done).toBe(true);
     vi.useRealTimers();
   });
 
   it("uses exponential backoff when no Retry-After", async () => {
     vi.useFakeTimers();
-    const p = retryDelay(null, 2);
-    await vi.advanceTimersByTimeAsync(2000);
+    let done = false;
+    const p = retryDelay(null, 2).then(() => {
+      done = true;
+    });
+    await vi.advanceTimersByTimeAsync(1999);
+    expect(done).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
     await p;
+    expect(done).toBe(true);
     vi.useRealTimers();
   });
 
@@ -79,9 +91,15 @@ describe("retryDelay", () => {
     vi.setSystemTime(new Date("2025-01-01T00:00:00Z"));
     const headers = new Headers({ "Retry-After": "Wed, 01 Jan 2025 00:00:03 GMT" });
     const res = new Response("", { status: 429, headers });
-    const p = retryDelay(res, 1);
-    await vi.advanceTimersByTimeAsync(3000);
+    let done = false;
+    const p = retryDelay(res, 1).then(() => {
+      done = true;
+    });
+    await vi.advanceTimersByTimeAsync(2999);
+    expect(done).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
     await p;
+    expect(done).toBe(true);
     vi.useRealTimers();
   });
 
@@ -89,9 +107,31 @@ describe("retryDelay", () => {
     vi.useFakeTimers();
     const headers = new Headers({ "Retry-After": "garbage" });
     const res = new Response("", { status: 429, headers });
-    const p = retryDelay(res, 2); // attempt 2 → 2^2 * 500 = 2000ms
-    await vi.advanceTimersByTimeAsync(2000);
+    let done = false;
+    const p = retryDelay(res, 2).then(() => {
+      done = true;
+    }); // 2^2 * 500 = 2000ms
+    await vi.advanceTimersByTimeAsync(1999);
+    expect(done).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
     await p;
+    expect(done).toBe(true);
+    vi.useRealTimers();
+  });
+
+  it("falls back on negative Retry-After", async () => {
+    vi.useFakeTimers();
+    const headers = new Headers({ "Retry-After": "-1" });
+    const res = new Response("", { status: 429, headers });
+    let done = false;
+    const p = retryDelay(res, 1).then(() => {
+      done = true;
+    }); // fallback: 2^1 * 500 = 1000ms
+    await vi.advanceTimersByTimeAsync(999);
+    expect(done).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await p;
+    expect(done).toBe(true);
     vi.useRealTimers();
   });
 
