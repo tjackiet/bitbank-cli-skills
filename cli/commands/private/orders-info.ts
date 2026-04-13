@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
+import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 
 const OrderSchema = z.object({
@@ -38,11 +39,5 @@ export async function ordersInfo(
   const ids = orderIds.split(",").map(Number);
   const body = { pair, order_ids: ids };
   const result = await privatePost<unknown>("/user/spot/orders_info", body, opts);
-  if (!result.success) return result;
-
-  const parsed = OrdersInfoResponseSchema.safeParse(result.data);
-  if (!parsed.success) {
-    return { success: false, error: `Invalid response: ${parsed.error.message}` };
-  }
-  return { success: true, data: parsed.data.orders };
+  return parseResponse(result, OrdersInfoResponseSchema, "orders");
 }

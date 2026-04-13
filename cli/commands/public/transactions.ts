@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type HttpOptions, publicGet } from "../../http.js";
+import { parseResponse } from "../../parse-response.js";
 import { numStr } from "../../schema-helpers.js";
 import type { Result } from "../../types.js";
 
@@ -27,11 +28,5 @@ export async function transactions(
   }
   const datePath = date ? `/${date}` : "";
   const result = await publicGet<unknown>(`/${pair}/transactions${datePath}`, opts);
-  if (!result.success) return result;
-
-  const parsed = TransactionsSchema.safeParse(result.data);
-  if (!parsed.success) {
-    return { success: false, error: `Invalid response: ${parsed.error.message}` };
-  }
-  return { success: true, data: parsed.data.transactions };
+  return parseResponse(result, TransactionsSchema, "transactions");
 }

@@ -1,6 +1,7 @@
 import * as readline from "node:readline";
 import { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
+import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 import { printDryRun } from "./dry-run.js";
 
@@ -89,9 +90,5 @@ export async function withdraw(
   }
 
   const result = await privatePost<unknown>("/user/request_withdrawal", body, opts);
-  if (!result.success) return result;
-
-  const r = WithdrawResponseSchema.safeParse(result.data);
-  if (!r.success) return { success: false, error: `Invalid response: ${r.error.message}` };
-  return { success: true, data: r.data };
+  return parseResponse(result, WithdrawResponseSchema);
 }

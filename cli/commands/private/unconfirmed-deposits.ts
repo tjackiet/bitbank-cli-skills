@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
+import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 
 const UnconfirmedDepositSchema = z.object({
@@ -25,11 +26,5 @@ export async function unconfirmedDeposits(
   if (asset) params.asset = asset;
 
   const result = await privateGet<unknown>("/user/unconfirmed_deposits", params, opts);
-  if (!result.success) return result;
-
-  const parsed = ResponseSchema.safeParse(result.data);
-  if (!parsed.success) {
-    return { success: false, error: `Invalid response: ${parsed.error.message}` };
-  }
-  return { success: true, data: parsed.data.deposits };
+  return parseResponse(result, ResponseSchema, "deposits");
 }

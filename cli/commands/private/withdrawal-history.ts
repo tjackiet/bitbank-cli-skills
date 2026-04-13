@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
+import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 
 const WithdrawalSchema = z.object({
@@ -34,11 +35,5 @@ export async function withdrawalHistory(
   if (end) params.end = end;
 
   const result = await privateGet<unknown>("/user/withdrawal_history", params, opts);
-  if (!result.success) return result;
-
-  const parsed = ResponseSchema.safeParse(result.data);
-  if (!parsed.success) {
-    return { success: false, error: `Invalid response: ${parsed.error.message}` };
-  }
-  return { success: true, data: parsed.data.withdrawals };
+  return parseResponse(result, ResponseSchema, "withdrawals");
 }

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type HttpOptions, publicGet } from "../../http.js";
+import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 
 const DepthSchema = z.object({
@@ -19,11 +20,5 @@ export async function depth(
     return { success: false, error: "pair is required. Example: npx bitbank depth btc_jpy" };
   }
   const result = await publicGet<unknown>(`/${pair}/depth`, opts);
-  if (!result.success) return result;
-
-  const parsed = DepthSchema.safeParse(result.data);
-  if (!parsed.success) {
-    return { success: false, error: `Invalid response: ${parsed.error.message}` };
-  }
-  return { success: true, data: parsed.data };
+  return parseResponse(result, DepthSchema);
 }

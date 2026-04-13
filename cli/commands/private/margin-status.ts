@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
+import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 
 const MarginStatusSchema = z.object({
@@ -16,11 +17,5 @@ export type MarginStatus = z.infer<typeof MarginStatusSchema>;
 
 export async function marginStatus(opts?: PrivateHttpOptions): Promise<Result<MarginStatus>> {
   const result = await privateGet<unknown>("/user/margin/status", undefined, opts);
-  if (!result.success) return result;
-
-  const parsed = MarginStatusSchema.safeParse(result.data);
-  if (!parsed.success) {
-    return { success: false, error: `Invalid response: ${parsed.error.message}` };
-  }
-  return { success: true, data: parsed.data };
+  return parseResponse(result, MarginStatusSchema);
 }

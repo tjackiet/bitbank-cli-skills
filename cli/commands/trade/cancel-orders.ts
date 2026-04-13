@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
+import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 import { printDryRun } from "./dry-run.js";
 
@@ -56,9 +57,5 @@ export async function cancelOrders(
   }
 
   const result = await privatePost<unknown>("/user/spot/cancel_orders", body, opts);
-  if (!result.success) return result;
-
-  const r = CancelOrdersResponseSchema.safeParse(result.data);
-  if (!r.success) return { success: false, error: `Invalid response: ${r.error.message}` };
-  return { success: true, data: r.data };
+  return parseResponse(result, CancelOrdersResponseSchema);
 }
