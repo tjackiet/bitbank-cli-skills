@@ -1,11 +1,9 @@
 import type { CommandEntry } from "./handler-types.js";
-import { valStr } from "./handler-types.js";
+import { bool, str, valStr } from "./handler-types.js";
 import { handler } from "./make-handler.js";
 import { tradeHistoryHandler } from "./private-trade-history-handler.js";
 
 const h = handler;
-const str = { type: "string" as const };
-const bool = (d = false) => ({ type: "boolean" as const, default: d });
 
 export const privateCommands: Record<string, CommandEntry> = {
   assets: {

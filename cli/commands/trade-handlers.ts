@@ -1,10 +1,8 @@
 import type { CommandEntry } from "./handler-types.js";
-import { valStr } from "./handler-types.js";
+import { bool, str, valStr } from "./handler-types.js";
 import { tradeHandler } from "./make-handler.js";
 
 const th = tradeHandler;
-const str = { type: "string" as const };
-const bool = (d = false) => ({ type: "boolean" as const, default: d });
 
 export const tradeCommands: Record<string, CommandEntry> = {
   "create-order": {
