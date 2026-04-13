@@ -4,8 +4,6 @@ import { type HttpOptions, publicGet } from "../../http.js";
 import { numStr } from "../../schema-helpers.js";
 import type { Result } from "../../types.js";
 
-export { YEARLY_TYPES } from "../../date-utils.js";
-
 export const VALID_TYPES = [
   "1min",
   "5min",
