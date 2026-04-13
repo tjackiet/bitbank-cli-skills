@@ -30,6 +30,26 @@ function fail(machine: boolean, msg: string, code: ExitCode): void {
   }
 }
 
+async function handleSpecialCommand(
+  command: string,
+  args: string[],
+  opts: Record<string, string | boolean | undefined>,
+  format: Format,
+): Promise<boolean> {
+  if (command === "profiles") {
+    const { profilesHandler } = await import("./commands/profiles.js");
+    await profilesHandler(args, opts, format);
+    return true;
+  }
+  if (command === "schema") {
+    const { buildSchemaHandler } = await import("./commands/schema/handler.js");
+    const desc = Object.fromEntries(Object.entries(COMMANDS).map(([k, v]) => [k, v.description]));
+    await buildSchemaHandler(desc)(args, opts, format);
+    return true;
+  }
+  return false;
+}
+
 async function main(): Promise<void> {
   const { positionals: p1 } = parseArgs({
     allowPositionals: true,
@@ -50,7 +70,6 @@ async function main(): Promise<void> {
     strict: false,
   });
   const machine = values.machine === true;
-
   if (typeof values.profile === "string") {
     const r = applyProfile(values.profile);
     if (!r.success) {
@@ -58,31 +77,14 @@ async function main(): Promise<void> {
       return;
     }
   }
-
   const format = (values.format ?? "json") as Format;
   if (!["json", "table", "csv"].includes(format)) {
     fail(machine, `Unknown format "${format}". Use json, table, or csv.`, EXIT.PARAM);
     return;
   }
-
   const [, ...args] = positionals;
-
-  if (command === "profiles") {
-    const { profilesHandler } = await import("./commands/profiles.js");
-    await profilesHandler(args, values as Record<string, string | boolean | undefined>, format);
-    return;
-  }
-  if (command === "schema") {
-    const { buildSchemaHandler } = await import("./commands/schema/handler.js");
-    const desc = Object.fromEntries(Object.entries(COMMANDS).map(([k, v]) => [k, v.description]));
-    await buildSchemaHandler(desc)(
-      args,
-      values as Record<string, string | boolean | undefined>,
-      format,
-    );
-    return;
-  }
-
+  const opts = values as Record<string, string | boolean | undefined>;
+  if (await handleSpecialCommand(command, args, opts, format)) return;
   if (!entry) {
     fail(machine, `Unknown command "${command}". Run with --help for usage.`, EXIT.PARAM);
     return;
@@ -92,8 +94,7 @@ async function main(): Promise<void> {
     const { showCommandHelp } = await import("./commands/schema/help.js");
     if (showCommandHelp(command, entry.description)) return;
   }
-
-  await entry.handler(args, values as Record<string, string | boolean | undefined>, format);
+  await entry.handler(args, opts, format);
 }
 
 main();
