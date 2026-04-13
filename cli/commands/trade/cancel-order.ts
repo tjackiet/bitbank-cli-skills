@@ -8,11 +8,13 @@ import { printDryRun } from "./dry-run.js";
 const CancelOrderInputSchema = z.object({
   pair: z
     .string({ required_error: "pair is required. Example: --pair=btc_jpy" })
+    .trim()
     .min(1, "pair is required. Example: --pair=btc_jpy"),
   orderId: z
     .string({ required_error: "order-id is required. Example: --order-id=12345" })
+    .trim()
     .min(1, "order-id is required. Example: --order-id=12345")
-    .refine((v) => !Number.isNaN(Number(v)), "order-id must be a number"),
+    .regex(/^\d+$/, "order-id must be an integer"),
 });
 
 export type CancelOrderResponse = z.infer<typeof CancelOrderSchema>;

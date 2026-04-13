@@ -1,13 +1,20 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  readFileSync,
+  realpathSync,
+  writeFileSync,
+} from "node:fs";
 import { homedir } from "node:os";
-import { join, resolve } from "node:path";
+import { join, resolve, sep } from "node:path";
 
 const CACHE_BASE = join(homedir(), ".bitbank-cache");
 const memCache = new Map<string, unknown>();
 
-/** パストラバーサルを防止: セグメントに / \ .. を含む場合 null を返す */
+/** パストラバーサルを防止: セグメントに / \ .. . を含む場合 null を返す */
 function sanitizeSegment(s: string): string | null {
-  if (/[/\\]|\.\./.test(s) || s.length === 0) return null;
+  if (s === "." || /[/\\]|\.\./.test(s) || s.length === 0) return null;
   return s;
 }
 
@@ -22,8 +29,20 @@ function cachePath(pair: string, type: string, date: string): string | null {
   if (!sp || !st || !sd) return null;
   const p = join(CACHE_BASE, sp, st, `${sd}.json`);
   // resolve して CACHE_BASE 配下であることを二重確認
-  if (!resolve(p).startsWith(resolve(CACHE_BASE))) return null;
+  const resolvedBase = resolve(CACHE_BASE);
+  if (!resolve(p).startsWith(resolvedBase + sep)) return null;
   return p;
+}
+
+/** シンボリックリンク経由のキャッシュ外アクセスを防止 */
+function isSymlinkSafe(filePath: string): boolean {
+  try {
+    const real = realpathSync(filePath);
+    const realBase = realpathSync(CACHE_BASE);
+    return real.startsWith(realBase + sep) || real === realBase;
+  } catch {
+    return false;
+  }
 }
 
 export function readCache<T>(pair: string, type: string, date: string): T | null {
@@ -33,6 +52,7 @@ export function readCache<T>(pair: string, type: string, date: string): T | null
 
   const p = cachePath(pair, type, date);
   if (!p || !existsSync(p)) return null;
+  if (!isSymlinkSafe(p)) return null;
   try {
     const data = JSON.parse(readFileSync(p, "utf-8")) as T;
     memCache.set(key, data);
@@ -48,6 +68,8 @@ export function writeCache(pair: string, type: string, date: string, data: unkno
   memCache.set(cacheKey(pair, type, date), data);
   const dir = join(p, "..");
   mkdirSync(dir, { recursive: true });
+  // 書き込み先がシンボリックリンクなら中止
+  if (existsSync(p) && lstatSync(p).isSymbolicLink()) return;
   writeFileSync(p, JSON.stringify(data));
 }
 
