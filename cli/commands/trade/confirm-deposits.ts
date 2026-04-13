@@ -2,6 +2,7 @@ import { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
+import { MSG_ID } from "../../validators.js";
 import { printDryRun } from "./dry-run.js";
 
 const ConfirmDepositsResponseSchema = z.object({
@@ -20,7 +21,7 @@ export async function confirmDeposits(
   args: ConfirmDepositsArgs,
   opts?: PrivatePostOptions,
 ): Promise<Result<ConfirmDepositsResponse | { dryRun: true }>> {
-  if (!args.id) return { success: false, error: "id is required. Example: --id=12345" };
+  if (!args.id) return { success: false, error: MSG_ID };
 
   const body = { id: args.id };
 

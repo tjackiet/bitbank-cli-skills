@@ -2,6 +2,7 @@ import type { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
+import { MSG_ORDER_ID, MSG_PAIR } from "../../validators.js";
 import { OrderSchema } from "../shared-schemas.js";
 
 export type Order = z.infer<typeof OrderSchema>;
@@ -12,10 +13,10 @@ export async function order(
 ): Promise<Result<Order>> {
   const { pair, orderId } = args;
   if (!pair) {
-    return { success: false, error: "pair is required. Example: --pair=btc_jpy" };
+    return { success: false, error: MSG_PAIR };
   }
   if (!orderId) {
-    return { success: false, error: "order-id is required. Example: --order-id=12345" };
+    return { success: false, error: MSG_ORDER_ID };
   }
   const params: Record<string, string> = { pair, order_id: orderId };
   const result = await privateGet<unknown>("/user/spot/order", params, opts);

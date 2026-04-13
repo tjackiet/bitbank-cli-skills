@@ -2,6 +2,7 @@ import { z } from "zod";
 import { type HttpOptions, publicGet } from "../../http.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
+import { MSG_PAIR_DEPTH } from "../../validators.js";
 
 const DepthSchema = z.object({
   asks: z.array(z.tuple([z.string(), z.string()])),
@@ -17,7 +18,7 @@ export async function depth(
 ): Promise<Result<Depth>> {
   const { pair } = args;
   if (!pair) {
-    return { success: false, error: "pair is required. Example: npx bitbank depth btc_jpy" };
+    return { success: false, error: MSG_PAIR_DEPTH };
   }
   const result = await publicGet<unknown>(`/${pair}/depth`, opts);
   return parseResponse(result, DepthSchema);

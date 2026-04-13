@@ -2,6 +2,7 @@
 // CLI では `trade-history --all` で呼び出される
 import type { PrivateHttpOptions } from "../../http-private.js";
 import type { Result } from "../../types.js";
+import { MSG_PAIR } from "../../validators.js";
 import { type Trade, tradeHistory } from "./trade-history.js";
 
 // bitbank API の1リクエストあたり最大取得件数
@@ -18,7 +19,7 @@ export async function tradeHistoryAll(
   opts?: PrivateHttpOptions,
 ): Promise<Result<Trade[]>> {
   if (!args.pair) {
-    return { success: false, error: "pair is required. Example: --pair=btc_jpy" };
+    return { success: false, error: MSG_PAIR };
   }
 
   const allTrades: Trade[] = [];

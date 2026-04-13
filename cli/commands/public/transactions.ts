@@ -3,6 +3,7 @@ import { type HttpOptions, publicGet } from "../../http.js";
 import { parseResponse } from "../../parse-response.js";
 import { numStr } from "../../schema-helpers.js";
 import type { Result } from "../../types.js";
+import { MSG_PAIR_TRANSACTIONS } from "../../validators.js";
 
 const TransactionSchema = z.object({
   transaction_id: z.number(),
@@ -24,7 +25,7 @@ export async function transactions(
 ): Promise<Result<Transaction[]>> {
   const { pair, date } = args;
   if (!pair) {
-    return { success: false, error: "pair is required. Example: npx bitbank transactions btc_jpy" };
+    return { success: false, error: MSG_PAIR_TRANSACTIONS };
   }
   const datePath = date ? `/${date}` : "";
   const result = await publicGet<unknown>(`/${pair}/transactions${datePath}`, opts);

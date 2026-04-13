@@ -2,6 +2,7 @@ import { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
+import { MSG_ASSET } from "../../validators.js";
 
 const OriginatorSchema = z.object({
   uuid: z.string(),
@@ -23,7 +24,7 @@ export async function depositOriginators(
 ): Promise<Result<DepositOriginator[]>> {
   const { asset } = args;
   if (!asset) {
-    return { success: false, error: "asset is required. Example: --asset=btc" };
+    return { success: false, error: MSG_ASSET };
   }
   const params: Record<string, string> = { asset };
 

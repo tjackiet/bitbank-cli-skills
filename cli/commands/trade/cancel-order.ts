@@ -2,6 +2,7 @@ import type { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
+import { MSG_ORDER_ID, MSG_PAIR } from "../../validators.js";
 import { CancelOrderSchema } from "../shared-schemas.js";
 import { printDryRun } from "./dry-run.js";
 
@@ -17,9 +18,8 @@ export async function cancelOrder(
   args: CancelOrderArgs,
   opts?: PrivatePostOptions,
 ): Promise<Result<CancelOrderResponse | { dryRun: true }>> {
-  if (!args.pair) return { success: false, error: "pair is required. Example: --pair=btc_jpy" };
-  if (!args.orderId)
-    return { success: false, error: "order-id is required. Example: --order-id=12345" };
+  if (!args.pair) return { success: false, error: MSG_PAIR };
+  if (!args.orderId) return { success: false, error: MSG_ORDER_ID };
 
   const body = { pair: args.pair, order_id: Number(args.orderId) };
 
