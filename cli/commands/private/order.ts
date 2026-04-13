@@ -1,23 +1,8 @@
-import { z } from "zod";
+import type { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
-
-const OrderSchema = z.object({
-  order_id: z.number(),
-  pair: z.string(),
-  side: z.string(),
-  type: z.string(),
-  start_amount: z.string().nullable(),
-  remaining_amount: z.string().nullable(),
-  executed_amount: z.string(),
-  price: z.string().nullable(),
-  post_only: z.boolean().optional(),
-  average_price: z.string(),
-  ordered_at: z.number(),
-  expire_at: z.number().nullable(),
-  status: z.string(),
-});
+import { OrderSchema } from "../shared-schemas.js";
 
 export type Order = z.infer<typeof OrderSchema>;
 
