@@ -4,6 +4,7 @@ import type { PrivateHttpOptions } from "../../http-private.js";
 import type { Result } from "../../types.js";
 import { type Trade, tradeHistory } from "./trade-history.js";
 
+// bitbank API の1リクエストあたり最大取得件数
 const PAGE_SIZE = 1000;
 
 type TradeHistoryAllArgs = {

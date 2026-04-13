@@ -4,6 +4,7 @@ import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
 import type { Result } from "../../types.js";
 import { type StreamFormat, writeStreamMessage } from "./format.js";
 
+// bitbank PubNub 公開サブスクライブキー
 const SUBSCRIBE_KEY = "sub-c-ecebae8e-dd60-11e6-b6b1-02ee2ddab7fe";
 // Refresh 5 minutes before the 12-hour TTL expires
 const TOKEN_REFRESH_MS = (12 * 60 - 5) * 60 * 1000;

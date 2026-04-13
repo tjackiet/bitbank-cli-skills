@@ -9,13 +9,13 @@ describe("candles --from/--to", () => {
   it("returns error when only --from is given", async () => {
     const result = await candles({ pair: "btc_jpy", type: "1day", from: "2024" });
     expect(result.success).toBe(false);
-    if (!result.success) expect(result.error).toContain("両方指定");
+    if (!result.success) expect(result.error).toContain("must both be specified");
   });
 
   it("returns error when only --to is given", async () => {
     const result = await candles({ pair: "btc_jpy", type: "1day", to: "2026" });
     expect(result.success).toBe(false);
-    if (!result.success) expect(result.error).toContain("両方指定");
+    if (!result.success) expect(result.error).toContain("must both be specified");
   });
 
   it("returns error when --date and --from/--to are combined", async () => {
@@ -27,13 +27,13 @@ describe("candles --from/--to", () => {
       to: "2026",
     });
     expect(result.success).toBe(false);
-    if (!result.success) expect(result.error).toContain("同時に指定");
+    if (!result.success) expect(result.error).toContain("cannot be used together");
   });
 
   it("returns error when --from > --to", async () => {
     const result = await candles({ pair: "btc_jpy", type: "1day", from: "2026", to: "2024" });
     expect(result.success).toBe(false);
-    if (!result.success) expect(result.error).toContain("以前の日付");
+    if (!result.success) expect(result.error).toContain("before or equal to");
   });
 
   it("returns error when format is wrong for yearly type", async () => {
@@ -44,13 +44,13 @@ describe("candles --from/--to", () => {
       to: "20260101",
     });
     expect(result.success).toBe(false);
-    if (!result.success) expect(result.error).toContain("年を指定");
+    if (!result.success) expect(result.error).toContain("must be a year");
   });
 
   it("returns error when format is wrong for daily type", async () => {
     const result = await candles({ pair: "btc_jpy", type: "1hour", from: "2024", to: "2026" });
     expect(result.success).toBe(false);
-    if (!result.success) expect(result.error).toContain("日付を指定");
+    if (!result.success) expect(result.error).toContain("must be a date");
   });
 
   it("fetches multiple years for yearly types", async () => {

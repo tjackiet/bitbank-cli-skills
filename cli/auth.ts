@@ -28,6 +28,7 @@ export function signPost(nonce: string, body: string, secret: string): string {
   return createHmac("sha256", secret).update(message).digest("hex");
 }
 
+// リクエスト有効期間（ミリ秒）。bitbank API の要件
 const TIME_WINDOW = "5000";
 
 let lastNonce = 0;

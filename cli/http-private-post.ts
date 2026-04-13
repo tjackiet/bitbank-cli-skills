@@ -1,9 +1,8 @@
 import { type ApiCredentials, authHeadersPost, loadCredentials } from "./auth.js";
 import { EXIT } from "./exit-codes.js";
 import { type BaseFetchOptions, fetchWithRetry, formatApiError } from "./http-core.js";
+import { PRIVATE_BASE_URL } from "./http-private.js";
 import type { Result } from "./types.js";
-
-const PRIVATE_BASE_URL = "https://api.bitbank.cc/v1";
 
 export type PrivatePostOptions = BaseFetchOptions & {
   credentials?: ApiCredentials;

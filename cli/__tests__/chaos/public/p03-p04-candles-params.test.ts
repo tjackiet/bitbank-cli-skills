@@ -33,13 +33,13 @@ describe("Chaos P-04: candles date format mismatch", () => {
   it("monthly type rejects YYYYMMDD date (expects YYYY)", async () => {
     const r = await candles({ pair: "btc_jpy", type: "1month", date: "20240101" });
     expect(r.success).toBe(false);
-    if (!r.success) expect(r.error).toContain("年");
+    if (!r.success) expect(r.error).toContain("must be a year");
   });
 
   it("hourly type rejects YYYY date (expects YYYYMMDD)", async () => {
     const r = await candles({ pair: "btc_jpy", type: "1hour", date: "2024" });
     expect(r.success).toBe(false);
-    if (!r.success) expect(r.error).toContain("日付");
+    if (!r.success) expect(r.error).toContain("must be a date");
   });
 
   it("--date and --from/--to are mutually exclusive", async () => {
@@ -51,18 +51,18 @@ describe("Chaos P-04: candles date format mismatch", () => {
       to: "20240102",
     });
     expect(r.success).toBe(false);
-    if (!r.success) expect(r.error).toContain("同時に指定できません");
+    if (!r.success) expect(r.error).toContain("cannot be used together");
   });
 
   it("--from without --to is rejected", async () => {
     const r = await candles({ pair: "btc_jpy", type: "1hour", from: "20240101" });
     expect(r.success).toBe(false);
-    if (!r.success) expect(r.error).toContain("両方指定");
+    if (!r.success) expect(r.error).toContain("must both be specified");
   });
 
   it("--from after --to is rejected", async () => {
     const r = await candles({ pair: "btc_jpy", type: "1hour", from: "20240201", to: "20240101" });
     expect(r.success).toBe(false);
-    if (!r.success) expect(r.error).toContain("以前");
+    if (!r.success) expect(r.error).toContain("before or equal to");
   });
 });

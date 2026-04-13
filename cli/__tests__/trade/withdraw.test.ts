@@ -105,7 +105,7 @@ describe("withdraw", () => {
       },
     );
     expect(result.success).toBe(false);
-    if (!result.success) expect(result.error).toContain("キャンセル");
+    if (!result.success) expect(result.error).toContain("cancelled");
     writeSpy.mockRestore();
   });
 });

@@ -8,6 +8,7 @@ export type { Candle };
 export { VALID_TYPES } from "./candles-fetch.js";
 export { shiftDate, todayDate } from "../../date-utils.js";
 
+// --date 未指定時に自動取得する過去日数の上限
 const MAX_FETCHES = 3;
 function validateType(type: string | undefined): string | null {
   if (!type || !VALID_TYPES.includes(type as (typeof VALID_TYPES)[number])) return null;
@@ -18,11 +19,11 @@ function validateDateFormat(date: string, type: string, label: string): Result<s
   if (YEARLY_TYPES.has(type) && date.length !== 4) {
     return {
       success: false,
-      error: `${label} は年を指定してください（例: 2025）。日付単位のデータには 1hour 等を使ってください`,
+      error: `${label} must be a year (e.g. 2025). Use 1hour or shorter for daily data`,
     };
   }
   if (!YEARLY_TYPES.has(type) && date.length !== 8) {
-    return { success: false, error: `${label} は日付を指定してください（例: 20250301）` };
+    return { success: false, error: `${label} must be a date (e.g. 20250301)` };
   }
   return { success: true, data: date };
 }
@@ -46,10 +47,10 @@ export async function candles(args: CandlesArgs, opts?: HttpOptions): Promise<Re
   }
 
   if ((from || to) && date) {
-    return { success: false, error: "--date と --from/--to は同時に指定できません" };
+    return { success: false, error: "--date and --from/--to cannot be used together" };
   }
   if ((from && !to) || (!from && to)) {
-    return { success: false, error: "--from と --to は両方指定してください" };
+    return { success: false, error: "--from and --to must both be specified" };
   }
 
   if (from && to) {
@@ -57,7 +58,7 @@ export async function candles(args: CandlesArgs, opts?: HttpOptions): Promise<Re
     if (!fv.success) return fv;
     const tov = validateDateFormat(to, validType, "--to");
     if (!tov.success) return tov;
-    if (from > to) return { success: false, error: "--from は --to 以前の日付にしてください" };
+    if (from > to) return { success: false, error: "--from must be before or equal to --to" };
     return candlesRange(pair, validType, from, to, opts, noCache);
   }
 

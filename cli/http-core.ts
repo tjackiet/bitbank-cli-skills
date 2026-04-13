@@ -35,14 +35,12 @@ export function shouldRetry(status: number): boolean {
   return status === 429 || status >= 500;
 }
 
+const BASE_DELAY_MS = 500; // 指数バックオフのベース遅延（ms）
+
 export async function retryDelay(res: Response | null, attempt: number): Promise<void> {
-  if (res?.status === 429) {
-    const after = res.headers.get("Retry-After");
-    const ms = after ? Number(after) * 1000 : 2 ** attempt * 500;
-    await new Promise((r) => setTimeout(r, ms));
-  } else {
-    await new Promise((r) => setTimeout(r, 2 ** attempt * 500));
-  }
+  const after = res?.status === 429 ? res.headers.get("Retry-After") : null;
+  const ms = after ? Number(after) * 1000 : 2 ** attempt * BASE_DELAY_MS;
+  await new Promise((r) => setTimeout(r, ms));
 }
 
 export type BaseFetchOptions = {
@@ -57,7 +55,7 @@ export async function fetchWithRetry<T>(
   opts: BaseFetchOptions,
   parseError: (body: { data?: { code?: number } }) => string,
 ): Promise<Result<T>> {
-  const { timeoutMs = 5000, retries = 2, fetch: fetchFn = globalThis.fetch } = opts;
+  const { timeoutMs = 5000, retries = 2, fetch: fetchFn = globalThis.fetch } = opts; // タイムアウト5秒、最大2回リトライ
 
   let lastError = "";
   let lastExitCode: ExitCode = EXIT.GENERAL;
