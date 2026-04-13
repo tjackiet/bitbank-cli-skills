@@ -25,7 +25,7 @@ function mergeBatchResults(
   for (const result of results) {
     if (!result.success) {
       if (allRows.length === 0) return { cont: false, result };
-      return { cont: false, result: { success: true, data: allRows } };
+      return { cont: false, result: { success: true, data: allRows, partial: true } };
     }
     allRows.push(...result.data);
   }
