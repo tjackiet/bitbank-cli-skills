@@ -25,7 +25,6 @@ export function apiErrorExitCode(code: number): (typeof EXIT)[keyof typeof EXIT]
   if (code >= 30001 && code <= 40001) return EXIT.PARAM;
   return EXIT.GENERAL;
 }
-
 export function formatApiError(code: number): string {
   const msg = ERROR_CODES[code];
   return msg ? `${code}: ${msg}` : `API error: ${code}`;
@@ -34,12 +33,15 @@ export function formatApiError(code: number): string {
 export function shouldRetry(status: number): boolean {
   return status === 429 || status >= 500;
 }
-
 const BASE_DELAY_MS = 500; // 指数バックオフのベース遅延（ms）
-
+function parseRetryAfter(v: string): number | null {
+  if (/^\d+$/.test(v)) return Number(v) * 1000;
+  const ts = /[a-z]/i.test(v) ? Date.parse(v) : Number.NaN;
+  return ts > 0 ? Math.max(0, ts - Date.now()) : null;
+}
 export async function retryDelay(res: Response | null, attempt: number): Promise<void> {
   const after = res?.status === 429 ? res.headers.get("Retry-After") : null;
-  const ms = after ? Number(after) * 1000 : 2 ** attempt * BASE_DELAY_MS;
+  const ms = (after ? parseRetryAfter(after) : null) ?? 2 ** attempt * BASE_DELAY_MS;
   await new Promise((r) => setTimeout(r, ms));
 }
 
