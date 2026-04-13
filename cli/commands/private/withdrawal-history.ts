@@ -3,6 +3,7 @@ import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
 import { compactParams } from "../../params.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
+import { MSG_ASSET } from "../../validators.js";
 
 const WithdrawalSchema = z.object({
   uuid: z.string(),
@@ -28,7 +29,7 @@ export async function withdrawalHistory(
 ): Promise<Result<Withdrawal[]>> {
   const { asset, count, since, end } = args;
   if (!asset) {
-    return { success: false, error: "asset is required. Example: --asset=btc" };
+    return { success: false, error: MSG_ASSET };
   }
   const params = compactParams({ asset, count, since, end });
 

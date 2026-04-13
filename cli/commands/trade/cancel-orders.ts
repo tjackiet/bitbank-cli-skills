@@ -2,6 +2,7 @@ import { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
+import { MSG_ORDER_IDS, MSG_PAIR } from "../../validators.js";
 import { CancelOrderSchema } from "../shared-schemas.js";
 import { printDryRun } from "./dry-run.js";
 
@@ -24,9 +25,8 @@ export async function cancelOrders(
   args: CancelOrdersArgs,
   opts?: PrivatePostOptions,
 ): Promise<Result<CancelOrdersResponse | { dryRun: true }>> {
-  if (!args.pair) return { success: false, error: "pair is required. Example: --pair=btc_jpy" };
-  if (!args.orderIds)
-    return { success: false, error: "order-ids is required. Example: --order-ids=1,2,3" };
+  if (!args.pair) return { success: false, error: MSG_PAIR };
+  if (!args.orderIds) return { success: false, error: MSG_ORDER_IDS };
 
   const ids = args.orderIds.split(",").map((s) => Number(s.trim()));
   if (ids.some(Number.isNaN))

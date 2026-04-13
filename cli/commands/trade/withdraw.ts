@@ -3,6 +3,7 @@ import { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
+import { MSG_AMOUNT, MSG_ASSET, MSG_UUID } from "../../validators.js";
 import { printDryRun } from "./dry-run.js";
 
 const WithdrawResponseSchema = z.object({
@@ -46,9 +47,9 @@ export async function withdraw(
   args: WithdrawArgs,
   opts?: WithdrawOptions,
 ): Promise<Result<WithdrawResponse | { dryRun: true }>> {
-  if (!args.asset) return { success: false, error: "asset is required. Example: --asset=btc" };
-  if (!args.uuid) return { success: false, error: "uuid is required. Example: --uuid=xxx-yyy" };
-  if (!args.amount) return { success: false, error: "amount is required. Example: --amount=0.5" };
+  if (!args.asset) return { success: false, error: MSG_ASSET };
+  if (!args.uuid) return { success: false, error: MSG_UUID };
+  if (!args.amount) return { success: false, error: MSG_AMOUNT };
   if (Number(args.amount) <= 0) return { success: false, error: "amount must be > 0" };
 
   const body: Record<string, unknown> = {
