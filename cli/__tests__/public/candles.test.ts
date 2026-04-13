@@ -42,13 +42,13 @@ describe("candles", () => {
   it("returns error when yearly type gets daily date", async () => {
     const result = await candles({ pair: "btc_jpy", type: "1day", date: "20250301", limit: 100 });
     expect(result.success).toBe(false);
-    if (!result.success) expect(result.error).toContain("年を指定");
+    if (!result.success) expect(result.error).toContain("must be a year");
   });
 
   it("returns error when daily type gets yearly date", async () => {
     const result = await candles({ pair: "btc_jpy", type: "1hour", date: "2025", limit: 100 });
     expect(result.success).toBe(false);
-    if (!result.success) expect(result.error).toContain("日付を指定");
+    if (!result.success) expect(result.error).toContain("must be a date");
   });
 
   it("respects limit", async () => {

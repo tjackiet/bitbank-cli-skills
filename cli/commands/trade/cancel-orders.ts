@@ -11,6 +11,7 @@ const CancelOrdersResponseSchema = z.object({
 
 export type CancelOrdersResponse = z.infer<typeof CancelOrdersResponseSchema>;
 
+// bitbank API の一括キャンセル上限
 const MAX_ORDER_IDS = 30;
 
 export type CancelOrdersArgs = {

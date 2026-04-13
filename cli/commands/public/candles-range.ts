@@ -3,7 +3,9 @@ import type { HttpOptions } from "../../http.js";
 import type { Result } from "../../types.js";
 import { type Candle, fetchOne } from "./candles-fetch.js";
 
+// 1年分+1日。年をまたぐレンジでも全日取得可能にする上限
 const MAX_RANGE_FETCHES = 366;
+// 並列フェッチ数。API レート制限を考慮した経験値
 const BATCH_SIZE = 10;
 
 function buildDateList(from: string, to: string, type: string): string[] {

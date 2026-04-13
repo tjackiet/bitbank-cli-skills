@@ -85,7 +85,7 @@ export async function withdraw(
     const output = opts?.output ?? process.stdout;
     const confirmed = await askConfirmation(input, output);
     if (!confirmed) {
-      return { success: false, error: "出金がキャンセルされました" };
+      return { success: false, error: "Withdrawal cancelled" };
     }
   }
 

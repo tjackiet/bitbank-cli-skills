@@ -2,6 +2,7 @@ import { type Socket, io } from "socket.io-client";
 import type { Result } from "../../types.js";
 import { type StreamFormat, writeStreamMessage } from "./format.js";
 
+// bitbank 公開 WebSocket エンドポイント
 const WS_ENDPOINT = "wss://stream.bitbank.cc";
 
 const PUBLIC_CHANNELS = [

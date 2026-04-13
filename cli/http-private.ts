@@ -3,7 +3,7 @@ import { EXIT } from "./exit-codes.js";
 import { type BaseFetchOptions, ERROR_CODES, fetchWithRetry, formatApiError } from "./http-core.js";
 import type { Result } from "./types.js";
 
-const PRIVATE_BASE_URL = "https://api.bitbank.cc/v1";
+export const PRIVATE_BASE_URL = "https://api.bitbank.cc/v1";
 
 export { ERROR_CODES };
 
