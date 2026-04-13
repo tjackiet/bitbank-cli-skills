@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
+import { compactParams } from "../../params.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 
@@ -24,11 +25,7 @@ export async function depositHistory(
   opts?: PrivateHttpOptions,
 ): Promise<Result<Deposit[]>> {
   const { asset, count, since, end } = args;
-  const params: Record<string, string> = {};
-  if (asset) params.asset = asset;
-  if (count) params.count = count;
-  if (since) params.since = since;
-  if (end) params.end = end;
+  const params = compactParams({ asset, count, since, end });
 
   const result = await privateGet<unknown>("/user/deposit_history", params, opts);
   return parseResponse(result, DepositHistoryResponseSchema, "deposits");

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
+import { compactParams } from "../../params.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 
@@ -29,10 +30,7 @@ export async function withdrawalHistory(
   if (!asset) {
     return { success: false, error: "asset is required. Example: --asset=btc" };
   }
-  const params: Record<string, string> = { asset };
-  if (count) params.count = count;
-  if (since) params.since = since;
-  if (end) params.end = end;
+  const params = compactParams({ asset, count, since, end });
 
   const result = await privateGet<unknown>("/user/withdrawal_history", params, opts);
   return parseResponse(result, ResponseSchema, "withdrawals");

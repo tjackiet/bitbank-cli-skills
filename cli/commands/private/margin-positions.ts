@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
+import { compactParams } from "../../params.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 
@@ -26,8 +27,7 @@ export async function marginPositions(
   opts?: PrivateHttpOptions,
 ): Promise<Result<MarginPosition[]>> {
   const { pair } = args;
-  const params: Record<string, string> = {};
-  if (pair) params.pair = pair;
+  const params = compactParams({ pair });
 
   const result = await privateGet<unknown>("/user/margin/positions", params, opts);
   return parseResponse(result, ResponseSchema, "positions");
