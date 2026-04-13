@@ -31,8 +31,10 @@ function fail(machine: boolean, msg: string, code: ExitCode): void {
 }
 
 async function handleSpecialCommand(
-  command: string, args: string[],
-  opts: Record<string, string | boolean | undefined>, format: Format,
+  command: string,
+  args: string[],
+  opts: Record<string, string | boolean | undefined>,
+  format: Format,
 ): Promise<boolean> {
   if (command === "profiles") {
     const { profilesHandler } = await import("./commands/profiles.js");
@@ -68,7 +70,6 @@ async function main(): Promise<void> {
     strict: false,
   });
   const machine = values.machine === true;
-
   if (typeof values.profile === "string") {
     const r = applyProfile(values.profile);
     if (!r.success) {
@@ -76,7 +77,6 @@ async function main(): Promise<void> {
       return;
     }
   }
-
   const format = (values.format ?? "json") as Format;
   if (!["json", "table", "csv"].includes(format)) {
     fail(machine, `Unknown format "${format}". Use json, table, or csv.`, EXIT.PARAM);
