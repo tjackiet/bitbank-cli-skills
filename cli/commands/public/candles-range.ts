@@ -18,6 +18,20 @@ function buildDateList(from: string, to: string, type: string): string[] {
   return dates;
 }
 
+function mergeBatchResults(
+  results: Result<Candle[]>[],
+  allRows: Candle[],
+): { cont: true } | { cont: false; result: Result<Candle[]> } {
+  for (const result of results) {
+    if (!result.success) {
+      if (allRows.length === 0) return { cont: false, result };
+      return { cont: false, result: { success: true, data: allRows } };
+    }
+    allRows.push(...result.data);
+  }
+  return { cont: true };
+}
+
 export async function candlesRange(
   pair: string,
   type: string,
@@ -32,13 +46,8 @@ export async function candlesRange(
   for (let i = 0; i < dates.length; i += BATCH_SIZE) {
     const batch = dates.slice(i, i + BATCH_SIZE);
     const results = await Promise.all(batch.map((d) => fetchOne(pair, type, d, opts, noCache)));
-    for (const result of results) {
-      if (!result.success) {
-        if (allRows.length === 0) return result;
-        return { success: true, data: allRows };
-      }
-      allRows.push(...result.data);
-    }
+    const merged = mergeBatchResults(results, allRows);
+    if (!merged.cont) return merged.result;
   }
 
   return { success: true, data: allRows };
