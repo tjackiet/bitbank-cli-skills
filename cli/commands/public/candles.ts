@@ -7,7 +7,7 @@ import { candlesRange } from "./candles-range.js";
 
 export type { Candle };
 export { VALID_TYPES } from "./candles-fetch.js";
-export { shiftDate, todayDate } from "../../date-utils.js";
+export { shiftDate } from "../../date-utils.js";
 
 const MAX_FETCHES = 3; // --date 未指定時に自動取得する過去日数の上限
 function validateType(type: string | undefined): string | null {

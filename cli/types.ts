@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { ExitCode } from "./exit-codes.js";
 
-export const RateLimitSchema = z.object({
+const RateLimitSchema = z.object({
   remaining: z.number(),
   limit: z.number(),
   reset: z.number(),
