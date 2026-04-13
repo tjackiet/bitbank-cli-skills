@@ -10,6 +10,9 @@ export function output<T>(result: Result<T>, format: Format, raw = false, machin
     process.exitCode = result.exitCode ?? 1;
     return;
   }
+  if (result.partial) {
+    process.stderr.write("Warning: partial data returned (some fetches failed)\n");
+  }
   const data = result.data;
   switch (format) {
     case "json":
@@ -29,6 +32,7 @@ export function output<T>(result: Result<T>, format: Format, raw = false, machin
 export function machineOutput<T>(result: Result<T>): void {
   if (result.success) {
     const envelope: Record<string, unknown> = { success: true, data: result.data };
+    if (result.partial) envelope.partial = true;
     if (result.meta) envelope.meta = result.meta;
     process.stdout.write(`${JSON.stringify(envelope)}\n`);
   } else {

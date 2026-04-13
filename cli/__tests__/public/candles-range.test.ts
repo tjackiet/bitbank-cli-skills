@@ -116,4 +116,49 @@ describe("candles --from/--to", () => {
     );
     expect(result.success).toBe(false);
   });
+
+  it("returns partial: true when some fetches succeed then one fails", async () => {
+    const year2024 = makeData("1day", [["80", "90", "70", "85", "40", 1000]]);
+    let callCount = 0;
+    const partialFetch: typeof globalThis.fetch = async () => {
+      callCount++;
+      if (callCount === 1) {
+        return new Response(JSON.stringify({ success: 1, data: year2024 }));
+      }
+      return new Response(JSON.stringify({ success: 0, data: { code: 10000 } }), { status: 500 });
+    };
+
+    const result = await candles(
+      { pair: "btc_jpy", type: "1day", from: "2024", to: "2026", noCache: true },
+      { fetch: partialFetch, retries: 0 },
+    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.partial).toBe(true);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].timestamp).toBe(1000);
+    }
+  });
+
+  it("does not set partial on full success", async () => {
+    const year2024 = makeData("1day", [["80", "90", "70", "85", "40", 1000]]);
+    const year2025 = makeData("1day", [["90", "100", "80", "95", "50", 2000]]);
+
+    let callCount = 0;
+    const okFetch: typeof globalThis.fetch = async () => {
+      callCount++;
+      const data = callCount === 1 ? year2024 : year2025;
+      return new Response(JSON.stringify({ success: 1, data }));
+    };
+
+    const result = await candles(
+      { pair: "btc_jpy", type: "1day", from: "2024", to: "2025", noCache: true },
+      { fetch: okFetch, retries: 0 },
+    );
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.partial).toBeUndefined();
+      expect(result.data).toHaveLength(2);
+    }
+  });
 });

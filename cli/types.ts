@@ -12,7 +12,7 @@ export type RateLimitInfo = z.infer<typeof RateLimitSchema>;
 export type ResultMeta = { rateLimit?: RateLimitInfo };
 
 export type Result<T> =
-  | { success: true; data: T; meta?: ResultMeta }
+  | { success: true; data: T; partial?: boolean; meta?: ResultMeta }
   | { success: false; error: string; exitCode?: ExitCode };
 
 export type Format = "json" | "table" | "csv";
