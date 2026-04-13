@@ -19,6 +19,9 @@ export type CliOptionConfig = {
   default?: string | boolean;
 };
 
+export const str: CliOptionConfig = { type: "string" };
+export const bool = (d = false): CliOptionConfig => ({ type: "boolean", default: d });
+
 export type CliOptions = Record<string, CliOptionConfig>;
 
 export type CommandEntry = {

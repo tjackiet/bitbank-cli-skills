@@ -1,9 +1,8 @@
 import type { CommandEntry } from "./handler-types.js";
-import { valStr } from "./handler-types.js";
+import { str, valStr } from "./handler-types.js";
 import { handler } from "./make-handler.js";
 
 const h = handler;
-const str = { type: "string" as const };
 
 export const privateTransferCommands: Record<string, CommandEntry> = {
   "deposit-history": {

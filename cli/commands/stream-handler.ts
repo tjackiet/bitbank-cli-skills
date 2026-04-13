@@ -1,8 +1,5 @@
 import type { CommandEntry } from "./handler-types.js";
-import { valStr } from "./handler-types.js";
-
-const str = { type: "string" as const };
-const bool = (d = false) => ({ type: "boolean" as const, default: d });
+import { bool, str, valStr } from "./handler-types.js";
 
 export const streamCommands: Record<string, CommandEntry> = {
   stream: {
