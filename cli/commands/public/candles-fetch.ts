@@ -4,6 +4,8 @@ import { type HttpOptions, publicGet } from "../../http.js";
 import { numStr } from "../../schema-helpers.js";
 import type { Result } from "../../types.js";
 
+export { YEARLY_TYPES } from "../../date-utils.js";
+
 export const VALID_TYPES = [
   "1min",
   "5min",
@@ -17,8 +19,6 @@ export const VALID_TYPES = [
   "1week",
   "1month",
 ] as const;
-
-export const YEARLY_TYPES = new Set(["4hour", "8hour", "12hour", "1day", "1week", "1month"]);
 
 const CandleSchema = z.tuple([numStr, numStr, numStr, numStr, numStr, z.number()]);
 
@@ -39,18 +39,6 @@ export type Candle = {
   vol: number;
   timestamp: number;
 };
-
-export function previousDate(dateStr: string, type: string): string {
-  if (YEARLY_TYPES.has(type)) return String(Number(dateStr) - 1);
-  const y = Number(dateStr.slice(0, 4));
-  const m = Number(dateStr.slice(4, 6)) - 1;
-  const d = Number(dateStr.slice(6, 8));
-  const prev = new Date(y, m, d - 1);
-  const py = prev.getFullYear();
-  const pm = String(prev.getMonth() + 1).padStart(2, "0");
-  const pd = String(prev.getDate()).padStart(2, "0");
-  return `${py}${pm}${pd}`;
-}
 
 export async function fetchOne(
   pair: string,

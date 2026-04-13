@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  VALID_TYPES,
-  YEARLY_TYPES,
-  fetchOne,
-  previousDate,
-} from "../../commands/public/candles-fetch.js";
+import { VALID_TYPES, YEARLY_TYPES, fetchOne } from "../../commands/public/candles-fetch.js";
 import { mockFetchRaw } from "../test-helpers.js";
 
 describe("VALID_TYPES", () => {
@@ -19,20 +14,6 @@ describe("YEARLY_TYPES", () => {
   it("includes 1day but not 1min", () => {
     expect(YEARLY_TYPES.has("1day")).toBe(true);
     expect(YEARLY_TYPES.has("1min")).toBe(false);
-  });
-});
-
-describe("previousDate", () => {
-  it("returns previous year for yearly types", () => {
-    expect(previousDate("2024", "1day")).toBe("2023");
-  });
-
-  it("returns previous date for daily types", () => {
-    expect(previousDate("20240315", "1min")).toBe("20240314");
-  });
-
-  it("handles month boundary", () => {
-    expect(previousDate("20240301", "5min")).toBe("20240229");
   });
 });
 

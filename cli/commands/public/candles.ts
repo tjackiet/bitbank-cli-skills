@@ -1,19 +1,12 @@
+import { YEARLY_TYPES, shiftDate, todayDate } from "../../date-utils.js";
 import type { HttpOptions } from "../../http.js";
 import type { Result } from "../../types.js";
-import { type Candle, VALID_TYPES, YEARLY_TYPES, fetchOne, previousDate } from "./candles-fetch.js";
+import { type Candle, VALID_TYPES, fetchOne } from "./candles-fetch.js";
 import { candlesRange } from "./candles-range.js";
 
 export type { Candle };
-export { VALID_TYPES, previousDate } from "./candles-fetch.js";
-export { nextDate } from "./candles-range.js";
-function todayDate(type: string): string {
-  const now = new Date();
-  if (YEARLY_TYPES.has(type)) return String(now.getFullYear());
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}${m}${d}`;
-}
+export { VALID_TYPES } from "./candles-fetch.js";
+export { shiftDate, todayDate } from "../../date-utils.js";
 
 const MAX_FETCHES = 3;
 function validateType(type: string | undefined): string | null {
@@ -85,7 +78,7 @@ export async function candles(args: CandlesArgs, opts?: HttpOptions): Promise<Re
     let fetches = 1;
     let total = first.data.length;
     while (total < effectiveLimit && fetches < MAX_FETCHES) {
-      currentDate = previousDate(currentDate, validType);
+      currentDate = shiftDate(currentDate, -1, validType);
       const prev = await fetchOne(pair, validType, currentDate, opts, noCache);
       if (!prev.success) break;
       chunks.unshift(prev.data);
