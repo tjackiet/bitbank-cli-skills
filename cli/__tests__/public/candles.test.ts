@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { candles, previousDate } from "../../commands/public/candles.js";
+import { candles, shiftDate } from "../../commands/public/candles.js";
 import { mockFetchData } from "../test-helpers.js";
 
 const MOCK_DATA = {
@@ -78,17 +78,28 @@ describe("candles", () => {
   });
 });
 
-describe("previousDate", () => {
+describe("shiftDate", () => {
   it("decrements year for yearly types", () => {
-    expect(previousDate("2026", "1day")).toBe("2025");
-    expect(previousDate("2025", "4hour")).toBe("2024");
-    expect(previousDate("2025", "1month")).toBe("2024");
+    expect(shiftDate("2026", -1, "1day")).toBe("2025");
+    expect(shiftDate("2025", -1, "4hour")).toBe("2024");
+    expect(shiftDate("2025", -1, "1month")).toBe("2024");
   });
 
   it("decrements day for daily types", () => {
-    expect(previousDate("20260325", "1hour")).toBe("20260324");
-    expect(previousDate("20260301", "5min")).toBe("20260228");
-    expect(previousDate("20260101", "1min")).toBe("20251231");
+    expect(shiftDate("20260325", -1, "1hour")).toBe("20260324");
+    expect(shiftDate("20260301", -1, "5min")).toBe("20260228");
+    expect(shiftDate("20260101", -1, "1min")).toBe("20251231");
+  });
+
+  it("increments year for yearly types", () => {
+    expect(shiftDate("2024", 1, "1day")).toBe("2025");
+    expect(shiftDate("2025", 1, "1month")).toBe("2026");
+  });
+
+  it("increments day for daily types", () => {
+    expect(shiftDate("20260329", 1, "1hour")).toBe("20260330");
+    expect(shiftDate("20260331", 1, "1hour")).toBe("20260401");
+    expect(shiftDate("20261231", 1, "1min")).toBe("20270101");
   });
 });
 

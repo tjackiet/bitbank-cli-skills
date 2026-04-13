@@ -1,22 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { nextDate } from "../../commands/public/candles-range.js";
 import { candles } from "../../commands/public/candles.js";
 
 const makeData = (type: string, ohlcv: unknown[][]) => ({
   candlestick: [{ type, ohlcv }],
-});
-
-describe("nextDate", () => {
-  it("increments year for yearly types", () => {
-    expect(nextDate("2024", "1day")).toBe("2025");
-    expect(nextDate("2025", "1month")).toBe("2026");
-  });
-
-  it("increments day for daily types", () => {
-    expect(nextDate("20260329", "1hour")).toBe("20260330");
-    expect(nextDate("20260331", "1hour")).toBe("20260401");
-    expect(nextDate("20261231", "1min")).toBe("20270101");
-  });
 });
 
 describe("candles --from/--to", () => {
