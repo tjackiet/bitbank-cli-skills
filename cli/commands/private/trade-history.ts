@@ -2,6 +2,7 @@
 // 全件取得が必要な場合は trade-history-all.ts を使う（自動ページング）
 import { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
+import { compactParams } from "../../params.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 
@@ -41,12 +42,14 @@ export async function tradeHistory(
   if (!args.pair) {
     return { success: false, error: "pair is required. Example: --pair=btc_jpy" };
   }
-  const params: Record<string, string> = { pair: args.pair };
-  if (args.count) params.count = args.count;
-  if (args.orderId) params.order_id = args.orderId;
-  if (args.since) params.since = args.since;
-  if (args.end) params.end = args.end;
-  if (args.order) params.order = args.order;
+  const params = compactParams({
+    pair: args.pair,
+    count: args.count,
+    order_id: args.orderId,
+    since: args.since,
+    end: args.end,
+    order: args.order,
+  });
 
   const result = await privateGet<unknown>("/user/spot/trade_history", params, opts);
   return parseResponse(result, TradeHistoryResponseSchema, "trades");

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
+import { compactParams } from "../../params.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 
@@ -22,8 +23,7 @@ export async function unconfirmedDeposits(
   opts?: PrivateHttpOptions,
 ): Promise<Result<UnconfirmedDeposit[]>> {
   const { asset } = args;
-  const params: Record<string, string> = {};
-  if (asset) params.asset = asset;
+  const params = compactParams({ asset });
 
   const result = await privateGet<unknown>("/user/unconfirmed_deposits", params, opts);
   return parseResponse(result, ResponseSchema, "deposits");

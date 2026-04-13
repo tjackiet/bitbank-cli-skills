@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
+import { compactParams } from "../../params.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 import { OrderSchema } from "../shared-schemas.js";
@@ -15,11 +16,7 @@ export async function activeOrders(
   opts?: PrivateHttpOptions,
 ): Promise<Result<ActiveOrder[]>> {
   const { pair, count, since, end } = args;
-  const params: Record<string, string> = {};
-  if (pair) params.pair = pair;
-  if (count) params.count = count;
-  if (since) params.since = since;
-  if (end) params.end = end;
+  const params = compactParams({ pair, count, since, end });
 
   const result = await privateGet<unknown>("/user/spot/active_orders", params, opts);
   return parseResponse(result, ActiveOrdersResponseSchema, "orders");
