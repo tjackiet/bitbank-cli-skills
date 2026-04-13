@@ -1,22 +1,7 @@
 import { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
 import type { Result } from "../../types.js";
-
-const OrderSchema = z.object({
-  order_id: z.number(),
-  pair: z.string(),
-  side: z.string(),
-  type: z.string(),
-  start_amount: z.string().nullable(),
-  remaining_amount: z.string().nullable(),
-  executed_amount: z.string(),
-  price: z.string().nullable(),
-  post_only: z.boolean().optional(),
-  average_price: z.string(),
-  ordered_at: z.number(),
-  expire_at: z.number().nullable(),
-  status: z.string(),
-});
+import { OrderSchema } from "../shared-schemas.js";
 
 const OrdersInfoResponseSchema = z.object({
   orders: z.array(OrderSchema),

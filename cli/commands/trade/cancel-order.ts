@@ -1,18 +1,10 @@
-import { z } from "zod";
+import type { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
 import type { Result } from "../../types.js";
+import { CancelOrderSchema } from "../shared-schemas.js";
 import { printDryRun } from "./dry-run.js";
 
-const CancelOrderResponseSchema = z.object({
-  order_id: z.number(),
-  pair: z.string(),
-  side: z.string(),
-  type: z.string(),
-  price: z.string().nullable(),
-  status: z.string(),
-});
-
-export type CancelOrderResponse = z.infer<typeof CancelOrderResponseSchema>;
+export type CancelOrderResponse = z.infer<typeof CancelOrderSchema>;
 
 export type CancelOrderArgs = {
   pair?: string;
@@ -42,7 +34,7 @@ export async function cancelOrder(
   const result = await privatePost<unknown>("/user/spot/cancel_order", body, opts);
   if (!result.success) return result;
 
-  const r = CancelOrderResponseSchema.safeParse(result.data);
+  const r = CancelOrderSchema.safeParse(result.data);
   if (!r.success) return { success: false, error: `Invalid response: ${r.error.message}` };
   return { success: true, data: r.data };
 }

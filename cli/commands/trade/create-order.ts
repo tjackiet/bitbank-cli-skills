@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
 import type { Result } from "../../types.js";
+import { OrderSchema } from "../shared-schemas.js";
 import { printDryRun } from "./dry-run.js";
 
 const SideEnum = z.enum(["buy", "sell"]);
@@ -25,23 +26,7 @@ const CreateOrderInputSchema = z
     }
   });
 
-const OrderResponseSchema = z.object({
-  order_id: z.number(),
-  pair: z.string(),
-  side: z.string(),
-  type: z.string(),
-  start_amount: z.string().nullable(),
-  remaining_amount: z.string().nullable(),
-  executed_amount: z.string(),
-  price: z.string().nullable(),
-  post_only: z.boolean().optional(),
-  average_price: z.string(),
-  ordered_at: z.number(),
-  expire_at: z.number().nullable(),
-  status: z.string(),
-});
-
-export type OrderResponse = z.infer<typeof OrderResponseSchema>;
+export type OrderResponse = z.infer<typeof OrderSchema>;
 
 export type CreateOrderArgs = {
   pair?: string;
@@ -91,7 +76,7 @@ export async function createOrder(
   const result = await privatePost<unknown>("/user/spot/order", body, opts);
   if (!result.success) return result;
 
-  const r = OrderResponseSchema.safeParse(result.data);
+  const r = OrderSchema.safeParse(result.data);
   if (!r.success) return { success: false, error: `Invalid response: ${r.error.message}` };
   return { success: true, data: r.data };
 }
