@@ -73,6 +73,38 @@ describe("retryDelay", () => {
     await p;
     vi.useRealTimers();
   });
+
+  it("uses Retry-After HTTP-date header on 429", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-01-01T00:00:00Z"));
+    const headers = new Headers({ "Retry-After": "Wed, 01 Jan 2025 00:00:03 GMT" });
+    const res = new Response("", { status: 429, headers });
+    const p = retryDelay(res, 1);
+    await vi.advanceTimersByTimeAsync(3000);
+    await p;
+    vi.useRealTimers();
+  });
+
+  it("falls back to exponential backoff on invalid Retry-After", async () => {
+    vi.useFakeTimers();
+    const headers = new Headers({ "Retry-After": "garbage" });
+    const res = new Response("", { status: 429, headers });
+    const p = retryDelay(res, 2); // attempt 2 → 2^2 * 500 = 2000ms
+    await vi.advanceTimersByTimeAsync(2000);
+    await p;
+    vi.useRealTimers();
+  });
+
+  it("clamps to 0 when Retry-After HTTP-date is in the past", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-01-01T00:00:00Z"));
+    const headers = new Headers({ "Retry-After": "Wed, 31 Dec 2024 23:59:57 GMT" });
+    const res = new Response("", { status: 429, headers });
+    const p = retryDelay(res, 1);
+    await vi.advanceTimersByTimeAsync(0);
+    await p;
+    vi.useRealTimers();
+  });
 });
 
 describe("fetchWithRetry", () => {

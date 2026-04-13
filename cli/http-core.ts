@@ -34,12 +34,14 @@ export function formatApiError(code: number): string {
 export function shouldRetry(status: number): boolean {
   return status === 429 || status >= 500;
 }
-
 const BASE_DELAY_MS = 500; // 指数バックオフのベース遅延（ms）
-
+function parseRetryAfter(v: string): number | null {
+  const ms = Number.isFinite(+v) ? +v * 1000 : Date.parse(v) - Date.now();
+  return Number.isFinite(ms) ? Math.max(0, ms) : null;
+}
 export async function retryDelay(res: Response | null, attempt: number): Promise<void> {
   const after = res?.status === 429 ? res.headers.get("Retry-After") : null;
-  const ms = after ? Number(after) * 1000 : 2 ** attempt * BASE_DELAY_MS;
+  const ms = (after ? parseRetryAfter(after) : null) ?? 2 ** attempt * BASE_DELAY_MS;
   await new Promise((r) => setTimeout(r, ms));
 }
 
