@@ -1,7 +1,11 @@
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { output } from "../output.js";
 import { buildLogRecord, writeTradeLog } from "../trade-log.js";
 import type { CommandHandler, ParsedValues } from "./handler-types.js";
 import { valStr } from "./handler-types.js";
+
+const DEFAULT_TRADE_LOG = join(homedir(), ".bitbank-trade.log");
 
 /** Public/Private 用: module を動的 import して fn(params) → output */
 export function handler(
@@ -33,7 +37,9 @@ export function tradeHandler(
     const r = await mod[fnName](params);
     if (isDryRun(r)) return;
     output(r, fmt, values.raw === true, values.machine === true);
-    const logFile = valStr(values, "log-file");
-    if (logFile) await writeTradeLog(logFile, buildLogRecord(fnName, params, r));
+    if (values["no-log"] !== true) {
+      const logFile = valStr(values, "log-file") ?? DEFAULT_TRADE_LOG;
+      await writeTradeLog(logFile, buildLogRecord(fnName, params, r));
+    }
   };
 }
