@@ -9,28 +9,23 @@ npm test                # vitest 全テスト
 npx tsx cli/index.ts    # CLI 実行
 ```
 
-## 禁止事項
+## コード品質
 
-1. **CLI に分析ロジックを入れない。** 指標計算・パターン検出・スコアリングは実装しない。CLI は API データの取得と整形だけ。
-2. **MCP サーバー (`bitbank-genesis-mcp-server`) の `tools/` を import しない。** 別リポ。API は直接 HTTP で叩く。
-3. **手動の `interface` / `type` を定義しない。** Zod スキーマ + `z.infer` が型の単一ソース。
-4. **例外を throw しない。** Result パターン (`{ success, data } | { success, error }`) を使う。
+- chaos テスト（`cli/__tests__/chaos/conventions/`）が検証する規約に従う。
+  違反したら無視・回避せず修正する。
+- CLI の責務は API データの取得と整形のみ
 
-## 安全設計（取引コマンド）
+## アーキテクチャ
 
-`create-order`, `cancel-order`, `cancel-orders`, `withdraw` は資金に影響する:
+- Zod スキーマ（`z.infer`）が型の単一ソース
+- 全コマンドは Result パターンで返す（例外は使わない）
+- MCP サーバー（`bitbank-genesis-mcp-server`）は別リポ。直接 import しない
+- コマンド追加 → `.claude/rules/commands.md`
+- 取引安全設計 → `.claude/rules/trading-safety.md`
 
-- `--execute` なしではドライラン（API を叩かない）
-- `withdraw` は追加で `--confirm` 対話確認が必須
+## リポジトリルール
 
-## 規約
-
-- 1ファイル 100 行以内。超えたら分割
-- 出力: `--format=json|table|csv`（デフォルト json）
-- コミット: `<type>: <概要>`（日本語 OK、type = feat/fix/refactor/test/docs/chore）
+- コミット: `<type>: <概要>`（日本語 OK）
 - 外部依存最小。`tsx` で直接実行。ビルドステップなし
-
-## ポインタ
-
-- 開発フェーズとタスク一覧 → [`docs/phases.md`](docs/phases.md)
-- Agent Skills → `.claude/skills/`
+- 開発フェーズ → [`docs/phases.md`](docs/phases.md)
+- Skill 追加 → `.claude/rules/skills.md`
