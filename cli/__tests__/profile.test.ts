@@ -1,8 +1,8 @@
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { applyProfile, parseEnvFile } from "../profile.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { applyProfile, parseEnvFile, warnIfInsecure } from "../profile.js";
 
 describe("parseEnvFile", () => {
   it("parses key=value lines", () => {
@@ -84,5 +84,52 @@ describe("applyProfile", () => {
     delete process.env.BITBANK_API_KEY;
     // loadCredentials without profile should use process.env as-is
     expect(process.env.BITBANK_API_KEY).toBeUndefined();
+  });
+});
+
+describe("warnIfInsecure", () => {
+  let tmpDir: string;
+
+  beforeEach(() => {
+    tmpDir = mkdtempSync(join(tmpdir(), "perm-test-"));
+  });
+
+  afterEach(() => {
+    rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it("warns when file is group/other readable (0644)", () => {
+    const filepath = join(tmpDir, ".env.prod");
+    writeFileSync(filepath, "SECRET=x");
+    chmodSync(filepath, 0o644);
+    const spy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    warnIfInsecure(filepath, ".env.prod");
+    expect(spy).toHaveBeenCalledOnce();
+    expect(spy.mock.calls[0][0]).toContain("readable by other users");
+    expect(spy.mock.calls[0][0]).toContain("chmod 600");
+    spy.mockRestore();
+  });
+
+  it("does not warn when file is owner-only (0600)", () => {
+    const filepath = join(tmpDir, ".env.safe");
+    writeFileSync(filepath, "SECRET=x");
+    chmodSync(filepath, 0o600);
+    const spy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    warnIfInsecure(filepath, ".env.safe");
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+  });
+
+  it("skips check on Windows", () => {
+    const filepath = join(tmpDir, ".env.win");
+    writeFileSync(filepath, "SECRET=x");
+    chmodSync(filepath, 0o644);
+    const origPlatform = process.platform;
+    Object.defineProperty(process, "platform", { value: "win32" });
+    const spy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    warnIfInsecure(filepath, ".env.win");
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+    Object.defineProperty(process, "platform", { value: origPlatform });
   });
 });

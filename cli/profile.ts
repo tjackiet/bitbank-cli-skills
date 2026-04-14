@@ -1,7 +1,23 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { EXIT } from "./exit-codes.js";
 import type { Result } from "./types.js";
+
+/** グループ・他ユーザーに権限がある場合 stderr に警告を出す */
+export function warnIfInsecure(filepath: string, filename: string): void {
+  if (process.platform === "win32") return;
+  try {
+    const { mode } = statSync(filepath);
+    if (mode & 0o077) {
+      const octal = `0${(mode & 0o777).toString(8)}`;
+      process.stderr.write(
+        `Warning: ${filename} is readable by other users (mode: ${octal}). Run: chmod 600 ${filename}\n`,
+      );
+    }
+  } catch {
+    // stat に失敗した場合は警告をスキップ
+  }
+}
 
 /** .env ファイルをパースして key=value の Record を返す */
 export function parseEnvFile(content: string): Record<string, string> {
@@ -36,6 +52,7 @@ export function applyProfile(profile: string): Result<string> {
       exitCode: EXIT.PARAM,
     };
   }
+  warnIfInsecure(filepath, filename);
   const content = readFileSync(filepath, "utf-8");
   const vars = parseEnvFile(content);
   for (const [key, val] of Object.entries(vars)) {
