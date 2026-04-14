@@ -55,6 +55,21 @@ describe("trade audit default logging", () => {
     expect(writeTradeLog).not.toHaveBeenCalled();
   });
 
+  it("writes warning to stderr when log write fails", async () => {
+    writeTradeLog.mockClear();
+    writeTradeLog.mockResolvedValueOnce({
+      success: false,
+      error: "Failed to write trade log: EACCES",
+    });
+    const cap = captureStdout();
+    const errSpy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    const th = makeTh();
+    await th([], { pair: "btc_jpy", "order-id": "1" }, "json");
+    cap.restore();
+    expect(errSpy).toHaveBeenCalledWith("Failed to write trade log: EACCES\n");
+    errSpy.mockRestore();
+  });
+
   it("does not log on dry-run even with default enabled", async () => {
     writeTradeLog.mockClear();
     mockCancel.mockResolvedValueOnce({ success: true, data: { dryRun: true } } as never);

@@ -39,7 +39,10 @@ export function tradeHandler(
     output(r, fmt, values.raw === true, values.machine === true);
     if (values["no-log"] !== true) {
       const logFile = valStr(values, "log-file") ?? DEFAULT_TRADE_LOG;
-      await writeTradeLog(logFile, buildLogRecord(fnName, params, r));
+      const logResult = await writeTradeLog(logFile, buildLogRecord(fnName, params, r));
+      if (!logResult.success) {
+        process.stderr.write(`${logResult.error}\n`);
+      }
     }
   };
 }
