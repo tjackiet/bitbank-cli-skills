@@ -1,34 +1,10 @@
+import { apiErrorExitCode, formatApiError } from "./error-codes.js";
 import { EXIT, type ExitCode } from "./exit-codes.js";
 import { extractRateLimit } from "./rate-limit.js";
+import { detectBucket, updateRateLimit, waitForSlot } from "./throttle.js";
 import type { Result } from "./types.js";
 
-export const ERROR_CODES: Record<number, string> = {
-  10000: "URL不正",
-  20001: "API認証失敗",
-  20002: "APIキー不正",
-  20003: "APIキー権限不足",
-  30001: "注文数量不正",
-  30006: "注文数量下限",
-  30007: "注文数量上限",
-  30012: "残高不足",
-  40001: "不正なパラメータ",
-  50003: "現在取引不可",
-  50004: "注文不可（板寄せ中）",
-  50009: "注文不可（サーキットブレーカー）",
-  60001: "レート制限",
-  70001: "システムエラー",
-};
-
-export function apiErrorExitCode(code: number): (typeof EXIT)[keyof typeof EXIT] {
-  if (code >= 20001 && code <= 20003) return EXIT.AUTH;
-  if (code === 60001) return EXIT.RATE_LIMIT;
-  if (code >= 30001 && code <= 40001) return EXIT.PARAM;
-  return EXIT.GENERAL;
-}
-export function formatApiError(code: number): string {
-  const msg = ERROR_CODES[code];
-  return msg ? `${code}: ${msg}` : `API error: ${code}`;
-}
+export { ERROR_CODES, apiErrorExitCode, formatApiError } from "./error-codes.js";
 
 export function shouldRetry(status: number): boolean {
   return status === 429 || status >= 500;
@@ -49,6 +25,8 @@ export type BaseFetchOptions = {
   timeoutMs?: number;
   retries?: number;
   fetch?: typeof globalThis.fetch;
+  /** プロアクティブスロットルの最小インターバル(ms)。省略時はバケット既定値 */
+  throttleMs?: number;
 };
 
 export async function fetchWithRetry<T>(
@@ -57,11 +35,13 @@ export async function fetchWithRetry<T>(
   opts: BaseFetchOptions,
   parseError: (body: { data?: { code?: number } }) => string,
 ): Promise<Result<T>> {
-  const { timeoutMs = 5000, retries = 2, fetch: fetchFn = globalThis.fetch } = opts; // タイムアウト5秒、最大2回リトライ
+  const { timeoutMs = 5000, retries = 2, fetch: fetchFn = globalThis.fetch } = opts;
+  const bucket = detectBucket(url);
 
   let lastError = "";
   let lastExitCode: ExitCode = EXIT.GENERAL;
   for (let attempt = 0; attempt <= retries; attempt++) {
+    if (attempt === 0) await waitForSlot(bucket, opts.throttleMs);
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -87,6 +67,7 @@ export async function fetchWithRetry<T>(
         return { success: false, error: parseError(body), exitCode: apiErrorExitCode(code) };
       }
       const rl = extractRateLimit(res.headers);
+      updateRateLimit(bucket, rl);
       return { success: true, data: body.data as T, ...(rl && { meta: { rateLimit: rl } }) };
     } catch (e) {
       lastError = e instanceof Error ? e.message : String(e);
