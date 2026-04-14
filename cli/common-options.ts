@@ -5,4 +5,5 @@ export const COMMON_OPTIONS = {
   machine: { type: "boolean" as const, default: false },
   raw: { type: "boolean" as const, default: false },
   "log-file": { type: "string" as const },
+  "no-log": { type: "boolean" as const, default: false },
 };
