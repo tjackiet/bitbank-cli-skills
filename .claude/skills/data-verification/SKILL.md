@@ -75,13 +75,14 @@ npx tsx cli/index.ts candles <pair> --type=<timeframe> --from=YYYYMMDD --to=YYYY
 直前の足からの変動率で異常を検出する。
 暗号資産はペアごとにボラティリティが大きく異なるため、閾値を 3 段階に分ける。
 
-**ペアカテゴリ:**
+**ペアカテゴリ:** `_shared/references/pair-classification.md` を参照。
+bitbank 上の実際の 24h 出来高シェアに基づく分類。
 
-| カテゴリ | 対象ペア | 特徴 |
-|---------|---------|------|
-| major | btc_jpy, eth_jpy | 流動性高、ボラ相対的に低い |
-| mid | xrp_jpy, sol_jpy, dot_jpy, link_jpy, ada_jpy, avax_jpy, ltc_jpy, atom_jpy, matic_jpy, xlm_jpy, mkr_jpy | 中程度 |
-| minor | mona_jpy, doge_jpy, sand_jpy, axs_jpy, ape_jpy, gala_jpy, chz_jpy, astr_jpy, flr_jpy, bat_jpy, dal_jpy, omg_jpy, bcc_jpy | 低流動性、ボラ高い |
+| カテゴリ | 基準 | 代表ペア |
+|---------|------|---------|
+| major | 出来高シェア 10% 以上 | btc_jpy, xrp_jpy, eth_jpy |
+| mid | 出来高シェア 1〜10% | doge_jpy, sol_jpy, ltc_jpy, ada_jpy 等 |
+| minor | 出来高シェア 1% 未満 | mona_jpy, sand_jpy, gala_jpy 等 |
 
 **デフォルト閾値（ペアカテゴリ × 時間軸）:**
 
@@ -91,7 +92,7 @@ npx tsx cli/index.ts candles <pair> --type=<timeframe> --from=YYYYMMDD --to=YYYY
 | mid | 価格 ±5%, 出来高 30x | 価格 ±12%, 出来高 20x | 価格 ±20%, 出来高 15x |
 | minor | 価格 ±8%, 出来高 50x | 価格 ±18%, 出来高 30x | 価格 ±30%, 出来高 20x |
 
-ペアが上記に該当しない場合は mid を適用する。
+ペアが分類表に未掲載の場合は mid を適用する。
 ユーザーが閾値を明示した場合はそちらを優先する。
 
 閾値を超えた足をフラグし、タイムスタンプ・値・変動率を報告する。

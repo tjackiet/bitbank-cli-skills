@@ -68,13 +68,15 @@
 暗号資産はペアごとにボラティリティ特性が大きく異なるため、一律の閾値は不適切。
 ペアカテゴリ（major / mid / minor）と時間軸で閾値を分ける。
 
-**ペアカテゴリの分類:**
+**ペアカテゴリの分類:** `_shared/references/pair-classification.md` を参照。
 
-| カテゴリ | ペア例 | 根拠 |
-|---------|-------|------|
-| major | btc_jpy, eth_jpy | bitbank で最も流動性が高く、ボラティリティが相対的に低い |
-| mid | xrp_jpy, sol_jpy, dot_jpy, link_jpy 等 | 中程度の流動性。BTC より変動が大きい |
-| minor | mona_jpy, doge_jpy, sand_jpy, gala_jpy 等 | 低流動性。10%+ の日次変動が珍しくない |
+bitbank 上の実際の 24h 出来高シェアに基づいて 3 段階に分類:
+
+| カテゴリ | 基準 | 代表ペア |
+|---------|------|---------|
+| major | 出来高シェア 10% 以上 | btc_jpy (~30%), xrp_jpy (~25%), eth_jpy (~16%) |
+| mid | 出来高シェア 1〜10% | doge_jpy (~7%), sol_jpy (~3%), ltc_jpy, ada_jpy 等 |
+| minor | 出来高シェア 1% 未満 | mona_jpy, sand_jpy, gala_jpy, bcc_jpy 等 |
 
 **デフォルト閾値テーブル:**
 
