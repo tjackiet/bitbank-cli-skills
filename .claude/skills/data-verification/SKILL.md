@@ -146,9 +146,9 @@ wick_ratio = (high - low) / abs(close - open)
 
 ## 実行手順
 
-1. `candles` コマンドで OHLCV データを取得
-2. JSON レスポンスから `data.candlestick[0].ohlcv` 配列を取り出す
-3. 各要素は `[open, high, low, close, volume, timestamp]`（文字列 → 数値変換する）
+1. `candles` コマンドで OHLCV データを取得（`--format=json`）
+2. 出力は `Candle` オブジェクトの配列。各要素は `{ open, high, low, close, vol, timestamp }`
+3. フィールドは CLI が数値変換済み。そのまま計算に使える
 4. ペア名からカテゴリ（major/mid/minor）を判定し、時間軸と合わせて閾値を決定
 5. 7 つの検証項目を順に実行
 6. 結果をレポート形式で出力
@@ -189,7 +189,7 @@ OHLCV 整合性           | OK/NG  | 違反 0 件 / 1 件
 
 ## Gotchas
 
-- **価格は文字列で返る。** 数値変換を忘れると比較演算が壊れる
+- **フィールド名に注意。** 出来高は `volume` ではなく `vol`
 - **配列は古い順。** 先頭が最も古いデータ
 - **日付形式に注意。** `--type=1month` は `--date=2024`、それ以外は `YYYYMMDD`
 - **暗号資産は 24/7。** 株式と違い「正当な休場」はない。欠損 = 取引所メンテか API 障害
