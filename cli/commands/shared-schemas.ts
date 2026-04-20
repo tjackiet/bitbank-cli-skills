@@ -7,14 +7,14 @@ export const OrderSchema = z.object({
   pair: z.string(),
   side: z.string(),
   type: z.string(),
-  start_amount: z.string().nullable(),
-  remaining_amount: z.string().nullable(),
+  start_amount: z.string().nullable().optional(),
+  remaining_amount: z.string().nullable().optional(),
   executed_amount: z.string(),
-  price: z.string().nullable(),
+  price: z.string().nullable().optional(),
   post_only: z.boolean().optional(),
   average_price: z.string(),
   ordered_at: z.number(),
-  expire_at: z.number().nullable(),
+  expire_at: z.number().nullable().optional(),
   status: z.string(),
 });
 

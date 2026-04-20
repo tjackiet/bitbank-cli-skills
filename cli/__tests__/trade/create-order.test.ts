@@ -109,4 +109,38 @@ describe("create-order", () => {
     expect(result).toEqual({ success: true, data: { dryRun: true } });
     writeSpy.mockRestore();
   });
+
+  it("accepts stop-market response without price field", async () => {
+    const stopMarketResponse = {
+      success: 1,
+      data: {
+        order_id: 56675044283,
+        pair: "btc_jpy",
+        side: "sell",
+        type: "stop",
+        executed_amount: "0",
+        average_price: "0",
+        ordered_at: 1700000000000,
+        status: "UNFILLED",
+      },
+    };
+    const result = await createOrder(
+      {
+        pair: "btc_jpy",
+        side: "sell",
+        type: "stop",
+        triggerPrice: "11000000",
+        amount: "0.001",
+        execute: true,
+      },
+      {
+        fetch: mockFetchRaw(stopMarketResponse),
+        retries: 0,
+        credentials: TEST_CREDS,
+        nonce: "1",
+      },
+    );
+    expect(result.success).toBe(true);
+    if (result.success) expect((result.data as Record<string, unknown>).order_id).toBe(56675044283);
+  });
 });
