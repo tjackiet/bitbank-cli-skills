@@ -60,8 +60,21 @@ describe("schema detail", () => {
       await buildSchemaHandler(DESC)(["create-order"], {}, "json");
       const data = JSON.parse(c.read());
       expect(data.category).toBe("trade");
+      expect(data.command).toBe("trade create-order");
       expect(data.params.properties.execute).toBeDefined();
       expect(data.params.properties.side.enum).toContain("buy");
+    } finally {
+      c.restore();
+    }
+  });
+
+  it("accepts 'trade <name>' two-arg form", async () => {
+    const c = captureStdout();
+    try {
+      await buildSchemaHandler(DESC)(["trade", "create-order"], {}, "json");
+      const data = JSON.parse(c.read());
+      expect(data.command).toBe("trade create-order");
+      expect(data.category).toBe("trade");
     } finally {
       c.restore();
     }

@@ -9,6 +9,7 @@ export const COMMANDS: Record<string, CommandEntry> = {
   ...publicCommands,
   ...privateCommands,
   ...privateTransferCommands,
-  ...tradeCommands,
   ...streamCommands,
 };
+
+export const TRADE_COMMANDS: Record<string, CommandEntry> = { ...tradeCommands };

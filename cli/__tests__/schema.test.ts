@@ -22,6 +22,9 @@ describe("schema list", () => {
       expect(ticker).toBeDefined();
       expect(ticker.category).toBe("public");
       expect(ticker.params).toContain("pair");
+      const createOrder = data.find((d: { command: string }) => d.command === "trade create-order");
+      expect(createOrder).toBeDefined();
+      expect(createOrder.category).toBe("trade");
     } finally {
       c.restore();
     }

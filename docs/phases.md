@@ -94,12 +94,12 @@
 
 ### コマンド
 
-- [x] `create-order` — 新規注文（--dry-run デフォルト、--execute で実行）
-- [x] `cancel-order` — 注文キャンセル
-- [x] `cancel-orders` — 複数注文一括キャンセル（最大30件）
-- [x] `confirm-deposits` — 入金確認
-- [x] `confirm-deposits-all` — 全入金確認
-- [x] `withdraw` — 出金リクエスト（--execute + --confirm 必須）
+- [x] `trade create-order` — 新規注文（--dry-run デフォルト、--execute で実行）
+- [x] `trade cancel-order` — 注文キャンセル
+- [x] `trade cancel-orders` — 複数注文一括キャンセル（最大30件）
+- [x] `trade confirm-deposits` — 入金確認
+- [x] `trade confirm-deposits-all` — 全入金確認
+- [x] `trade withdraw` — 出金リクエスト（--execute + --confirm 必須）
 
 ### テスト
 
