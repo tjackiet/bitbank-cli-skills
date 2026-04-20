@@ -66,6 +66,33 @@ describe("CLI E2E", () => {
     expect(stdout).toContain("ticker");
     expect(stdout).toContain("status");
     expect(stdout).toContain("candles");
+    expect(stdout).toContain("trade <subcommand>");
+  });
+
+  it("shows trade subcommand list when invoked as 'bitbank trade'", async () => {
+    const { stdout, exitCode } = await run("trade");
+    expect(exitCode).toBe(0);
+    expect(stdout).toContain("Usage: bitbank trade");
+    expect(stdout).toContain("create-order");
+    expect(stdout).toContain("withdraw");
+  });
+
+  it("rejects unknown trade subcommand with exit 4", async () => {
+    const { stderr, exitCode } = await run("trade", "nope");
+    expect(exitCode).toBe(4);
+    expect(stderr).toContain("Unknown trade subcommand");
+  });
+
+  it("rejects flat invocation of trade commands (breaking change)", async () => {
+    const { stderr, exitCode } = await run("create-order");
+    expect(exitCode).toBe(4);
+    expect(stderr).toContain("Unknown command");
+  });
+
+  it("shows trade subcommand help with 'trade <cmd> --help'", async () => {
+    const { stdout, exitCode } = await run("trade", "create-order", "--help");
+    expect(exitCode).toBe(0);
+    expect(stdout).toContain("Usage: bitbank trade create-order");
   });
 
   const describeE2E = process.env.TEST_E2E === "1" ? describe : describe.skip;

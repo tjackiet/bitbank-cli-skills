@@ -2,7 +2,9 @@
 
 ## 対象コマンド
 
-`create-order`, `cancel-order`, `cancel-orders`, `withdraw` は資金に影響する trade コマンド。
+`trade create-order`, `trade cancel-order`, `trade cancel-orders`, `trade withdraw` は資金に影響する trade サブコマンド（`bitbank trade <cmd>` で呼び出す）。
+
+注: サブコマンド形式は discoverability と視覚的な警告が目的で、実行ガードではない。実際の安全ガードは以下 `--execute` / `--confirm` フラグ側にある。
 
 ## ドライラン（デフォルト）
 

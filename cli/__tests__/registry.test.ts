@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { COMMANDS } from "../commands/registry.js";
+import { COMMANDS, TRADE_COMMANDS } from "../commands/registry.js";
 
 describe("COMMANDS registry", () => {
   it("includes public commands", () => {
@@ -18,10 +18,10 @@ describe("COMMANDS registry", () => {
     expect(COMMANDS["trade-history"]).toBeDefined();
   });
 
-  it("includes trade commands", () => {
-    expect(COMMANDS["create-order"]).toBeDefined();
-    expect(COMMANDS["cancel-order"]).toBeDefined();
-    expect(COMMANDS.withdraw).toBeDefined();
+  it("does not include trade commands in flat COMMANDS", () => {
+    expect(COMMANDS["create-order"]).toBeUndefined();
+    expect(COMMANDS["cancel-order"]).toBeUndefined();
+    expect(COMMANDS.withdraw).toBeUndefined();
   });
 
   it("includes stream command", () => {
@@ -31,6 +31,24 @@ describe("COMMANDS registry", () => {
 
   it("all entries have description and handler", () => {
     for (const [name, entry] of Object.entries(COMMANDS)) {
+      expect(entry.description, `${name} missing description`).toBeTruthy();
+      expect(typeof entry.handler, `${name} handler not a function`).toBe("function");
+    }
+  });
+});
+
+describe("TRADE_COMMANDS registry", () => {
+  it("includes all trade subcommands", () => {
+    expect(TRADE_COMMANDS["create-order"]).toBeDefined();
+    expect(TRADE_COMMANDS["cancel-order"]).toBeDefined();
+    expect(TRADE_COMMANDS["cancel-orders"]).toBeDefined();
+    expect(TRADE_COMMANDS["confirm-deposits"]).toBeDefined();
+    expect(TRADE_COMMANDS["confirm-deposits-all"]).toBeDefined();
+    expect(TRADE_COMMANDS.withdraw).toBeDefined();
+  });
+
+  it("all entries have description and handler", () => {
+    for (const [name, entry] of Object.entries(TRADE_COMMANDS)) {
       expect(entry.description, `${name} missing description`).toBeTruthy();
       expect(typeof entry.handler, `${name} handler not a function`).toBe("function");
     }

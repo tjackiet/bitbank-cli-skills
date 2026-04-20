@@ -36,8 +36,9 @@ export function buildHelp(command: string, description: string): string | null {
   const schema = ALL[command];
   if (!schema) return null;
 
+  const invocation = schema.category === "trade" ? `trade ${command}` : command;
   const lines: string[] = [];
-  lines.push(`Usage: bitbank ${command} [options]\n`);
+  lines.push(`Usage: bitbank ${invocation} [options]\n`);
   lines.push(`${description}\n`);
   lines.push(`Category: ${schema.category}\n`);
 
@@ -53,8 +54,8 @@ export function buildHelp(command: string, description: string): string | null {
   }
 
   lines.push("Examples:");
-  lines.push(`  bitbank ${command}${exampleArgs(command, schema)}`);
-  lines.push(`  bitbank ${command}${exampleArgs(command, schema)} --format=table`);
+  lines.push(`  bitbank ${invocation}${exampleArgs(command, schema)}`);
+  lines.push(`  bitbank ${invocation}${exampleArgs(command, schema)} --format=table`);
 
   return lines.join("\n");
 }

@@ -28,9 +28,13 @@ function toParamsJsonSchema(params: SchemaDef["params"]): object {
   return { type: "object", properties, required };
 }
 
+function invocationPath(name: string, schema: SchemaDef): string {
+  return schema.category === "trade" ? `trade ${name}` : name;
+}
+
 function listAll(descriptions: Record<string, string>) {
   return Object.entries(ALL).map(([name, schema]) => ({
-    command: name,
+    command: invocationPath(name, schema),
     category: schema.category,
     description: descriptions[name] ?? "",
     params: Object.keys(schema.params),
@@ -43,7 +47,7 @@ function detail(name: string, descriptions: Record<string, string>) {
   return {
     success: true as const,
     data: {
-      command: name,
+      command: invocationPath(name, schema),
       category: schema.category,
       description: descriptions[name] ?? "",
       params: toParamsJsonSchema(schema.params),
@@ -56,8 +60,9 @@ export function buildSchemaHandler(descriptions: Record<string, string>): Comman
   return async (args, _values, fmt) => {
     if (args.length === 0) {
       output({ success: true, data: listAll(descriptions) }, fmt);
-    } else {
-      output(detail(args[0], descriptions), fmt);
+      return;
     }
+    const name = args[0] === "trade" && args[1] ? args[1] : args[0];
+    output(detail(name, descriptions), fmt);
   };
 }

@@ -46,10 +46,12 @@ describe("subcommand help", () => {
 
   it("works for trade commands with execute flag", () => {
     const text = buildHelp("create-order", "Create a spot order");
+    expect(text).toContain("Usage: bitbank trade create-order");
     expect(text).toContain("--side");
     expect(text).toContain("Values: buy, sell");
     expect(text).toContain("--execute");
     expect(text).toContain("Category: trade");
+    expect(text).toContain("bitbank trade create-order --pair=btc_jpy");
   });
 
   it("works for private commands", () => {

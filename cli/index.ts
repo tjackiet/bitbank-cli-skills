@@ -1,6 +1,6 @@
 #!/usr/bin/env tsx
 import { parseArgs } from "node:util";
-import { COMMANDS } from "./commands/registry.js";
+import { COMMANDS, TRADE_COMMANDS } from "./commands/registry.js";
 import { COMMON_OPTIONS } from "./common-options.js";
 import { EXIT, type ExitCode } from "./exit-codes.js";
 import { machineOutput } from "./output.js";
@@ -15,11 +15,24 @@ function showHelp(): void {
   for (const [name, { description }] of Object.entries(COMMANDS)) {
     console.log(`  ${name.padEnd(24)} ${description}`);
   }
+  console.log(
+    `  ${"trade <subcommand>".padEnd(24)} Fund-affecting operations (run 'bitbank trade' for list)`,
+  );
   console.log("\nOptions:");
   console.log("  --profile=<name>         Use .env.<name> for credentials");
   console.log("  --format=json|table|csv  Output format (default: json)");
   console.log("  --machine                Machine-readable JSON envelope on stdout");
   console.log("  --help                   Show this help");
+}
+
+function showTradeHelp(): void {
+  console.log("Usage: bitbank trade <subcommand> [options]\n");
+  console.log("Fund-affecting operations. All default to dry-run; use --execute to send.\n");
+  console.log("Subcommands:");
+  for (const [name, { description }] of Object.entries(TRADE_COMMANDS)) {
+    console.log(`  ${name.padEnd(24)} ${description}`);
+  }
+  console.log("\nRun 'bitbank trade <subcommand> --help' for subcommand options.");
 }
 
 function fail(machine: boolean, msg: string, code: ExitCode): void {
@@ -43,7 +56,12 @@ async function handleSpecialCommand(
   }
   if (command === "schema") {
     const { buildSchemaHandler } = await import("./commands/schema/handler.js");
-    const desc = Object.fromEntries(Object.entries(COMMANDS).map(([k, v]) => [k, v.description]));
+    const desc = Object.fromEntries(
+      [...Object.entries(COMMANDS), ...Object.entries(TRADE_COMMANDS)].map(([k, v]) => [
+        k,
+        v.description,
+      ]),
+    );
     await buildSchemaHandler(desc)(args, opts, format);
     return true;
   }
@@ -61,8 +79,9 @@ async function main(): Promise<void> {
     return;
   }
 
-  const [command] = p1;
-  const entry = COMMANDS[command];
+  const isTrade = p1[0] === "trade";
+  const command = isTrade ? p1[1] : p1[0];
+  const entry = isTrade ? (command ? TRADE_COMMANDS[command] : undefined) : COMMANDS[command ?? ""];
   const merged = { ...COMMON_OPTIONS, ...(entry?.options ?? {}) };
   const { values, positionals } = parseArgs({
     allowPositionals: true,
@@ -82,6 +101,30 @@ async function main(): Promise<void> {
     fail(machine, `Unknown format "${format}". Use json, table, or csv.`, EXIT.PARAM);
     return;
   }
+
+  if (isTrade) {
+    if (!command) {
+      showTradeHelp();
+      return;
+    }
+    if (!entry) {
+      fail(
+        machine,
+        `Unknown trade subcommand "${command}". Run 'bitbank trade' for the list.`,
+        EXIT.PARAM,
+      );
+      return;
+    }
+    if (values.help) {
+      const { showCommandHelp } = await import("./commands/schema/help.js");
+      if (showCommandHelp(command, entry.description)) return;
+    }
+    const [, , ...tradeArgs] = positionals;
+    const opts = values as Record<string, string | boolean | undefined>;
+    await entry.handler(tradeArgs, opts, format);
+    return;
+  }
+
   const [, ...args] = positionals;
   const opts = values as Record<string, string | boolean | undefined>;
   if (await handleSpecialCommand(command, args, opts, format)) return;
