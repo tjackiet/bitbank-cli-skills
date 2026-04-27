@@ -53,7 +53,10 @@ cp .env.example .env
 ```
 
 ```bash
+# 保有資産一覧（JPY / BTC / ETH などの残高）を取得
 npx tsx --env-file=.env cli/index.ts assets
+
+# 指定ペアの未約定（アクティブ）注文を一覧表示
 npx tsx --env-file=.env cli/index.ts active-orders --pair=btc_jpy
 ```
 
