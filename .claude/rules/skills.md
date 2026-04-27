@@ -3,11 +3,15 @@
 ## ディレクトリ構造
 
 ```
-.claude/skills/<skill-name>/
-  SKILL.md              # Skill 定義（必須）
-  references/           # 参照資料（任意）
-    bitbank-api-formats.md
-    <domain-specific>.md
+.claude/skills/
+  _shared/
+    references/
+      bitbank-api-formats.md   # 全 Skill 共通の API レスポンス形式
+      pair-classification.md   # 全 Skill 共通のペア分類（流動性・カテゴリ等）
+  <skill-name>/
+    SKILL.md                   # Skill 定義（必須）
+    references/                # ドメイン固有の参照資料（任意）
+      <domain-specific>.md
 ```
 
 ## SKILL.md テンプレート
@@ -38,8 +42,12 @@ metadata:
 
 ## references/ の規約
 
-- `bitbank-api-formats.md` は共通。各 Skill で同じものを配置
-- ドメイン固有の資料は `<domain>-guide.md` や `<domain>-patterns.md` で命名
+- 共通資料（`bitbank-api-formats.md`、`pair-classification.md` 等）は
+  `.claude/skills/_shared/references/` に集約する。各 Skill 配下にコピーしない
+- SKILL.md から共通資料を参照するときは
+  `_shared/references/<file>.md` というパスで明示的に書く
+- ドメイン固有の資料は `<skill>/references/<domain>-guide.md` や
+  `<domain>-patterns.md` で命名
 - CLI コマンドの実行例を含め、モデルが正確にコマンドを組み立てられるようにする
 
 ## 注意
