@@ -130,9 +130,9 @@
 
 ---
 
-## Phase 5: Agent Skills（3本）+ references + カスタマイズガイド ✅
+## Phase 5: Agent Skills（7本）+ references + カスタマイズガイド ✅
 
-**成果物:** `.claude/skills/*/SKILL.md`, README 拡充
+**成果物:** `.claude/skills/*/SKILL.md`, `.claude/skills/_shared/references/`, README 拡充
 **ドッグフーディング基準:** Claude Code / Cursor で Skills が正しくトリガーされること
 
 ### Skills
@@ -140,9 +140,13 @@
 - [x] `indicator-analysis` — 生OHLCVからモデルに任意の指標を計算させる
 - [x] `backtest` — ストラテジーをモデルに定義・シミュレーションさせる
 - [x] `portfolio` — 保有資産の損益分析・リバランス提案
+- [x] `volatility-profile` — リターン分布・ファットテール・時間帯別出来高などリスク特性を定量化
+- [x] `signal-explorer` — シグナル候補の予測力を評価（相関・Z-score・ラグ相関・冗長性チェック）
+- [x] `correlation-analysis` — 複数銘柄間の相関・β・環境別相関・ラグ相関
+- [x] `data-verification` — ローソク足の欠損・整合性・異常値・重複の品質検証
 
 ### ドキュメント
 
-- [x] references（API リファレンス等）
+- [x] references（API リファレンス等。共通分は `_shared/references/` に集約）
 - [x] カスタマイズガイド
 - [x] README 拡充

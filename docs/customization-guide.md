@@ -11,10 +11,15 @@ Skill は「モデルへの指示書」です。コードは書きません。CL
 ### ディレクトリを作成
 
 ```
-.claude/skills/<skill-name>/
-  SKILL.md              # Skill 定義（必須）
-  references/           # 参照資料（任意）
-    bitbank-api-formats.md
+.claude/skills/
+  _shared/
+    references/
+      bitbank-api-formats.md   # 既存。全 Skill 共通の API レスポンス形式
+      pair-classification.md   # 既存。全 Skill 共通のペア分類
+  <skill-name>/
+    SKILL.md                   # Skill 定義（必須）
+    references/                # ドメイン固有の参照資料（任意）
+      <domain-specific>.md
 ```
 
 ### SKILL.md を書く
@@ -61,7 +66,8 @@ npx tsx cli/index.ts candles btc_jpy --type=1day --format=json
 - **分析ロジックのコードは書かない。** 手順をモデルに伝え、モデルが計算する
 - **CLI コマンドの実行例を具体的に書く。** モデルが正確にコマンドを組み立てられるようにする
 - **Gotchas を充実させる。** 価格が文字列で返る、配列の順序など、モデルが間違えやすいポイントを列挙する
-- **references/ に `bitbank-api-formats.md` を配置する。** 既存 Skill からコピーする
+- **共通の参照資料は `_shared/references/` を参照する。** `bitbank-api-formats.md` などはコピーせず、SKILL.md から `_shared/references/bitbank-api-formats.md` というパスで参照する
+- **ドメイン固有の資料だけを `<skill-name>/references/` に置く。** `<domain>-guide.md` のような命名で
 
 ### 動作確認
 
