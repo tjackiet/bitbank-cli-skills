@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { tradeHistoryAll } from "../../commands/private/trade-history-all.js";
 import { tradeHistory, tradeHistoryDispatch } from "../../commands/private/trade-history.js";
 import { TEST_CREDS, mockFetchData } from "../test-helpers.js";
 
@@ -68,10 +69,10 @@ describe("tradeHistoryDispatch", () => {
   });
 
   it("delegates to single-page tradeHistory when --all is not set", async () => {
-    // pair=undefined makes tradeHistory return the validation error path,
-    // which proves dispatch routed to it without making a network call.
+    vi.mocked(tradeHistoryAll).mockClear();
     const result = await tradeHistoryDispatch({ pair: undefined, all: false });
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toBeTruthy();
+    expect(vi.mocked(tradeHistoryAll)).not.toHaveBeenCalled();
   });
 });
