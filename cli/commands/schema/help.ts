@@ -1,18 +1,5 @@
-import { privateAccountSchemas } from "./defs-private-account.js";
-import { privateTransferSchemas } from "./defs-private-transfer.js";
-import { publicDataSchemas } from "./defs-public-data.js";
-import { publicMarketSchemas } from "./defs-public-market.js";
-import { streamSchemas, tradeSchemas } from "./defs-trade.js";
+import { ALL_SCHEMAS } from "./registry.js";
 import type { ParamProp, SchemaDef } from "./types.js";
-
-const ALL: Record<string, SchemaDef> = {
-  ...publicMarketSchemas,
-  ...publicDataSchemas,
-  ...privateAccountSchemas,
-  ...privateTransferSchemas,
-  ...tradeSchemas,
-  ...streamSchemas,
-};
 
 function formatParam(name: string, def: ParamProp): string {
   const parts: string[] = [];
@@ -33,7 +20,7 @@ export function showCommandHelp(command: string, description: string): boolean {
 }
 
 export function buildHelp(command: string, description: string): string | null {
-  const schema = ALL[command];
+  const schema = ALL_SCHEMAS[command];
   if (!schema) return null;
 
   const invocation = schema.category === "trade" ? `trade ${command}` : command;
