@@ -4,7 +4,7 @@ import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 import { MSG_ORDER_IDS, MSG_PAIR } from "../../validators.js";
 import { CancelOrderSchema } from "../shared-schemas.js";
-import { printDryRun } from "./dry-run.js";
+import { dryRunResult } from "./dry-run.js";
 
 const CancelOrdersResponseSchema = z.object({
   orders: z.array(CancelOrderSchema),
@@ -41,12 +41,12 @@ export async function cancelOrders(
   const body = { pair: args.pair, order_ids: ids };
 
   if (!args.execute) {
-    printDryRun({
+    return dryRunResult({
+      command: "cancel-orders",
       endpoint: "/v1/user/spot/cancel_orders",
       body,
-      executeHint: `npx bitbank cancel-orders --pair=${args.pair} --order-ids=${args.orderIds} --execute`,
+      args: { pair: args.pair, orderIds: args.orderIds },
     });
-    return { success: true, data: { dryRun: true } };
   }
 
   const result = await privatePost<unknown>("/user/spot/cancel_orders", body, opts);

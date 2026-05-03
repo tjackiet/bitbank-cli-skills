@@ -3,7 +3,7 @@ import { type PrivatePostOptions, privatePost } from "../../http-private-post.js
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 import { MSG_ID } from "../../validators.js";
-import { printDryRun } from "./dry-run.js";
+import { dryRunResult } from "./dry-run.js";
 
 const ConfirmDepositsResponseSchema = z.object({
   uuid: z.string(),
@@ -26,12 +26,12 @@ export async function confirmDeposits(
   const body = { id: args.id };
 
   if (!args.execute) {
-    printDryRun({
+    return dryRunResult({
+      command: "confirm-deposits",
       endpoint: "/v1/user/confirm_deposits",
       body,
-      executeHint: `npx bitbank confirm-deposits --id=${args.id} --execute`,
+      args: { id: args.id },
     });
-    return { success: true, data: { dryRun: true } };
   }
 
   const result = await privatePost<unknown>("/user/confirm_deposits", body, opts);

@@ -4,7 +4,7 @@ import { type PrivatePostOptions, privatePost } from "../../http-private-post.js
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 import { MSG_AMOUNT, MSG_ASSET, MSG_UUID } from "../../validators.js";
-import { printDryRun } from "./dry-run.js";
+import { dryRunResult } from "./dry-run.js";
 
 const WithdrawResponseSchema = z.object({
   uuid: z.string(),
@@ -60,15 +60,13 @@ export async function withdraw(
   if (args.token) body.token = args.token;
 
   if (!args.execute) {
-    const tokenHint = args.token ? " --token=***" : "";
-    printDryRun({
+    return dryRunResult({
+      command: "withdraw",
       endpoint: "/v1/user/request_withdrawal",
       body,
-      executeHint:
-        `npx bitbank withdraw --asset=${args.asset} --uuid=${args.uuid}` +
-        ` --amount=${args.amount}${tokenHint} --execute --confirm`,
+      args: { asset: args.asset, uuid: args.uuid, amount: args.amount, token: args.token },
+      extraFlags: ["--execute", "--confirm"],
     });
-    return { success: true, data: { dryRun: true } };
   }
 
   if (!args.confirm) {
