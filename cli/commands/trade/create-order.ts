@@ -3,7 +3,7 @@ import { type PrivatePostOptions, privatePost } from "../../http-private-post.js
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 import { OrderSchema } from "../shared-schemas.js";
-import { printDryRun } from "./dry-run.js";
+import { dryRunResult } from "./dry-run.js";
 
 const SideEnum = z.enum(["buy", "sell"]);
 const TypeEnum = z.enum(["limit", "market", "stop", "stop_limit"]);
@@ -69,9 +69,20 @@ export async function createOrder(
   if (parsed.data.postOnly) body.post_only = true;
 
   if (!args.execute) {
-    const hint = `npx bitbank create-order --pair=${parsed.data.pair} --side=${parsed.data.side} --type=${parsed.data.type}${parsed.data.price ? ` --price=${parsed.data.price}` : ""} --amount=${parsed.data.amount}${parsed.data.triggerPrice ? ` --trigger-price=${parsed.data.triggerPrice}` : ""}${parsed.data.postOnly ? " --post-only" : ""} --execute`;
-    printDryRun({ endpoint: "/v1/user/spot/order", body, executeHint: hint });
-    return { success: true, data: { dryRun: true } };
+    return dryRunResult({
+      command: "create-order",
+      endpoint: "/v1/user/spot/order",
+      body,
+      args: {
+        pair: parsed.data.pair,
+        side: parsed.data.side,
+        type: parsed.data.type,
+        price: parsed.data.price,
+        amount: parsed.data.amount,
+        triggerPrice: parsed.data.triggerPrice,
+        postOnly: parsed.data.postOnly,
+      },
+    });
   }
 
   const result = await privatePost<unknown>("/user/spot/order", body, opts);

@@ -3,7 +3,7 @@ import { type PrivatePostOptions, privatePost } from "../../http-private-post.js
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
 import { CancelOrderSchema } from "../shared-schemas.js";
-import { printDryRun } from "./dry-run.js";
+import { dryRunResult } from "./dry-run.js";
 
 const CancelOrderInputSchema = z.object({
   pair: z
@@ -38,12 +38,12 @@ export async function cancelOrder(
   const body = { pair: parsed.data.pair, order_id: Number(parsed.data.orderId) };
 
   if (!args.execute) {
-    printDryRun({
+    return dryRunResult({
+      command: "cancel-order",
       endpoint: "/v1/user/spot/cancel_order",
       body,
-      executeHint: `npx bitbank cancel-order --pair=${parsed.data.pair} --order-id=${parsed.data.orderId} --execute`,
+      args: { pair: parsed.data.pair, orderId: parsed.data.orderId },
     });
-    return { success: true, data: { dryRun: true } };
   }
 
   const result = await privatePost<unknown>("/user/spot/cancel_order", body, opts);
