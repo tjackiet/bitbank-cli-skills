@@ -41,11 +41,10 @@ async function attemptOnce<T>(
   parseError: (body: { data?: { code?: number } }) => string,
   bucket: Bucket,
 ): Promise<Attempt<T>> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
     const res = await fetchFn(url, { ...init, signal: controller.signal });
-    clearTimeout(timer);
 
     if (!res.ok) {
       const error = `HTTP ${res.status}: ${res.statusText}`;
@@ -71,6 +70,8 @@ async function attemptOnce<T>(
   } catch (e) {
     const error = e instanceof Error ? e.message : String(e);
     return { kind: "retry", res: null, error, exitCode: EXIT.NETWORK };
+  } finally {
+    clearTimeout(timer);
   }
 }
 
