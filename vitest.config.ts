@@ -7,7 +7,11 @@ export default defineConfig({
 		coverage: {
 			provider: "v8",
 			include: ["cli/**/*.ts"],
-			exclude: ["cli/__tests__/**"],
+			exclude: [
+				"cli/__tests__/**",
+				"cli/index.ts", // subprocess 経由でのみ実行されるエントリ
+				"cli/types.ts", // 型定義のみ
+			],
 			thresholds: {
 				statements: 80,
 				branches: 70,
