@@ -1,7 +1,7 @@
 import { apiErrorExitCode, formatApiError } from "./error-codes.js";
 import { EXIT, type ExitCode } from "./exit-codes.js";
 import { extractRateLimit } from "./rate-limit.js";
-import { detectBucket, updateRateLimit, waitForSlot } from "./throttle.js";
+import { type Bucket, detectBucket, updateRateLimit, waitForSlot } from "./throttle.js";
 import type { Result } from "./types.js";
 
 export { ERROR_CODES, apiErrorExitCode, formatApiError } from "./error-codes.js";
@@ -29,6 +29,51 @@ export type BaseFetchOptions = {
   throttleMs?: number;
 };
 
+type Attempt<T> =
+  | { kind: "done"; result: Result<T> }
+  | { kind: "retry"; res: Response | null; error: string; exitCode: ExitCode };
+
+async function attemptOnce<T>(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+  fetchFn: typeof globalThis.fetch,
+  parseError: (body: { data?: { code?: number } }) => string,
+  bucket: Bucket,
+): Promise<Attempt<T>> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetchFn(url, { ...init, signal: controller.signal });
+    clearTimeout(timer);
+
+    if (!res.ok) {
+      const error = `HTTP ${res.status}: ${res.statusText}`;
+      if (shouldRetry(res.status)) return { kind: "retry", res, error, exitCode: EXIT.GENERAL };
+      const exitCode = res.status === 401 || res.status === 403 ? EXIT.AUTH : EXIT.GENERAL;
+      return { kind: "done", result: { success: false, error, exitCode } };
+    }
+    const body = await res.json();
+    if (body.success !== 1) {
+      const code = body.data?.code ?? 0;
+      const error = parseError(body);
+      if (code === 60001) return { kind: "retry", res: null, error, exitCode: EXIT.RATE_LIMIT };
+      return { kind: "done", result: { success: false, error, exitCode: apiErrorExitCode(code) } };
+    }
+    const rl = extractRateLimit(res.headers);
+    updateRateLimit(bucket, rl);
+    const result: Result<T> = {
+      success: true,
+      data: body.data as T,
+      ...(rl && { meta: { rateLimit: rl } }),
+    };
+    return { kind: "done", result };
+  } catch (e) {
+    const error = e instanceof Error ? e.message : String(e);
+    return { kind: "retry", res: null, error, exitCode: EXIT.NETWORK };
+  }
+}
+
 export async function fetchWithRetry<T>(
   url: string,
   init: RequestInit,
@@ -42,40 +87,11 @@ export async function fetchWithRetry<T>(
   let lastExitCode: ExitCode = EXIT.GENERAL;
   for (let attempt = 0; attempt <= retries; attempt++) {
     if (attempt === 0) await waitForSlot(bucket, opts.throttleMs);
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
-      const res = await fetchFn(url, { ...init, signal: controller.signal });
-      clearTimeout(timer);
-
-      if (!res.ok) {
-        if (shouldRetry(res.status) && attempt < retries) {
-          await retryDelay(res, attempt + 1);
-          continue;
-        }
-        lastError = `HTTP ${res.status}: ${res.statusText}`;
-        lastExitCode = res.status === 401 || res.status === 403 ? EXIT.AUTH : EXIT.GENERAL;
-        continue;
-      }
-      const body = await res.json();
-      if (body.success !== 1) {
-        const code = body.data?.code ?? 0;
-        if (code === 60001 && attempt < retries) {
-          await retryDelay(null, attempt + 1);
-          continue;
-        }
-        return { success: false, error: parseError(body), exitCode: apiErrorExitCode(code) };
-      }
-      const rl = extractRateLimit(res.headers);
-      updateRateLimit(bucket, rl);
-      return { success: true, data: body.data as T, ...(rl && { meta: { rateLimit: rl } }) };
-    } catch (e) {
-      lastError = e instanceof Error ? e.message : String(e);
-      lastExitCode = EXIT.NETWORK;
-      if (attempt < retries) {
-        await retryDelay(null, attempt + 1);
-      }
-    }
+    const r = await attemptOnce<T>(url, init, timeoutMs, fetchFn, parseError, bucket);
+    if (r.kind === "done") return r.result;
+    lastError = r.error;
+    lastExitCode = r.exitCode;
+    if (attempt < retries) await retryDelay(r.res, attempt + 1);
   }
   return { success: false, error: lastError, exitCode: lastExitCode };
 }
