@@ -93,4 +93,71 @@ describe("startPrivateStream", () => {
     if (result.success) result.data.stop();
     expect(mockPubnub.unsubscribeAll).toHaveBeenCalled();
   });
+
+  it("emits a connected message on PNConnectedCategory status", async () => {
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    await startPrivateStream({
+      format: "json",
+      credentials: { apiKey: "k", apiSecret: "s" },
+    });
+    const listener = mockPubnub.addListener.mock.calls[0][0];
+    listener.status({ category: "PNConnectedCategory" });
+    expect(stderr).toHaveBeenCalledWith(
+      expect.stringContaining("Private stream connected: ch_123"),
+    );
+    // Non-connected categories should not emit
+    stderr.mockClear();
+    listener.status({ category: "PNNetworkDownCategory" });
+    expect(stderr).not.toHaveBeenCalled();
+    stderr.mockRestore();
+  });
+
+  it("refreshes the PubNub token periodically", async () => {
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    await startPrivateStream({
+      format: "json",
+      credentials: { apiKey: "k", apiSecret: "s" },
+    });
+    mockPubnub.setToken.mockClear();
+    mockPrivateGet.mockResolvedValueOnce({
+      success: true,
+      data: { pubnub_channel: "ch_123", pubnub_token: "tok_refreshed" },
+    });
+    await vi.advanceTimersByTimeAsync((12 * 60 - 5) * 60 * 1000);
+    expect(mockPubnub.setToken).toHaveBeenCalledWith("tok_refreshed");
+    expect(stderr).toHaveBeenCalledWith(expect.stringContaining("Token refreshed"));
+    stderr.mockRestore();
+  });
+
+  it("logs a failure when token refresh fails", async () => {
+    const stderr = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    await startPrivateStream({
+      format: "json",
+      credentials: { apiKey: "k", apiSecret: "s" },
+    });
+    mockPrivateGet.mockResolvedValueOnce({ success: false, error: "rate limited" });
+    await vi.advanceTimersByTimeAsync((12 * 60 - 5) * 60 * 1000);
+    expect(stderr).toHaveBeenCalledWith(
+      expect.stringContaining("Token refresh failed: rate limited"),
+    );
+    stderr.mockRestore();
+  });
+
+  it("uses loadCredentials() when credentials are not provided", async () => {
+    const result = await startPrivateStream({ format: "json" });
+    expect(result.success).toBe(true);
+  });
+
+  it("propagates loadCredentials errors", async () => {
+    vi.doMock("../../auth.js", () => ({
+      loadCredentials: () => ({ error: "missing api key" }),
+    }));
+    vi.resetModules();
+    const { startPrivateStream: freshStart } = await import("../../commands/stream/private.js");
+    const result = await freshStart({ format: "json" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("missing api key");
+    vi.doUnmock("../../auth.js");
+    vi.resetModules();
+  });
 });

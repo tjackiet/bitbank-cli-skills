@@ -1,6 +1,14 @@
-import { describe, expect, it } from "vitest";
-import { tradeHistory } from "../../commands/private/trade-history.js";
+import { describe, expect, it, vi } from "vitest";
+import { tradeHistoryAll } from "../../commands/private/trade-history-all.js";
+import { tradeHistory, tradeHistoryDispatch } from "../../commands/private/trade-history.js";
 import { TEST_CREDS, mockFetchData } from "../test-helpers.js";
+
+vi.mock("../../commands/private/trade-history-all.js", () => ({
+  tradeHistoryAll: vi.fn(async (args: { pair?: string }) => {
+    if (!args.pair) return { success: false, error: "pair required" };
+    return { success: true, data: [{ pair: args.pair, marker: "all" }] };
+  }),
+}));
 
 const MOCK = {
   trades: [
@@ -38,5 +46,33 @@ describe("tradeHistory", () => {
     );
     expect(result.success).toBe(true);
     if (result.success) expect(result.data).toHaveLength(1);
+  });
+});
+
+describe("tradeHistoryDispatch", () => {
+  it("delegates to tradeHistoryAll when --all is set", async () => {
+    const result = await tradeHistoryDispatch({
+      pair: "btc_jpy",
+      all: true,
+      since: "1000",
+      end: "2000",
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toEqual([{ pair: "btc_jpy", marker: "all" }]);
+    }
+  });
+
+  it("propagates errors from tradeHistoryAll", async () => {
+    const result = await tradeHistoryDispatch({ pair: undefined, all: true });
+    expect(result.success).toBe(false);
+  });
+
+  it("delegates to single-page tradeHistory when --all is not set", async () => {
+    vi.mocked(tradeHistoryAll).mockClear();
+    const result = await tradeHistoryDispatch({ pair: undefined, all: false });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toBeTruthy();
+    expect(vi.mocked(tradeHistoryAll)).not.toHaveBeenCalled();
   });
 });
