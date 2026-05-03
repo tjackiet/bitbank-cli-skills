@@ -1,20 +1,7 @@
 import { output } from "../../output.js";
 import type { CommandHandler } from "../handler-types.js";
-import { privateAccountSchemas } from "./defs-private-account.js";
-import { privateTransferSchemas } from "./defs-private-transfer.js";
-import { publicDataSchemas } from "./defs-public-data.js";
-import { publicMarketSchemas } from "./defs-public-market.js";
-import { streamSchemas, tradeSchemas } from "./defs-trade.js";
+import { ALL_SCHEMAS } from "./registry.js";
 import type { SchemaDef } from "./types.js";
-
-const ALL: Record<string, SchemaDef> = {
-  ...publicMarketSchemas,
-  ...publicDataSchemas,
-  ...privateAccountSchemas,
-  ...privateTransferSchemas,
-  ...tradeSchemas,
-  ...streamSchemas,
-};
 
 function toParamsJsonSchema(params: SchemaDef["params"]): object {
   const properties: Record<string, object> = {};
@@ -33,7 +20,7 @@ function invocationPath(name: string, schema: SchemaDef): string {
 }
 
 function listAll(descriptions: Record<string, string>) {
-  return Object.entries(ALL).map(([name, schema]) => ({
+  return Object.entries(ALL_SCHEMAS).map(([name, schema]) => ({
     command: invocationPath(name, schema),
     category: schema.category,
     description: descriptions[name] ?? "",
@@ -42,7 +29,7 @@ function listAll(descriptions: Record<string, string>) {
 }
 
 function detail(name: string, descriptions: Record<string, string>) {
-  const schema = ALL[name];
+  const schema = ALL_SCHEMAS[name];
   if (!schema) return { success: false as const, error: `Unknown command: "${name}"` };
   return {
     success: true as const,
