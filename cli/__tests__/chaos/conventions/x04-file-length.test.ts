@@ -43,10 +43,9 @@ describe("Chaos X-04: all files ≤ 100 lines", () => {
     }
   });
 
-  it("cli/index.ts line count is tracked (known exception)", () => {
+  it("cli/index.ts is within limit", () => {
     const output = execSync("wc -l cli/index.ts", { encoding: "utf-8" });
     const lines = Number(output.trim().split(/\s+/)[0]);
-    // index.ts is 140 lines — known exception, flag if it grows further
-    expect(lines).toBeLessThanOrEqual(150);
+    expect(lines).toBeLessThanOrEqual(MAX_LINES);
   });
 });
