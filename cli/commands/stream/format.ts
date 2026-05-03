@@ -15,39 +15,52 @@ function formatJson(msg: StreamMessage): string {
   return JSON.stringify(msg);
 }
 
-function formatTable(msg: StreamMessage): string {
-  const time = new Date(msg.timestamp).toLocaleTimeString("ja-JP", { hour12: false });
-  const chan = msg.channel;
-  const data = msg.data as Record<string, unknown>;
+type Renderer = (pair: string, time: string, data: Record<string, unknown>) => string;
 
-  if (chan.startsWith("ticker_")) {
-    const pair = chan.slice(7);
-    return `[${time}] TICKER ${pair}  Last: ${fmtNum(data.last)}  Vol: ${fmtNum(data.vol)}`;
-  }
-  if (chan.startsWith("transactions_")) {
-    const pair = chan.slice(13);
-    const txs = (data.transactions ?? []) as Array<Record<string, unknown>>;
-    if (txs.length === 0) return `[${time}] TRADE  ${pair}  (no transactions)`;
-    return txs
-      .map(
-        (tx) => `[${time}] TRADE  ${pair}  ${ucFirst(tx.side)} ${tx.amount} @ ${fmtNum(tx.price)}`,
-      )
-      .join("\n");
-  }
-  if (chan.startsWith("depth_diff_") || chan.startsWith("depth_whole_")) {
-    const isDiff = chan.startsWith("depth_diff_");
-    const pair = chan.slice(isDiff ? 11 : 12);
-    const label = isDiff ? "DEPTH_DIFF" : "DEPTH_WHOLE";
+function depthLine(label: string): Renderer {
+  return (pair, time, data) => {
     const asks = Array.isArray(data.asks) ? data.asks.length : 0;
     const bids = Array.isArray(data.bids) ? data.bids.length : 0;
     return `[${time}] ${label} ${pair}  asks: ${asks}, bids: ${bids}`;
+  };
+}
+
+const PUBLIC_CHANNEL_RENDERERS: Array<{ prefix: string; render: Renderer }> = [
+  {
+    prefix: "ticker_",
+    render: (pair, time, data) =>
+      `[${time}] TICKER ${pair}  Last: ${fmtNum(data.last)}  Vol: ${fmtNum(data.vol)}`,
+  },
+  {
+    prefix: "transactions_",
+    render: (pair, time, data) => {
+      const txs = (data.transactions ?? []) as Array<Record<string, unknown>>;
+      if (txs.length === 0) return `[${time}] TRADE  ${pair}  (no transactions)`;
+      return txs
+        .map(
+          (tx) =>
+            `[${time}] TRADE  ${pair}  ${ucFirst(tx.side)} ${tx.amount} @ ${fmtNum(tx.price)}`,
+        )
+        .join("\n");
+    },
+  },
+  { prefix: "depth_diff_", render: depthLine("DEPTH_DIFF") },
+  { prefix: "depth_whole_", render: depthLine("DEPTH_WHOLE") },
+  {
+    prefix: "circuit_break_info_",
+    render: (pair, time, data) => `[${time}] CIRCUIT ${pair}  mode: ${data.mode}`,
+  },
+];
+
+function formatTable(msg: StreamMessage): string {
+  const time = new Date(msg.timestamp).toLocaleTimeString("ja-JP", { hour12: false });
+  const data = msg.data as Record<string, unknown>;
+  for (const { prefix, render } of PUBLIC_CHANNEL_RENDERERS) {
+    if (msg.channel.startsWith(prefix)) {
+      return render(msg.channel.slice(prefix.length), time, data);
+    }
   }
-  if (chan.startsWith("circuit_break_info_")) {
-    const pair = chan.slice(19);
-    return `[${time}] CIRCUIT ${pair}  mode: ${data.mode}`;
-  }
-  // Private stream events or unknown channels
-  return `[${time}] ${chan}  ${JSON.stringify(data)}`;
+  return `[${time}] ${msg.channel}  ${JSON.stringify(data)}`;
 }
 
 function fmtNum(v: unknown): string {
