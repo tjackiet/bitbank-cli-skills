@@ -5,7 +5,7 @@ describe("Chaos T-03: withdraw --execute without --confirm", () => {
   it("returns error mentioning --confirm", async () => {
     const r = await withdraw({
       asset: "btc",
-      uuid: "uuid-1",
+      uuid: "11111111-1111-1111-1111-111111111111",
       amount: "0.5",
       execute: true,
     });
@@ -17,7 +17,7 @@ describe("Chaos T-03: withdraw --execute without --confirm", () => {
     const spy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     const r = await withdraw({
       asset: "btc",
-      uuid: "uuid-1",
+      uuid: "11111111-1111-1111-1111-111111111111",
       amount: "0.5",
       confirm: true,
     });
@@ -29,7 +29,7 @@ describe("Chaos T-03: withdraw --execute without --confirm", () => {
     const spy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     const r = await withdraw({
       asset: "btc",
-      uuid: "uuid-1",
+      uuid: "11111111-1111-1111-1111-111111111111",
       amount: "0.5",
     });
     expect(r).toEqual({ success: true, data: { dryRun: true } });
