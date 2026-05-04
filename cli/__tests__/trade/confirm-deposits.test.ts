@@ -25,6 +25,19 @@ describe("confirm-deposits", () => {
 
   it("requires id", async () => {
     const result = await confirmDeposits({});
-    expect(result).toEqual({ success: false, error: "id is required. Example: --id=12345" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("id is required");
+  });
+
+  it("rejects empty id", async () => {
+    const result = await confirmDeposits({ id: "" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("id is required");
+  });
+
+  it("rejects non-numeric id", async () => {
+    const result = await confirmDeposits({ id: "abc" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("positive integer");
   });
 });

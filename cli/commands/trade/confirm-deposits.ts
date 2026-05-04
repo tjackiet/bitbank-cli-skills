@@ -2,7 +2,7 @@ import { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
-import { MSG_ID } from "../../validators.js";
+import { IntegerStringSchema } from "../../validators.js";
 import { dryRunResult } from "./dry-run.js";
 
 const ConfirmDepositsResponseSchema = z.object({
@@ -11,6 +11,10 @@ const ConfirmDepositsResponseSchema = z.object({
 });
 
 export type ConfirmDepositsResponse = z.infer<typeof ConfirmDepositsResponseSchema>;
+
+const ConfirmDepositsInputSchema = z.object({
+  id: IntegerStringSchema,
+});
 
 export type ConfirmDepositsArgs = {
   id?: string;
@@ -21,9 +25,13 @@ export async function confirmDeposits(
   args: ConfirmDepositsArgs,
   opts?: PrivatePostOptions,
 ): Promise<Result<ConfirmDepositsResponse | { dryRun: true }>> {
-  if (!args.id) return { success: false, error: MSG_ID };
+  const parsed = ConfirmDepositsInputSchema.safeParse({ id: args.id });
+  if (!parsed.success) {
+    const msg = parsed.error.issues.map((i) => i.message).join("; ");
+    return { success: false, error: msg };
+  }
 
-  const body = { id: args.id };
+  const body = { id: parsed.data.id };
 
   if (!args.execute) {
     return dryRunResult({
