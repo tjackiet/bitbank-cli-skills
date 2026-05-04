@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { Result } from "./types.js";
 
 function msg(field: string, example: string): string {
@@ -24,3 +25,39 @@ export function requireField<T>(value: T | undefined | null, message: string): R
   if (!value) return { success: false, error: message };
   return { success: true, data: value };
 }
+
+const UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+export const PairSchema = z
+  .string({ required_error: MSG_PAIR })
+  .trim()
+  .min(1, MSG_PAIR)
+  .regex(/^[a-z0-9]+_[a-z0-9]+$/, "pair must be like btc_jpy");
+
+export const AssetSchema = z
+  .string({ required_error: MSG_ASSET })
+  .trim()
+  .min(1, MSG_ASSET)
+  .regex(/^[a-z0-9]+$/i, "asset must be alphanumeric");
+
+export const UuidSchema = z
+  .string({ required_error: MSG_UUID })
+  .trim()
+  .min(1, MSG_UUID)
+  .regex(UUID_RE, "uuid must be a valid UUID");
+
+export const PositiveDecimalSchema = z
+  .string({ required_error: MSG_AMOUNT })
+  .trim()
+  .min(1, MSG_AMOUNT)
+  .regex(/^\d+(\.\d+)?$/, "amount must be a positive decimal (no exponent/sign)")
+  .refine((v) => {
+    const n = Number(v);
+    return Number.isFinite(n) && n > 0;
+  }, "amount must be > 0 and finite");
+
+export const IntegerStringSchema = z
+  .string({ required_error: MSG_ID })
+  .trim()
+  .min(1, MSG_ID)
+  .regex(/^\d+$/, "id must be a positive integer");
