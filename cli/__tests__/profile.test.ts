@@ -37,6 +37,8 @@ describe("applyProfile", () => {
     process.cwd = () => tmpDir;
     savedEnv.BITBANK_API_KEY = process.env.BITBANK_API_KEY;
     savedEnv.BITBANK_API_SECRET = process.env.BITBANK_API_SECRET;
+    savedEnv.PATH = process.env.PATH;
+    savedEnv.NODE_OPTIONS = process.env.NODE_OPTIONS;
   });
 
   afterEach(() => {
@@ -69,7 +71,7 @@ describe("applyProfile", () => {
   });
 
   it("rejects profile names with path traversal", () => {
-    for (const name of ["../etc/passwd", "..\\foo", "sub/dir", "a\\b"]) {
+    for (const name of ["../etc/passwd", "..\\foo", "sub/dir", "a\\b", "foo..bar"]) {
       const result = applyProfile(name);
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -77,6 +79,52 @@ describe("applyProfile", () => {
         expect(result.exitCode).toBe(4);
       }
     }
+  });
+
+  it("rejects profile names with disallowed characters", () => {
+    for (const name of ["foo bar", ".hidden", "foo\0bar", "foo\nbar", "foo;bar", ""]) {
+      const result = applyProfile(name);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe("Invalid profile name");
+        expect(result.exitCode).toBe(4);
+      }
+    }
+  });
+
+  it("accepts valid profile names", () => {
+    writeFileSync(join(tmpDir, ".env.valid_name-1"), "BITBANK_API_KEY=v1");
+    writeFileSync(join(tmpDir, ".env.test"), "BITBANK_API_KEY=t1");
+    expect(applyProfile("valid_name-1").success).toBe(true);
+    expect(applyProfile("test").success).toBe(true);
+  });
+
+  it("only reflects BITBANK_* keys and warns for others", () => {
+    const origPath = process.env.PATH;
+    const origNodeOpts = process.env.NODE_OPTIONS;
+    writeFileSync(
+      join(tmpDir, ".env.bot2"),
+      [
+        "BITBANK_API_KEY=foo",
+        "PATH=/evil",
+        "NODE_OPTIONS=--require ./mal.js",
+        "LD_PRELOAD=/tmp/x.so",
+      ].join("\n"),
+    );
+    const spy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    const result = applyProfile("bot2");
+    expect(result.success).toBe(true);
+    expect(process.env.BITBANK_API_KEY).toBe("foo");
+    expect(process.env.PATH).toBe(origPath);
+    expect(process.env.NODE_OPTIONS).toBe(origNodeOpts);
+    const warnings = spy.mock.calls
+      .map((c) => String(c[0]))
+      .filter((m) => m.includes("ignored non-BITBANK_*"));
+    expect(warnings.length).toBe(1);
+    expect(warnings[0]).toContain("PATH");
+    expect(warnings[0]).toContain("NODE_OPTIONS");
+    expect(warnings[0]).toContain("LD_PRELOAD");
+    spy.mockRestore();
   });
 
   it("does not affect env when profile is not specified (backward compat)", () => {

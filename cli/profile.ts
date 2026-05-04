@@ -38,9 +38,11 @@ export function parseEnvFile(content: string): Record<string, string> {
   return vars;
 }
 
+const ALLOWED_KEYS = /^BITBANK_[A-Z0-9_]+$/;
+
 /** プロファイル用 .env ファイルを読み込み process.env に反映する */
 export function applyProfile(profile: string): Result<string> {
-  if (/[/\\]|\.\./.test(profile)) {
+  if (!/^[A-Za-z0-9._-]+$/.test(profile) || profile.startsWith(".") || profile.includes("..")) {
     return { success: false, error: "Invalid profile name", exitCode: EXIT.PARAM };
   }
   const filename = `.env.${profile}`;
@@ -55,8 +57,18 @@ export function applyProfile(profile: string): Result<string> {
   warnIfInsecure(filepath, filename);
   const content = readFileSync(filepath, "utf-8");
   const vars = parseEnvFile(content);
+  const skipped: string[] = [];
   for (const [key, val] of Object.entries(vars)) {
+    if (!ALLOWED_KEYS.test(key)) {
+      skipped.push(key);
+      continue;
+    }
     process.env[key] = val;
+  }
+  if (skipped.length > 0) {
+    process.stderr.write(
+      `Warning: ignored non-BITBANK_* keys in ${filename}: ${skipped.join(", ")}\n`,
+    );
   }
   return { success: true, data: filename };
 }
