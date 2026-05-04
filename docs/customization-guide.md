@@ -172,7 +172,7 @@ export async function myCommand(
 
 ### 規約チェックリスト
 
-- [ ] 1 ファイル 100 行以内
+- [ ] 1 ファイル 100 行を目安（超過時はファイル冒頭に理由コメント）
 - [ ] Zod スキーマ + `z.infer`（手動 interface 禁止）
 - [ ] Result パターン（throw 禁止）
 - [ ] `--format=json|table|csv` 対応
