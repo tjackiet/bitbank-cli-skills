@@ -86,6 +86,12 @@ describe("buildLogRecord", () => {
     expect(data.items[1].uuid).toBe("b");
   });
 
+  it("does not pollute Object.prototype via __proto__ key", () => {
+    const payload = JSON.parse('{"__proto__": {"polluted": true}, "ok": 1}');
+    buildLogRecord("withdraw", {}, { success: true, data: payload });
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
+
   it("masks sensitive keys in nested params (regression)", () => {
     const r = buildLogRecord(
       "withdraw",

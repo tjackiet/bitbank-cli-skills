@@ -22,7 +22,8 @@ const SENSITIVE_PATTERN = /secret|password|credential|auth_token/i;
 function maskSensitiveDeep(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(maskSensitiveDeep);
   if (value !== null && typeof value === "object") {
-    const masked: Record<string, unknown> = {};
+    // null-prototype でプロトタイプ汚染（__proto__ など）を防ぐ
+    const masked = Object.create(null) as Record<string, unknown>;
     for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
       if (SENSITIVE_KEYS.has(k) || SENSITIVE_PATTERN.test(k)) {
         masked[k] = "***";
