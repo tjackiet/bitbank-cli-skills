@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EXIT } from "../exit-codes.js";
 import {
   ERROR_CODES,
@@ -56,6 +56,14 @@ describe("shouldRetry", () => {
 });
 
 describe("retryDelay", () => {
+  beforeEach(() => {
+    // ジッターを 0 に固定して既存タイミング検証を維持
+    vi.spyOn(Math, "random").mockReturnValue(0.5);
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("uses Retry-After header on 429", async () => {
     vi.useFakeTimers();
     const headers = new Headers({ "Retry-After": "1" });
@@ -144,6 +152,62 @@ describe("retryDelay", () => {
     await vi.advanceTimersByTimeAsync(0);
     await p;
     vi.useRealTimers();
+  });
+
+  describe("jitter", () => {
+    function captureSetTimeoutMs(): { ms: number } {
+      const captured = { ms: 0 };
+      vi.spyOn(globalThis, "setTimeout").mockImplementation(((cb: () => void, ms?: number) => {
+        captured.ms = ms ?? 0;
+        cb();
+        return 0 as unknown as ReturnType<typeof setTimeout>;
+      }) as typeof setTimeout);
+      return captured;
+    }
+
+    it("applies +25% jitter when Math.random() = 1", async () => {
+      vi.spyOn(Math, "random").mockReturnValue(1);
+      const captured = captureSetTimeoutMs();
+      await retryDelay(null, 2); // base = 2^2 * 500 = 2000ms
+      expect(captured.ms).toBe(2500);
+      vi.restoreAllMocks();
+    });
+
+    it("applies -25% jitter when Math.random() = 0", async () => {
+      vi.spyOn(Math, "random").mockReturnValue(0);
+      const captured = captureSetTimeoutMs();
+      await retryDelay(null, 2);
+      expect(captured.ms).toBe(1500);
+      vi.restoreAllMocks();
+    });
+
+    it("applies 0% jitter when Math.random() = 0.5", async () => {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+      const captured = captureSetTimeoutMs();
+      await retryDelay(null, 2);
+      expect(captured.ms).toBe(2000);
+      vi.restoreAllMocks();
+    });
+
+    it("jitters Retry-After header value too", async () => {
+      vi.spyOn(Math, "random").mockReturnValue(1);
+      const captured = captureSetTimeoutMs();
+      const headers = new Headers({ "Retry-After": "4" });
+      const res = new Response("", { status: 429, headers });
+      await retryDelay(res, 1); // base = 4000ms, +25% = 5000
+      expect(captured.ms).toBe(5000);
+      vi.restoreAllMocks();
+    });
+
+    it("clamps to 0 when jitter produces negative", async () => {
+      vi.spyOn(Math, "random").mockReturnValue(0);
+      const captured = captureSetTimeoutMs();
+      const headers = new Headers({ "Retry-After": "0" });
+      const res = new Response("", { status: 429, headers });
+      await retryDelay(res, 0); // base = 0, -25% of 0 = 0
+      expect(captured.ms).toBe(0);
+      vi.restoreAllMocks();
+    });
   });
 });
 
