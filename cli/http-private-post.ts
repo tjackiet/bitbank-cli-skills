@@ -24,7 +24,7 @@ export async function privatePost<T>(
   return fetchWithRetry<T>(
     url,
     { method: "POST", headers, body: jsonBody || undefined },
-    opts,
+    { ...opts, retries: 0, retryOnNetworkError: false },
     (b) => formatApiError(b.data?.code ?? 0),
   );
 }

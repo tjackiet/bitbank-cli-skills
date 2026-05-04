@@ -27,6 +27,8 @@ export type BaseFetchOptions = {
   fetch?: typeof globalThis.fetch;
   /** プロアクティブスロットルの最小インターバル(ms)。省略時はバケット既定値 */
   throttleMs?: number;
+  /** false にするとネットワーク例外で再試行しない（POST の冪等性確保用） */
+  retryOnNetworkError?: boolean;
 };
 
 type Attempt<T> =
@@ -83,7 +85,6 @@ export async function fetchWithRetry<T>(
 ): Promise<Result<T>> {
   const { timeoutMs = 5000, retries = 2, fetch: fetchFn = globalThis.fetch } = opts;
   const bucket = detectBucket(url);
-
   let lastError = "";
   let lastExitCode: ExitCode = EXIT.GENERAL;
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -92,6 +93,7 @@ export async function fetchWithRetry<T>(
     if (r.kind === "done") return r.result;
     lastError = r.error;
     lastExitCode = r.exitCode;
+    if (r.res === null && opts.retryOnNetworkError === false) break;
     if (attempt < retries) await retryDelay(r.res, attempt + 1);
   }
   return { success: false, error: lastError, exitCode: lastExitCode };

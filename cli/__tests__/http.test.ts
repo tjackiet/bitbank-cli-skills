@@ -105,6 +105,22 @@ describe("publicGet", () => {
     expect(result.success === false && result.error).toContain("abort");
   });
 
+  it("retries on network exception then succeeds (GET regression)", async () => {
+    vi.useFakeTimers();
+    let calls = 0;
+    const fetch: typeof globalThis.fetch = async () => {
+      calls++;
+      if (calls === 1) throw new Error("ECONNRESET");
+      return new Response(JSON.stringify({ success: 1, data: { ok: true } }));
+    };
+    const p = publicGet("/test", { fetch, retries: 1 });
+    await vi.advanceTimersByTimeAsync(5000);
+    const result = await p;
+    expect(result).toEqual({ success: true, data: { ok: true } });
+    expect(calls).toBe(2);
+    vi.useRealTimers();
+  });
+
   it("does not retry 60001 when retries is 0", async () => {
     let calls = 0;
     const fetch: typeof globalThis.fetch = async () => {

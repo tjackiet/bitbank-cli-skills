@@ -81,6 +81,51 @@ describe("privatePost", () => {
     expect(capturedContentType).toBe("application/json");
   });
 
+  it("does not retry on network exception (POST is not idempotent)", async () => {
+    let calls = 0;
+    const fetch: typeof globalThis.fetch = async () => {
+      calls++;
+      throw new Error("ECONNRESET");
+    };
+    const result = await privatePost(
+      "/user/spot/order",
+      { pair: "btc_jpy" },
+      { fetch, credentials: TEST_CREDS, nonce: "123" },
+    );
+    expect(result.success).toBe(false);
+    expect(calls).toBe(1);
+  });
+
+  it("does not retry on AbortError timeout", async () => {
+    let calls = 0;
+    const fetch: typeof globalThis.fetch = async () => {
+      calls++;
+      throw new DOMException("The operation was aborted.", "AbortError");
+    };
+    const result = await privatePost(
+      "/user/spot/order",
+      { pair: "btc_jpy" },
+      { fetch, credentials: TEST_CREDS, nonce: "123" },
+    );
+    expect(result.success).toBe(false);
+    expect(calls).toBe(1);
+  });
+
+  it("does not retry on HTTP 503 (retries: 0 forced)", async () => {
+    let calls = 0;
+    const fetch: typeof globalThis.fetch = async () => {
+      calls++;
+      return new Response("", { status: 503, statusText: "Service Unavailable" });
+    };
+    const result = await privatePost(
+      "/user/spot/order",
+      { pair: "btc_jpy" },
+      { fetch, retries: 5, credentials: TEST_CREDS, nonce: "123" },
+    );
+    expect(result.success).toBe(false);
+    expect(calls).toBe(1);
+  });
+
   it("returns formatted error on API failure", async () => {
     const fetch = mockFetchRaw({ success: 0, data: { code: 20001 } });
     const result = await privatePost(

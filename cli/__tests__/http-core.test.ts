@@ -195,4 +195,20 @@ describe("fetchWithRetry", () => {
     );
     expect(result).toMatchObject({ success: false, exitCode: EXIT.NETWORK });
   });
+
+  it("retryOnNetworkError: false breaks loop on network exception", async () => {
+    let calls = 0;
+    const fetch: typeof globalThis.fetch = async () => {
+      calls++;
+      throw new Error("ECONNRESET");
+    };
+    const result = await fetchWithRetry(
+      "http://test",
+      {},
+      { fetch, retries: 5, retryOnNetworkError: false },
+      parseError,
+    );
+    expect(result).toMatchObject({ success: false, exitCode: EXIT.NETWORK });
+    expect(calls).toBe(1);
+  });
 });
