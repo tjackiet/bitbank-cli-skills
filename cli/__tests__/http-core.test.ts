@@ -195,4 +195,41 @@ describe("fetchWithRetry", () => {
     );
     expect(result).toMatchObject({ success: false, exitCode: EXIT.NETWORK });
   });
+
+  it("retryOnNetworkError: false breaks loop on network exception", async () => {
+    let calls = 0;
+    const fetch: typeof globalThis.fetch = async () => {
+      calls++;
+      throw new Error("ECONNRESET");
+    };
+    const result = await fetchWithRetry(
+      "http://test",
+      {},
+      { fetch, retries: 5, retryOnNetworkError: false },
+      parseError,
+    );
+    expect(result).toMatchObject({ success: false, exitCode: EXIT.NETWORK });
+    expect(calls).toBe(1);
+  });
+
+  it("retryOnNetworkError: false still retries on API rate limit 60001", async () => {
+    vi.useFakeTimers();
+    let calls = 0;
+    const fetch: typeof globalThis.fetch = async () => {
+      calls++;
+      if (calls === 1) return new Response(JSON.stringify({ success: 0, data: { code: 60001 } }));
+      return new Response(JSON.stringify({ success: 1, data: { ok: true } }));
+    };
+    const p = fetchWithRetry(
+      "http://test",
+      {},
+      { fetch, retries: 1, retryOnNetworkError: false },
+      parseError,
+    );
+    await vi.advanceTimersByTimeAsync(5000);
+    const result = await p;
+    expect(result).toMatchObject({ success: true });
+    expect(calls).toBe(2);
+    vi.useRealTimers();
+  });
 });
