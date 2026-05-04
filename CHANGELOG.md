@@ -5,6 +5,16 @@
 
 ## [Unreleased]
 
+### Breaking Changes
+
+- `--profile=<name>` で読み込まれる `.env.<profile>` ファイルから、
+  `BITBANK_*` 以外の env 変数が反映されなくなった。それ以外のキーが
+  含まれる場合は stderr に警告を出して無視する。
+  これは profile 経由の任意 env 上書き（`NODE_OPTIONS` など）による
+  コード実行リスクを断つための安全側の変更。
+- プロファイル名の許容文字を `^[A-Za-z0-9._-]+$` に厳格化。
+  先頭ドットのプロファイル名（`.hidden` など）も拒否される。
+
 ### Added
 
 - `volatility-profile` skill: リターン分布・ファットテール・時間帯別出来高などリスク特性を定量化
