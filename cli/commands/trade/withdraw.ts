@@ -92,7 +92,7 @@ export async function withdraw(
 
   if (!opts?.skipConfirmPrompt) {
     process.stdout.write(
-      `\n⚠️  出金リクエスト\n  資産: ${args.asset}\n  出金先UUID: ${args.uuid}\n  金額: ${args.amount}\n`,
+      `\n⚠️  出金リクエスト\n  資産: ${parsed.data.asset}\n  出金先UUID: ${parsed.data.uuid}\n  金額: ${parsed.data.amount}\n`,
     );
     const input = opts?.input ?? process.stdin;
     const output = opts?.output ?? process.stdout;

@@ -127,6 +127,12 @@ describe("withdraw", () => {
     if (!result.success) expect(result.error).toContain("uuid must be a valid UUID");
   });
 
+  it("rejects uppercase asset (BTC)", async () => {
+    const result = await withdraw({ asset: "BTC", uuid: VALID_UUID, amount: "0.5" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toMatch(/asset/);
+  });
+
   it("rejects asset=../btc", async () => {
     const result = await withdraw({ asset: "../btc", uuid: VALID_UUID, amount: "0.5" });
     expect(result.success).toBe(false);

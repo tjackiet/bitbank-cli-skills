@@ -40,4 +40,10 @@ describe("confirm-deposits", () => {
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("positive integer");
   });
+
+  it("rejects id=0", async () => {
+    const result = await confirmDeposits({ id: "0" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("positive integer");
+  });
 });

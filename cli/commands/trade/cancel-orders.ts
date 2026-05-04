@@ -23,7 +23,7 @@ const CancelOrdersInputSchema = z.object({
     .min(1, MSG_ORDER_IDS)
     .transform((s, ctx) => {
       const parts = s.split(",").map((x) => x.trim());
-      if (parts.some((p) => !/^\d+$/.test(p))) {
+      if (parts.some((p) => !/^[1-9]\d*$/.test(p))) {
         ctx.addIssue({
           code: "custom",
           message: "order-ids must be comma-separated positive integers",

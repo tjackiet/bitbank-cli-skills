@@ -87,6 +87,12 @@ describe("cancel-orders", () => {
     writeSpy.mockRestore();
   });
 
+  it("rejects 0 in order-ids", async () => {
+    const result = await cancelOrders({ pair: "btc_jpy", orderIds: "1,0,3" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("positive integers");
+  });
+
   it("rejects malformed pair (../btc)", async () => {
     const result = await cancelOrders({ pair: "../btc", orderIds: "1,2" });
     expect(result.success).toBe(false);

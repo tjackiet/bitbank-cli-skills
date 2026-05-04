@@ -38,7 +38,7 @@ export const AssetSchema = z
   .string({ required_error: MSG_ASSET })
   .trim()
   .min(1, MSG_ASSET)
-  .regex(/^[a-z0-9]+$/i, "asset must be alphanumeric");
+  .regex(/^[a-z0-9]+$/, "asset must be alphanumeric (lowercase)");
 
 export const UuidSchema = z
   .string({ required_error: MSG_UUID })
@@ -60,4 +60,4 @@ export const IntegerStringSchema = z
   .string({ required_error: MSG_ID })
   .trim()
   .min(1, MSG_ID)
-  .regex(/^\d+$/, "id must be a positive integer");
+  .regex(/^[1-9]\d*$/, "id must be a positive integer");
