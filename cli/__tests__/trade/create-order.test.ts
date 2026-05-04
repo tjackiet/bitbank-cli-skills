@@ -85,7 +85,72 @@ describe("create-order", () => {
       amount: "0",
     });
     expect(result.success).toBe(false);
-    if (!result.success) expect(result.error).toContain("amount must be > 0");
+    if (!result.success) expect(result.error).toContain("amount");
+  });
+
+  it("rejects amount=Infinity", async () => {
+    const result = await createOrder({
+      pair: "btc_jpy",
+      side: "buy",
+      type: "market",
+      amount: "Infinity",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("positive decimal");
+  });
+
+  it("rejects amount in exponent notation (1e308)", async () => {
+    const result = await createOrder({
+      pair: "btc_jpy",
+      side: "buy",
+      type: "market",
+      amount: "1e308",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("positive decimal");
+  });
+
+  it("rejects signed amount (+1)", async () => {
+    const result = await createOrder({
+      pair: "btc_jpy",
+      side: "buy",
+      type: "market",
+      amount: "+1",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects malformed pair (no underscore)", async () => {
+    const result = await createOrder({
+      pair: "foo",
+      side: "buy",
+      type: "market",
+      amount: "0.001",
+    });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("pair must be like btc_jpy");
+  });
+
+  it("rejects negative price", async () => {
+    const result = await createOrder({
+      pair: "btc_jpy",
+      side: "buy",
+      type: "limit",
+      price: "-100",
+      amount: "0.001",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects price=Infinity", async () => {
+    const result = await createOrder({
+      pair: "btc_jpy",
+      side: "buy",
+      type: "limit",
+      price: "Infinity",
+      amount: "0.001",
+    });
+    expect(result.success).toBe(false);
   });
 
   it("validates side enum", async () => {

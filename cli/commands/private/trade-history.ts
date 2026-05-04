@@ -5,7 +5,7 @@ import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
 import { compactParams } from "../../params.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
-import { MSG_PAIR } from "../../validators.js";
+import { validatePair } from "../../validators.js";
 
 const TradeSchema = z.object({
   trade_id: z.number(),
@@ -40,11 +40,10 @@ export async function tradeHistory(
   args: TradeHistoryArgs,
   opts?: PrivateHttpOptions,
 ): Promise<Result<Trade[]>> {
-  if (!args.pair) {
-    return { success: false, error: MSG_PAIR };
-  }
+  const pv = validatePair(args.pair);
+  if (!pv.success) return pv;
   const params = compactParams({
-    pair: args.pair,
+    pair: pv.data,
     count: args.count,
     order_id: args.orderId,
     since: args.since,

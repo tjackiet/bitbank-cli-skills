@@ -2,7 +2,7 @@ import { z } from "zod";
 import { type HttpOptions, publicGet } from "../../http.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
-import { MSG_PAIR_CIRCUIT_BREAK } from "../../validators.js";
+import { MSG_PAIR_CIRCUIT_BREAK, validatePair } from "../../validators.js";
 
 const CircuitBreakSchema = z.object({
   mode: z.string(),
@@ -22,13 +22,8 @@ export async function circuitBreak(
   args: { pair: string | undefined },
   opts?: HttpOptions,
 ): Promise<Result<CircuitBreak>> {
-  const { pair } = args;
-  if (!pair) {
-    return {
-      success: false,
-      error: MSG_PAIR_CIRCUIT_BREAK,
-    };
-  }
-  const result = await publicGet<unknown>(`/${pair}/circuit_break_info`, opts);
+  const v = validatePair(args.pair, MSG_PAIR_CIRCUIT_BREAK);
+  if (!v.success) return v;
+  const result = await publicGet<unknown>(`/${v.data}/circuit_break_info`, opts);
   return parseResponse(result, CircuitBreakSchema);
 }

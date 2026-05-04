@@ -44,7 +44,25 @@ describe("cancel-order", () => {
     const result = await cancelOrder({ pair: "btc_jpy" });
     expect(result).toEqual({
       success: false,
-      error: "order-id is required. Example: --order-id=12345",
+      error: "id is required. Example: --id=12345",
     });
+  });
+
+  it("rejects pair format mismatch (no underscore)", async () => {
+    const result = await cancelOrder({ pair: "btcjpy", orderId: "123" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("pair must be like btc_jpy");
+  });
+
+  it("rejects order-id=0", async () => {
+    const result = await cancelOrder({ pair: "btc_jpy", orderId: "0" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("id must be a positive integer");
+  });
+
+  it("rejects non-numeric order-id", async () => {
+    const result = await cancelOrder({ pair: "btc_jpy", orderId: "abc" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("id must be a positive integer");
   });
 });

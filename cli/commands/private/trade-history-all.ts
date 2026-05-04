@@ -2,7 +2,7 @@
 // CLI では `trade-history --all` で呼び出される
 import type { PrivateHttpOptions } from "../../http-private.js";
 import type { Result } from "../../types.js";
-import { MSG_PAIR } from "../../validators.js";
+import { validatePair } from "../../validators.js";
 import { type Trade, tradeHistory } from "./trade-history.js";
 
 // bitbank API の1リクエストあたり最大取得件数
@@ -18,9 +18,8 @@ export async function tradeHistoryAll(
   args: TradeHistoryAllArgs,
   opts?: PrivateHttpOptions,
 ): Promise<Result<Trade[]>> {
-  if (!args.pair) {
-    return { success: false, error: MSG_PAIR };
-  }
+  const pv = validatePair(args.pair);
+  if (!pv.success) return pv;
 
   const allTrades: Trade[] = [];
   const seen = new Set<number>();
@@ -29,7 +28,7 @@ export async function tradeHistoryAll(
   for (;;) {
     const result = await tradeHistory(
       {
-        pair: args.pair,
+        pair: pv.data,
         count: String(PAGE_SIZE),
         order: "asc",
         since,

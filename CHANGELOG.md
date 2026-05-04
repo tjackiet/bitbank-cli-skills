@@ -44,3 +44,17 @@
   - `confirm-deposits --id=abc`（非数値）
   既存の正常系（`amount=0.5`、`uuid=xxx-yyy-...` 等）の挙動は変わらない。
   バリデーションエラーメッセージのフォーマットは変更されている（複数 issue は `;` 区切り）。
+- `create-order` / `cancel-order` および public/private GET 系の `pair` 入力検証を
+  共通スキーマ（`PairSchema` / `PositiveDecimalSchema` / `IntegerStringSchema`）に統一。
+  以下のケースが従来は素通りしていたが、CLI 層で弾くようになった（破壊的変更）:
+  - `create-order --amount=Infinity` / `--amount=1e308` / `--amount=+1`
+  - `create-order --price=-100` / `--trigger-price=Infinity` 等の非正値・指数表記
+  - `create-order --pair=foo`（`^[a-z0-9]+_[a-z0-9]+$` 形式不正）
+  - `cancel-order --order-id=0` / `--order-id=abc`（0 や非整数）
+  - `ticker` / `depth` / `transactions` / `circuit-break` / `candles` /
+    `order` / `active-orders` / `trade-history` / `trade-history-all` /
+    `orders-info` / `margin-positions` で形式不正な `pair` を URL に補間する前に拒否
+  共通ヘルパ `validatePair(pair, missingMessage)` を `cli/validators.ts` に追加。
+  `cancel-order --order-id` 未指定時のエラー文言が
+  `order-id is required. Example: --order-id=12345` から
+  `id is required. Example: --id=12345` に変更（共通スキーマ既定の文言）。

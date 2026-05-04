@@ -2,19 +2,13 @@ import { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
+import { IntegerStringSchema, PairSchema } from "../../validators.js";
 import { CancelOrderSchema } from "../shared-schemas.js";
 import { dryRunResult } from "./dry-run.js";
 
 const CancelOrderInputSchema = z.object({
-  pair: z
-    .string({ required_error: "pair is required. Example: --pair=btc_jpy" })
-    .trim()
-    .min(1, "pair is required. Example: --pair=btc_jpy"),
-  orderId: z
-    .string({ required_error: "order-id is required. Example: --order-id=12345" })
-    .trim()
-    .min(1, "order-id is required. Example: --order-id=12345")
-    .regex(/^\d+$/, "order-id must be an integer"),
+  pair: PairSchema,
+  orderId: IntegerStringSchema,
 });
 
 export type CancelOrderResponse = z.infer<typeof CancelOrderSchema>;

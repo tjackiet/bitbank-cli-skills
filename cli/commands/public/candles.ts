@@ -1,7 +1,8 @@
+// 100行超: pair/type/date/range の入力検証 + 単発取得・自動マージ・範囲取得のディスパッチを 1 ファイルに集約
 import { YEARLY_TYPES, shiftDate, todayDate } from "../../date-utils.js";
 import type { HttpOptions } from "../../http.js";
 import type { Result } from "../../types.js";
-import { MSG_PAIR } from "../../validators.js";
+import { validatePair } from "../../validators.js";
 import { type Candle, VALID_TYPES, fetchOne } from "./candles-fetch.js";
 import { candlesRange } from "./candles-range.js";
 
@@ -63,8 +64,10 @@ async function fetchAutoMerge(
 }
 
 export async function candles(args: CandlesArgs, opts?: HttpOptions): Promise<Result<Candle[]>> {
-  const { pair, type, date, limit, from, to, noCache } = args;
-  if (!pair) return { success: false, error: MSG_PAIR };
+  const pv = validatePair(args.pair);
+  if (!pv.success) return pv;
+  const pair = pv.data;
+  const { type, date, limit, from, to, noCache } = args;
   const validType = validateType(type);
   if (!validType) {
     return { success: false, error: `--type is required. Valid: ${VALID_TYPES.join(", ")}` };

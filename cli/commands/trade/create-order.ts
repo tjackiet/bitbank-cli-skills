@@ -2,6 +2,7 @@ import { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
+import { PairSchema, PositiveDecimalSchema } from "../../validators.js";
 import { OrderSchema } from "../shared-schemas.js";
 import { dryRunResult } from "./dry-run.js";
 
@@ -10,12 +11,12 @@ const TypeEnum = z.enum(["limit", "market", "stop", "stop_limit"]);
 
 const CreateOrderInputSchema = z
   .object({
-    pair: z.string({ required_error: "pair is required" }).min(1, "pair is required"),
+    pair: PairSchema,
     side: SideEnum,
     type: TypeEnum,
-    price: z.string().optional(),
-    amount: z.string().refine((v) => Number(v) > 0, "amount must be > 0"),
-    triggerPrice: z.string().optional(),
+    price: PositiveDecimalSchema.optional(),
+    amount: PositiveDecimalSchema,
+    triggerPrice: PositiveDecimalSchema.optional(),
     postOnly: z.boolean().optional(),
   })
   .superRefine((val, ctx) => {

@@ -2,7 +2,7 @@ import { z } from "zod";
 import { type HttpOptions, publicGet } from "../../http.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
-import { MSG_PAIR_DEPTH } from "../../validators.js";
+import { MSG_PAIR_DEPTH, validatePair } from "../../validators.js";
 
 const DepthSchema = z.object({
   asks: z.array(z.tuple([z.string(), z.string()])),
@@ -16,10 +16,8 @@ export async function depth(
   args: { pair: string | undefined },
   opts?: HttpOptions,
 ): Promise<Result<Depth>> {
-  const { pair } = args;
-  if (!pair) {
-    return { success: false, error: MSG_PAIR_DEPTH };
-  }
-  const result = await publicGet<unknown>(`/${pair}/depth`, opts);
+  const v = validatePair(args.pair, MSG_PAIR_DEPTH);
+  if (!v.success) return v;
+  const result = await publicGet<unknown>(`/${v.data}/depth`, opts);
   return parseResponse(result, DepthSchema);
 }

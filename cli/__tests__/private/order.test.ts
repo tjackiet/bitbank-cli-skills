@@ -28,6 +28,18 @@ describe("order", () => {
     expect(result.success).toBe(false);
   });
 
+  it("rejects malformed pair before fetching", async () => {
+    const failFetch = (() => {
+      throw new Error("fetch should not be called");
+    }) as unknown as typeof fetch;
+    const result = await order(
+      { pair: "BTC_JPY", orderId: "12345" },
+      { fetch: failFetch, retries: 0, credentials: TEST_CREDS, nonce: "1" },
+    );
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("pair must be like btc_jpy");
+  });
+
   it("returns parsed order data", async () => {
     const result = await order(
       { pair: "btc_jpy", orderId: "12345" },

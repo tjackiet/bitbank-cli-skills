@@ -19,6 +19,15 @@ describe("ticker", () => {
     expect(result.success).toBe(false);
   });
 
+  it("rejects malformed pair (no underscore) before fetching", async () => {
+    const failFetch = (() => {
+      throw new Error("fetch should not be called");
+    }) as unknown as typeof fetch;
+    const result = await ticker({ pair: "foo" }, { fetch: failFetch, retries: 0 });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("pair must be like btc_jpy");
+  });
+
   it("returns parsed ticker data", async () => {
     const result = await ticker(
       { pair: "btc_jpy" },

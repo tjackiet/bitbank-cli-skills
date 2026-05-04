@@ -3,7 +3,7 @@ import { type HttpOptions, publicGet } from "../../http.js";
 import { parseResponse } from "../../parse-response.js";
 import { numStr } from "../../schema-helpers.js";
 import type { Result } from "../../types.js";
-import { MSG_PAIR_TRANSACTIONS } from "../../validators.js";
+import { MSG_PAIR_TRANSACTIONS, validatePair } from "../../validators.js";
 
 const TransactionSchema = z.object({
   transaction_id: z.number(),
@@ -23,11 +23,9 @@ export async function transactions(
   args: { pair: string | undefined; date?: string },
   opts?: HttpOptions,
 ): Promise<Result<Transaction[]>> {
-  const { pair, date } = args;
-  if (!pair) {
-    return { success: false, error: MSG_PAIR_TRANSACTIONS };
-  }
-  const datePath = date ? `/${date}` : "";
-  const result = await publicGet<unknown>(`/${pair}/transactions${datePath}`, opts);
+  const v = validatePair(args.pair, MSG_PAIR_TRANSACTIONS);
+  if (!v.success) return v;
+  const datePath = args.date ? `/${args.date}` : "";
+  const result = await publicGet<unknown>(`/${v.data}/transactions${datePath}`, opts);
   return parseResponse(result, TransactionsSchema, "transactions");
 }

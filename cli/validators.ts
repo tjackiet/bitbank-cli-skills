@@ -61,3 +61,15 @@ export const IntegerStringSchema = z
   .trim()
   .min(1, MSG_ID)
   .regex(/^[1-9]\d*$/, "id must be a positive integer");
+
+export function validatePair(
+  pair: string | undefined,
+  missingMessage: string = MSG_PAIR,
+): Result<string> {
+  if (!pair) return { success: false, error: missingMessage };
+  const parsed = PairSchema.safeParse(pair);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues.map((i) => i.message).join("; ") };
+  }
+  return { success: true, data: parsed.data };
+}
