@@ -27,3 +27,12 @@
 ### Changed
 
 - README / `docs/phases.md` / `docs/customization-guide.md` / `.claude/rules/skills.md` を 7 Skill 構成と `_shared/references/` 運用に合わせて更新
+- `withdraw` / `cancel-orders` / `confirm-deposits` の入力検証を Zod に統一。
+  以下のケースが従来は素通りしていたが、CLI 層で弾くようになった:
+  - `withdraw --amount=Infinity` / `--amount=1e308` / `--amount=NaN`
+  - `withdraw --uuid=<UUID形式以外>`
+  - `withdraw --asset=<英数以外>`
+  - `cancel-orders --order-ids=1.5,2`（小数点）
+  - `confirm-deposits --id=abc`（非数値）
+  既存の正常系（`amount=0.5`、`uuid=xxx-yyy-...` 等）の挙動は変わらない。
+  バリデーションエラーメッセージのフォーマットは変更されている（複数 issue は `;` 区切り）。

@@ -57,7 +57,11 @@ describe("Chaos T-01: all trade commands return dryRun without --execute", () =>
 
   it("withdraw dry-run shows --confirm hint", async () => {
     const spy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-    const r = await withdraw({ asset: "btc", uuid: "u-1", amount: "1.0" });
+    const r = await withdraw({
+      asset: "btc",
+      uuid: "11111111-1111-1111-1111-111111111111",
+      amount: "1.0",
+    });
     expect(r).toEqual({ success: true, data: { dryRun: true } });
     const out = spy.mock.calls.map((c) => c[0]).join("");
     expect(out).toContain("DRY RUN");

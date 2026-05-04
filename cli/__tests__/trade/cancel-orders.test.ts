@@ -61,4 +61,41 @@ describe("cancel-orders", () => {
     const result = await cancelOrders({ pair: "btc_jpy" });
     expect(result.success).toBe(false);
   });
+
+  it("rejects empty order-ids string", async () => {
+    const result = await cancelOrders({ pair: "btc_jpy", orderIds: "" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("order-ids is required");
+  });
+
+  it("rejects decimal order ids (1.5,2)", async () => {
+    const result = await cancelOrders({ pair: "btc_jpy", orderIds: "1.5,2" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("positive integers");
+  });
+
+  it("rejects non-numeric order ids (abc)", async () => {
+    const result = await cancelOrders({ pair: "btc_jpy", orderIds: "abc" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("positive integers");
+  });
+
+  it("accepts whitespace-padded ids", async () => {
+    const writeSpy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    const result = await cancelOrders({ pair: "btc_jpy", orderIds: "1, 2 ,3" });
+    expect(result).toEqual({ success: true, data: { dryRun: true } });
+    writeSpy.mockRestore();
+  });
+
+  it("rejects 0 in order-ids", async () => {
+    const result = await cancelOrders({ pair: "btc_jpy", orderIds: "1,0,3" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("positive integers");
+  });
+
+  it("rejects malformed pair (../btc)", async () => {
+    const result = await cancelOrders({ pair: "../btc", orderIds: "1,2" });
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toMatch(/pair/);
+  });
 });

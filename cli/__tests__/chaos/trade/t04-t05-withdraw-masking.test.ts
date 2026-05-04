@@ -8,7 +8,7 @@ describe("Chaos T-04: withdraw dry-run masks --token in hint", () => {
     const spy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     await withdraw({
       asset: "btc",
-      uuid: "uuid-1",
+      uuid: "11111111-1111-1111-1111-111111111111",
       amount: "0.5",
       token: SECRET_TOKEN,
     });
@@ -20,7 +20,7 @@ describe("Chaos T-04: withdraw dry-run masks --token in hint", () => {
 
   it("without token, no --token=*** in hint", async () => {
     const spy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
-    await withdraw({ asset: "btc", uuid: "uuid-1", amount: "0.5" });
+    await withdraw({ asset: "btc", uuid: "11111111-1111-1111-1111-111111111111", amount: "0.5" });
     const out = spy.mock.calls.map((c) => c[0]).join("");
     expect(out).not.toContain("--token");
     spy.mockRestore();
@@ -32,7 +32,7 @@ describe("Chaos T-05: withdraw dry-run masks token in body", () => {
     const spy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     await withdraw({
       asset: "btc",
-      uuid: "uuid-1",
+      uuid: "11111111-1111-1111-1111-111111111111",
       amount: "0.5",
       token: SECRET_TOKEN,
     });

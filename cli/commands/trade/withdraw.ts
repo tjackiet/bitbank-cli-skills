@@ -1,9 +1,10 @@
+// 100行超: 出金は資金移動を伴うため、入力検証 + dry-run + --confirm 対話の 3 ガードを 1 ファイルに集約
 import * as readline from "node:readline";
 import { z } from "zod";
 import { type PrivatePostOptions, privatePost } from "../../http-private-post.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
-import { MSG_AMOUNT, MSG_ASSET, MSG_UUID } from "../../validators.js";
+import { AssetSchema, PositiveDecimalSchema, UuidSchema } from "../../validators.js";
 import { dryRunResult } from "./dry-run.js";
 
 const WithdrawResponseSchema = z.object({
@@ -11,6 +12,13 @@ const WithdrawResponseSchema = z.object({
   asset: z.string(),
   amount: z.union([z.string(), z.number()]),
   status: z.string(),
+});
+
+const WithdrawInputSchema = z.object({
+  asset: AssetSchema,
+  uuid: UuidSchema,
+  amount: PositiveDecimalSchema,
+  token: z.string().min(1).optional(),
 });
 
 export type WithdrawResponse = z.infer<typeof WithdrawResponseSchema>;
@@ -47,17 +55,23 @@ export async function withdraw(
   args: WithdrawArgs,
   opts?: WithdrawOptions,
 ): Promise<Result<WithdrawResponse | { dryRun: true }>> {
-  if (!args.asset) return { success: false, error: MSG_ASSET };
-  if (!args.uuid) return { success: false, error: MSG_UUID };
-  if (!args.amount) return { success: false, error: MSG_AMOUNT };
-  if (Number(args.amount) <= 0) return { success: false, error: "amount must be > 0" };
-
-  const body: Record<string, unknown> = {
+  const parsed = WithdrawInputSchema.safeParse({
     asset: args.asset,
     uuid: args.uuid,
     amount: args.amount,
+    token: args.token,
+  });
+  if (!parsed.success) {
+    const msg = parsed.error.issues.map((i) => i.message).join("; ");
+    return { success: false, error: msg };
+  }
+
+  const body: Record<string, unknown> = {
+    asset: parsed.data.asset,
+    uuid: parsed.data.uuid,
+    amount: parsed.data.amount,
   };
-  if (args.token) body.token = args.token;
+  if (parsed.data.token) body.token = parsed.data.token;
 
   if (!args.execute) {
     return dryRunResult({
@@ -78,7 +92,7 @@ export async function withdraw(
 
   if (!opts?.skipConfirmPrompt) {
     process.stdout.write(
-      `\n⚠️  出金リクエスト\n  資産: ${args.asset}\n  出金先UUID: ${args.uuid}\n  金額: ${args.amount}\n`,
+      `\n⚠️  出金リクエスト\n  資産: ${parsed.data.asset}\n  出金先UUID: ${parsed.data.uuid}\n  金額: ${parsed.data.amount}\n`,
     );
     const input = opts?.input ?? process.stdin;
     const output = opts?.output ?? process.stdout;
