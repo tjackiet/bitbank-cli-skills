@@ -19,14 +19,25 @@ export async function writeTradeLog(
 const SENSITIVE_KEYS = new Set(["token", "otp_token"]);
 const SENSITIVE_PATTERN = /secret|password|credential|auth_token/i;
 
-function maskSensitive(params: Record<string, unknown>): Record<string, unknown> {
-  const masked = { ...params };
-  for (const key of Object.keys(masked)) {
-    if (SENSITIVE_KEYS.has(key) || SENSITIVE_PATTERN.test(key)) {
-      masked[key] = "***";
+function maskSensitiveDeep(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(maskSensitiveDeep);
+  if (value !== null && typeof value === "object") {
+    // null-prototype でプロトタイプ汚染（__proto__ など）を防ぐ
+    const masked = Object.create(null) as Record<string, unknown>;
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      if (SENSITIVE_KEYS.has(k) || SENSITIVE_PATTERN.test(k)) {
+        masked[k] = "***";
+      } else {
+        masked[k] = maskSensitiveDeep(v);
+      }
     }
+    return masked;
   }
-  return masked;
+  return value;
+}
+
+function maskSensitive(params: Record<string, unknown>): Record<string, unknown> {
+  return maskSensitiveDeep(params) as Record<string, unknown>;
 }
 
 /** API 実行結果からログレコードを組み立てる */
@@ -40,6 +51,8 @@ export function buildLogRecord(
     command,
     params: maskSensitive(params),
     success: result.success,
-    ...(result.success ? { data: result.data } : { error: String(result.error) }),
+    ...(result.success
+      ? { data: maskSensitiveDeep(result.data) }
+      : { error: String(result.error) }),
   };
 }

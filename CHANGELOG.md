@@ -26,6 +26,14 @@
 
 ### Changed
 
+- リトライバックオフに ±25% のジッターを追加。複数クライアント同時実行時の
+  リトライ同期（thundering herd）を緩和。
+- trade ログの `data` フィールドも再帰的に sensitive キーをマスク。
+  従来は `params` のみマスクしていたが、API レスポンス側に token 等が
+  含まれた場合に素通りする可能性があった。
+- `cli/index.ts` の起動部に未捕捉 Promise のセーフティネットを追加。
+  Result パターンで吸収できなかった例外を `Fatal: <message>` として
+  stderr に出して exit code を返すようになった。
 - README / `docs/phases.md` / `docs/customization-guide.md` / `.claude/rules/skills.md` を 7 Skill 構成と `_shared/references/` 運用に合わせて更新
 - `withdraw` / `cancel-orders` / `confirm-deposits` の入力検証を Zod に統一。
   以下のケースが従来は素通りしていたが、CLI 層で弾くようになった:

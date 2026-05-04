@@ -1,3 +1,4 @@
+// 100行超: リトライ判定・指数バックオフ＋ジッター・fetch 本体を一箇所に集約しているため。
 import { apiErrorExitCode, formatApiError } from "./error-codes.js";
 import { EXIT, type ExitCode } from "./exit-codes.js";
 import { extractRateLimit } from "./rate-limit.js";
@@ -15,9 +16,15 @@ function parseRetryAfter(v: string): number | null {
   const ts = /[a-z]/i.test(v) ? Date.parse(v) : Number.NaN;
   return ts > 0 ? Math.max(0, ts - Date.now()) : null;
 }
+function jitter(ms: number): number {
+  // ±25% のジッターでリトライ同期（thundering herd）を防ぐ
+  const range = ms * 0.25;
+  return ms + (Math.random() * 2 - 1) * range;
+}
 export async function retryDelay(res: Response | null, attempt: number): Promise<void> {
   const after = res?.status === 429 ? res.headers.get("Retry-After") : null;
-  const ms = (after ? parseRetryAfter(after) : null) ?? 2 ** attempt * BASE_DELAY_MS;
+  const base = (after ? parseRetryAfter(after) : null) ?? 2 ** attempt * BASE_DELAY_MS;
+  const ms = Math.max(0, jitter(base));
   await new Promise((r) => setTimeout(r, ms));
 }
 

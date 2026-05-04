@@ -79,4 +79,8 @@ async function main(): Promise<void> {
   await entry.handler(args, opts, format);
 }
 
-main();
+main().catch((e: unknown) => {
+  const msg = e instanceof Error ? e.message : String(e);
+  process.stderr.write(`Fatal: ${msg}\n`);
+  process.exit(EXIT.GENERAL);
+});
