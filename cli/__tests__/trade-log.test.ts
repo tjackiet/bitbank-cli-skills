@@ -50,6 +50,53 @@ describe("buildLogRecord", () => {
     expect(r.params.amount).toBe("0.5");
   });
 
+  it("masks sensitive keys in result.data", () => {
+    const r = buildLogRecord(
+      "withdraw",
+      { asset: "btc" },
+      { success: true, data: { token: "secret123", uuid: "u1" } },
+    );
+    const data = r.data as { token: string; uuid: string };
+    expect(data.token).toBe("***");
+    expect(data.uuid).toBe("u1");
+  });
+
+  it("masks sensitive keys in nested objects within data", () => {
+    const r = buildLogRecord(
+      "withdraw",
+      {},
+      {
+        success: true,
+        data: { meta: { auth_token: "x", inner: { credential: "y" } } },
+      },
+    );
+    const data = r.data as { meta: { auth_token: string; inner: { credential: string } } };
+    expect(data.meta.auth_token).toBe("***");
+    expect(data.meta.inner.credential).toBe("***");
+  });
+
+  it("masks sensitive keys inside arrays within data", () => {
+    const r = buildLogRecord(
+      "withdraw",
+      {},
+      { success: true, data: { items: [{ token: "a" }, { uuid: "b" }] } },
+    );
+    const data = r.data as { items: Array<{ token?: string; uuid?: string }> };
+    expect(data.items[0].token).toBe("***");
+    expect(data.items[1].uuid).toBe("b");
+  });
+
+  it("masks sensitive keys in nested params (regression)", () => {
+    const r = buildLogRecord(
+      "withdraw",
+      { nested: { token: "deep", asset: "btc" } },
+      { success: true, data: {} },
+    );
+    const params = r.params as { nested: { token: string; asset: string } };
+    expect(params.nested.token).toBe("***");
+    expect(params.nested.asset).toBe("btc");
+  });
+
   it("builds a failure record", () => {
     const r = buildLogRecord(
       "cancelOrder",
