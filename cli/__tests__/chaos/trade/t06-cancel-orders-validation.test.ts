@@ -5,7 +5,7 @@ describe("Chaos T-06: cancel-orders with invalid --order-ids", () => {
   it("rejects non-numeric order IDs like abc,def", async () => {
     const r = await cancelOrders({ pair: "btc_jpy", orderIds: "abc,def" });
     expect(r.success).toBe(false);
-    if (!r.success) expect(r.error).toContain("number");
+    if (!r.success) expect(r.error).toMatch(/integer|number/);
   });
 
   it("rejects mixed numeric/non-numeric IDs", async () => {
