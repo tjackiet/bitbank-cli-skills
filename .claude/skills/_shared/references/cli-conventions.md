@@ -70,3 +70,9 @@
 
 - MVP では成行（`--type=market`）のみ対応。指値・ストップ等は未実装
 - `paper reset` は state の誤削除を防ぐため `--confirm` 必須
+
+## shell 補完
+
+- `bitbank completion <bash|zsh>` で補完スクリプトを stdout に出す（API は叩かない）。
+  インストール手順は README の「Shell 補完」を参照
+

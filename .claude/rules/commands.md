@@ -8,6 +8,11 @@
 | private | `cli/commands/private/` | `bitbank <cmd>` | 必要 | アカウント情報の読み取り（assets, orders 等） |
 | trade | `cli/commands/trade/` | `bitbank trade <cmd>` | 必要 | 資金に影響する操作（create-order, withdraw 等） |
 | paper | `cli/commands/paper/` | `bitbank paper <cmd>` | 不要 | 仮想資金での練習用（ライブ価格 × ローカル state、実 API は public ticker のみ） |
+| meta | （登録なし、`router.ts` の `handleSpecialCommand` で振り分け） | `bitbank <cmd>` | 不要 | API を叩かないユーティリティ（`schema`, `profiles`, `completion`） |
+
+メタコマンドは bitbank API ではなく CLI 自体の情報（コマンド一覧・補完スクリプト）を返す。
+`COMMANDS` / `TRADE_COMMANDS` / `PAPER_COMMANDS` には登録せず、`router.ts` の `handleSpecialCommand` で個別にディスパッチする。
+
 
 trade / paper だけサブコマンド形式にしているのは、フラット一覧での誤爆を減らすため（discoverability・視覚的警告）。
 trade の安全ガード自体は `--execute` / `--confirm` フラグ側にある（`trading-safety.md`）。

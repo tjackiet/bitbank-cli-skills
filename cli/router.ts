@@ -31,6 +31,11 @@ export async function handleSpecialCommand(
     await profilesHandler(args, opts, format);
     return true;
   }
+  if (command === "completion") {
+    const { completionHandler } = await import("./commands/completion/index.js");
+    await completionHandler(args, opts, format);
+    return true;
+  }
   if (command === "schema") {
     const { buildSchemaHandler } = await import("./commands/schema/handler.js");
     const desc = Object.fromEntries([

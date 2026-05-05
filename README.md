@@ -211,6 +211,39 @@ npx bitbank ticker btc_jpy | jq '.last'
 npx bitbank candles btc_jpy --type=1day --format=csv > btc_daily.csv
 ```
 
+## Shell 補完
+
+`bitbank completion <shell>` で補完スクリプトを stdout に出力します。
+コマンド名・`trade` / `paper` のサブコマンド・`pair` 引数（`btc_jpy` など）・
+`--format=` の値・既知のフラグを補完します。
+
+### bash
+
+```bash
+# 一度試す
+source <(bitbank completion bash)
+
+# 永続化（~/.bashrc.d がある環境）
+bitbank completion bash >> ~/.bashrc.d/bitbank-completion.sh
+
+# それ以外は ~/.bashrc に追記
+echo 'source <(bitbank completion bash)' >> ~/.bashrc
+```
+
+### zsh
+
+```bash
+# fpath にあるディレクトリへ _bitbank として配置
+bitbank completion zsh > "${fpath[1]}/_bitbank"
+
+# 反映
+autoload -U compinit && compinit
+```
+
+補完スクリプトはコマンド一覧・ペア一覧を生成時に埋め込みます。
+補完経路で `bitbank` 本体を起動しないため、シェル起動・タブ補完が遅くなりません。
+新コマンドや新ペアを追加した後はスクリプトを再生成してください。
+
 ## Agent Skills
 
 Claude Code / Cursor でリポジトリを開くと自動的にトリガーされる Skill を7つ搭載しています（Cursor は `.claude/skills/` を互換で読みます）。Skill はモデルへの指示書であり、CLI コマンドを組み合わせて分析や取引を実行します。

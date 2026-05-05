@@ -5,6 +5,7 @@ export function showHelp(): void {
   console.log("Commands:");
   console.log(`  ${"schema".padEnd(24)} Show command schemas (JSON Schema format)`);
   console.log(`  ${"profiles".padEnd(24)} List available profiles (.env.* files)`);
+  console.log(`  ${"completion <shell>".padEnd(24)} Print shell completion script (bash | zsh)`);
   for (const [name, { description }] of Object.entries(COMMANDS)) {
     console.log(`  ${name.padEnd(24)} ${description}`);
   }
