@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, unlinkSync } from "node:fs";
+import { existsSync, readFileSync, statSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -151,6 +151,15 @@ describe("writeTradeLog", () => {
     expect(lines).toHaveLength(2);
     expect(JSON.parse(lines[0]).command).toBe("createOrder");
     expect(JSON.parse(lines[1]).command).toBe("cancelOrder");
+  });
+
+  it.skipIf(process.platform === "win32")("creates file with mode 0o600 (owner-only)", async () => {
+    const f = tmpFile();
+    cleanup.push(f);
+    const record = buildLogRecord("createOrder", {}, { success: true, data: {} });
+    await writeTradeLog(f, record);
+    // umask に依存しない: appendFile は新規作成時に指定 mode を適用
+    expect(statSync(f).mode & 0o777).toBe(0o600);
   });
 
   it("returns error for invalid path", async () => {

@@ -8,7 +8,7 @@ export async function writeTradeLog(
   record: TradeLogRecord,
 ): Promise<Result<{ written: true }>> {
   try {
-    await appendFile(logFile, `${JSON.stringify(record)}\n`, "utf8");
+    await appendFile(logFile, `${JSON.stringify(record)}\n`, { encoding: "utf8", mode: 0o600 });
     return { success: true, data: { written: true } };
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);

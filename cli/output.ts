@@ -75,8 +75,11 @@ function printTable(data: unknown): void {
   process.stdout.write(`${parts.join("\n")}\n`);
 }
 
+// OWASP CSV Injection: 先頭が = + - @ \t \r なら式評価される恐れがあるため強制クォート
+const NEEDS_QUOTE_RE = /^[=+\-@\t\r]|[,"\n]/;
+
 function escapeCsvField(value: string): string {
-  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
+  if (NEEDS_QUOTE_RE.test(value)) {
     return `"${value.replace(/"/g, '""')}"`;
   }
   return value;

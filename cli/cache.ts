@@ -1,9 +1,13 @@
+// 100行超: パストラバーサル防止・symlink 防御・temp+rename atomic write を一箇所に集約
+import { randomBytes } from "node:crypto";
 import {
   existsSync,
   lstatSync,
   mkdirSync,
   readFileSync,
   realpathSync,
+  renameSync,
+  unlinkSync,
   writeFileSync,
 } from "node:fs";
 import { homedir } from "node:os";
@@ -66,11 +70,21 @@ export function writeCache(pair: string, type: string, date: string, data: unkno
   const p = cachePath(pair, type, date);
   if (!p) return;
   memCache.set(cacheKey(pair, type, date), data);
-  const dir = join(p, "..");
-  mkdirSync(dir, { recursive: true });
+  mkdirSync(join(p, ".."), { recursive: true });
   // 書き込み先がシンボリックリンクなら中止
   if (existsSync(p) && lstatSync(p).isSymbolicLink()) return;
-  writeFileSync(p, JSON.stringify(data));
+  // temp + rename で atomic に置換（同一 FS 上の inode 差し替え）
+  const tmp = `${p}.tmp.${process.pid}.${randomBytes(6).toString("hex")}`;
+  try {
+    writeFileSync(tmp, JSON.stringify(data));
+    renameSync(tmp, p);
+  } catch {
+    try {
+      unlinkSync(tmp);
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 /** テスト用: インメモリキャッシュをクリア */
