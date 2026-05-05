@@ -25,7 +25,9 @@ export const publicDataSchemas: Record<string, SchemaDef> = {
         ],
       }),
       date: p("string", "Date (YYYYMMDD or YYYY for >=4hour)"),
-      limit: p("number", "Max rows (default 100)", { default: 100 }),
+      limit: p("number", "Max rows (default 1000; with --date, returns all rows when omitted)", {
+        default: 1000,
+      }),
       from: p("string", "Range start (YYYYMMDD)"),
       to: p("string", "Range end (YYYYMMDD)"),
       "no-cache": p("boolean", "Skip cache"),

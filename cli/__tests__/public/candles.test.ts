@@ -63,6 +63,30 @@ describe("candles", () => {
     }
   });
 
+  it("returns all rows when --date is set and --limit is omitted", async () => {
+    const bigData = {
+      candlestick: [
+        {
+          type: "1day",
+          ohlcv: Array.from({ length: 365 }, (_, i) => [
+            "100",
+            "110",
+            "90",
+            "105",
+            "50",
+            1000 + i,
+          ]),
+        },
+      ],
+    };
+    const result = await candles(
+      { pair: "btc_jpy", type: "1day", date: "2025", noCache: true },
+      { fetch: mockFetchData(bigData), retries: 0 },
+    );
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data).toHaveLength(365);
+  });
+
   it("does not auto-merge when --date is explicit", async () => {
     let callCount = 0;
     const countingFetch: typeof globalThis.fetch = async () => {
@@ -183,6 +207,36 @@ describe("candles auto-merge", () => {
       expect(result.data).toHaveLength(2);
       expect(callCount).toBe(2);
     }
+  });
+
+  it("defaults to 1000 rows when --date and --limit are both omitted", async () => {
+    const yearData = (start: number) => ({
+      candlestick: [
+        {
+          type: "1day",
+          ohlcv: Array.from({ length: 365 }, (_, i) => [
+            "100",
+            "110",
+            "90",
+            "105",
+            "50",
+            start + i,
+          ]),
+        },
+      ],
+    });
+    let call = 0;
+    const fetchYears: typeof globalThis.fetch = async () => {
+      call++;
+      return new Response(JSON.stringify({ success: 1, data: yearData(call * 10000) }));
+    };
+    const result = await candles(
+      { pair: "btc_jpy", type: "1day", noCache: true },
+      { fetch: fetchYears, retries: 0 },
+    );
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data).toHaveLength(1000);
+    expect(call).toBe(3);
   });
 
   it("respects MAX_FETCHES limit", async () => {
