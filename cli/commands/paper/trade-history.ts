@@ -1,12 +1,24 @@
+import { type FetchCandles, runTick } from "../../paper-fill.js";
 import { type PaperHistoryEntry, defaultStatePath, loadState } from "../../paper-state.js";
 import type { Result } from "../../types.js";
 
-export type PaperTradeHistoryArgs = { statePath?: string };
+export type PaperTradeHistoryArgs = {
+  statePath?: string;
+  fetchCandles?: FetchCandles;
+  nowMs?: number;
+  feeRate?: number;
+};
 
 export async function paperTradeHistory(
   args: PaperTradeHistoryArgs = {},
 ): Promise<Result<PaperHistoryEntry[]>> {
   const path = args.statePath ?? defaultStatePath();
+  await runTick({
+    statePath: path,
+    fetchCandles: args.fetchCandles,
+    nowMs: args.nowMs,
+    feeRate: args.feeRate,
+  });
   const r = await loadState(path);
   if (!r.success) return r;
   if (!r.data) {

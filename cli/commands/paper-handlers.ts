@@ -12,17 +12,36 @@ export const paperCommands: Record<string, CommandEntry> = {
     })),
   },
   assets: {
-    description: "Show paper trading balances",
+    description: "Show paper trading balances (available / locked / total)",
     handler: handler("./paper/assets.js", "paperAssets", () => ({})),
   },
   "create-order": {
-    description: "Place a paper market order at live last price",
-    options: { pair: str, side: str, type: str, amount: str },
+    description: "Place a paper order (market or limit)",
+    options: { pair: str, side: str, type: str, amount: str, price: str },
     handler: handler("./paper/create-order.js", "paperCreateOrder", (_a, v) => ({
       pair: valStr(v, "pair"),
       side: valStr(v, "side"),
       type: valStr(v, "type"),
       amount: valStr(v, "amount"),
+      price: valStr(v, "price"),
+    })),
+  },
+  "active-orders": {
+    description: "Show paper open (limit) orders",
+    handler: handler("./paper/active-orders.js", "paperActiveOrders", () => ({})),
+  },
+  "cancel-order": {
+    description: "Cancel a paper limit order by id",
+    options: { id: str },
+    handler: handler("./paper/cancel-order.js", "paperCancelOrder", (_a, v) => ({
+      id: valStr(v, "id"),
+    })),
+  },
+  tick: {
+    description: "Resolve paper limit fills against recent 1m candles",
+    options: { pair: str },
+    handler: handler("./paper/tick.js", "paperTick", (_a, v) => ({
+      pair: valStr(v, "pair"),
     })),
   },
   "trade-history": {
