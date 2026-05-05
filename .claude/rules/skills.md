@@ -8,6 +8,7 @@
     references/
       bitbank-api-formats.md   # 全 Skill 共通の API レスポンス形式
       pair-classification.md   # 全 Skill 共通のペア分類（流動性・カテゴリ等）
+      cli-conventions.md       # CLI 呼び出し規約（--format=json / Result パターン等）
   <skill-name>/
     SKILL.md                   # Skill 定義（必須）
     references/                # ドメイン固有の参照資料（任意）
