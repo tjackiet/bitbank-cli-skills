@@ -38,7 +38,7 @@ describe("paper create-order", () => {
       { fetch: tickerOf("5000000"), retries: 0 },
     );
     expect(r.success).toBe(true);
-    if (!r.success) return;
+    if (!r.success || !("fillPrice" in r.data)) return;
     expect(r.data.fillPrice).toBe(5000000);
     expect(r.data.balances.jpy).toBe(1000000 - 5000);
     expect(r.data.balances.btc).toBe(0.001);
@@ -56,7 +56,7 @@ describe("paper create-order", () => {
       { fetch: tickerOf("6000000"), retries: 0 },
     );
     expect(r.success).toBe(true);
-    if (!r.success) return;
+    if (!r.success || !("balances" in r.data)) return;
     expect(r.data.balances.btc).toBeCloseTo(0.005, 10);
     // Started with 1,000,000 - 0.01 * 5,000,000 = 950,000, then +0.005*6,000,000 = 980,000
     expect(r.data.balances.jpy).toBeCloseTo(980000, 6);
@@ -91,13 +91,14 @@ describe("paper create-order", () => {
     if (!r.success) expect(r.error).toContain("not initialized");
   });
 
-  it("rejects non-market type at MVP", async () => {
+  it("requires --price for limit orders", async () => {
     await paperInit({ jpy: "1000000", statePath });
     const r = await paperCreateOrder(
       { pair: "btc_jpy", side: "buy", type: "limit", amount: "0.001", statePath },
       { fetch: tickerOf("5000000"), retries: 0 },
     );
     expect(r.success).toBe(false);
+    if (!r.success) expect(r.error).toContain("price");
   });
 
   it("persists fill into history", async () => {
@@ -120,7 +121,7 @@ describe("paper create-order", () => {
       { fetch: tickerOf("5000000"), retries: 0 },
     );
     expect(r.success).toBe(true);
-    if (!r.success) return;
+    if (!r.success || !("feeJpy" in r.data)) return;
     // notional 5000, fee 5 → jpy = 1,000,000 - 5005 = 994,995
     expect(r.data.feeJpy).toBeCloseTo(5, 10);
     expect(r.data.balances.jpy).toBeCloseTo(994995, 6);

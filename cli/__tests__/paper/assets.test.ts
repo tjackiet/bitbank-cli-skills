@@ -23,7 +23,7 @@ describe("paper assets", () => {
     const r = await paperAssets({ statePath });
     expect(r.success).toBe(true);
     if (!r.success) return;
-    expect(r.data).toEqual([{ asset: "jpy", amount: 1000000 }]);
+    expect(r.data).toEqual([{ asset: "jpy", total: 1000000, locked: 0, available: 1000000 }]);
   });
 
   it("returns Err when state is not initialized", async () => {

@@ -7,6 +7,9 @@ describe("PAPER_COMMANDS registry", () => {
     expect(PAPER_COMMANDS.init).toBeDefined();
     expect(PAPER_COMMANDS.assets).toBeDefined();
     expect(PAPER_COMMANDS["create-order"]).toBeDefined();
+    expect(PAPER_COMMANDS["active-orders"]).toBeDefined();
+    expect(PAPER_COMMANDS["cancel-order"]).toBeDefined();
+    expect(PAPER_COMMANDS.tick).toBeDefined();
     expect(PAPER_COMMANDS["trade-history"]).toBeDefined();
     expect(PAPER_COMMANDS.reset).toBeDefined();
   });
