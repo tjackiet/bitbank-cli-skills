@@ -49,6 +49,25 @@ describe("output", () => {
     expect(lines[1]).toBe('"say ""hi""",2');
   });
 
+  it.each([
+    ["=SUM(A1)", '"=SUM(A1)"'],
+    ["+1+1", '"+1+1"'],
+    ["-2", '"-2"'],
+    ["@cmd", '"@cmd"'],
+    ["\tleading-tab", '"\tleading-tab"'],
+    ["\rleading-cr", '"\rleading-cr"'],
+  ])("quotes CSV fields starting with formula prefix %j", (input, expected) => {
+    output({ success: true, data: { name: input, value: 1 } }, "csv");
+    const lines = stdout.trim().split("\n");
+    expect(lines[1].split(",")[0]).toBe(expected);
+  });
+
+  it("does not quote plain values starting with safe characters", () => {
+    output({ success: true, data: { name: "hello", value: 1 } }, "csv");
+    const lines = stdout.trim().split("\n");
+    expect(lines[1]).toBe("hello,1");
+  });
+
   it("escapes CSV fields containing newlines", () => {
     output({ success: true, data: { name: "line1\nline2", value: 3 } }, "csv");
     const lines = stdout.split("\n");

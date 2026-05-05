@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -26,6 +26,14 @@ describe("cache", () => {
     const data = [{ open: 100, close: 105 }];
     writeCache("btc_jpy", "1day", "2024", data);
     expect(readCache("btc_jpy", "1day", "2024")).toEqual(data);
+  });
+
+  it("uses atomic temp + rename (no .tmp.* leftovers)", () => {
+    writeCache("btc_jpy", "1day", "2024", [{ x: 1 }]);
+    const dir = join(TEST_CACHE, "btc_jpy", "1day");
+    const files = readdirSync(dir);
+    expect(files).toContain("2024.json");
+    expect(files.some((f) => f.includes(".tmp."))).toBe(false);
   });
 
   it("returns null on corrupted cache", () => {
