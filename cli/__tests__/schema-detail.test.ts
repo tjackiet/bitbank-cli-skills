@@ -31,7 +31,7 @@ describe("schema detail", () => {
       await buildSchemaHandler(DESC)(["candles"], {}, "json");
       const data = JSON.parse(c.read());
       expect(data.params.properties.type.enum).toContain("1hour");
-      expect(data.params.properties.limit.default).toBe(100);
+      expect(data.params.properties.limit.default).toBe(1000);
     } finally {
       c.restore();
     }

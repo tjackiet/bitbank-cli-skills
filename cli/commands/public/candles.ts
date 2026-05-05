@@ -89,7 +89,6 @@ export async function candles(args: CandlesArgs, opts?: HttpOptions): Promise<Re
     return candlesRange(pair, validType, from, to, opts, noCache);
   }
 
-  const effectiveLimit = limit ?? 100;
   const dateStr = date ?? todayDate(validType);
   if (date) {
     const dv = validateDateFormat(date, validType, "--date");
@@ -98,6 +97,9 @@ export async function candles(args: CandlesArgs, opts?: HttpOptions): Promise<Re
 
   const first = await fetchOne(pair, validType, dateStr, opts, noCache);
   if (!first.success) return first;
-  if (date !== undefined) return { success: true, data: first.data.slice(-effectiveLimit) };
+  if (date !== undefined) {
+    return { success: true, data: limit === undefined ? first.data : first.data.slice(-limit) };
+  }
+  const effectiveLimit = limit ?? 1000;
   return fetchAutoMerge(pair, validType, dateStr, effectiveLimit, first.data, opts, noCache);
 }
