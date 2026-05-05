@@ -114,11 +114,13 @@ describe("publicGet", () => {
     vi.useRealTimers();
   });
 
-  it("formats 60001 as insufficient amount in error message", async () => {
+  it("returns code-only error on 60001 via publicGet's parseError contract", async () => {
+    // publicGet は parseError でコードのみ返す（http.ts）。
+    // formatApiError 経由の "60001: 残高不足" は privateGet 側の責務で、
+    // http-private.test.ts でカバーする。
     const fetch: typeof globalThis.fetch = async () =>
       new Response(JSON.stringify({ success: 0, data: { code: 60001 } }));
     const result = await publicGet("/test", { fetch, retries: 0 });
-    expect(result).toMatchObject({ success: false });
-    expect(result.success === false && result.error).toContain("60001");
+    expect(result).toMatchObject({ success: false, error: "60001" });
   });
 });

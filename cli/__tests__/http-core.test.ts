@@ -292,10 +292,14 @@ describe("fetchWithRetry", () => {
     expect(calls).toBe(1);
   });
 
-  it("classifies 10009 as RATE_LIMIT exit code", async () => {
-    const fetch: typeof globalThis.fetch = async () =>
-      new Response(JSON.stringify({ success: 0, data: { code: 10009 } }));
-    const result = await fetchWithRetry("http://test", {}, { fetch, retries: 0 }, parseError);
+  it("classifies 10009 as RATE_LIMIT exit code without retrying", async () => {
+    let calls = 0;
+    const fetch: typeof globalThis.fetch = async () => {
+      calls++;
+      return new Response(JSON.stringify({ success: 0, data: { code: 10009 } }));
+    };
+    const result = await fetchWithRetry("http://test", {}, { fetch, retries: 3 }, parseError);
     expect(result).toMatchObject({ success: false, exitCode: EXIT.RATE_LIMIT });
+    expect(calls).toBe(1);
   });
 });
