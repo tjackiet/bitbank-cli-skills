@@ -28,11 +28,13 @@ export async function marginPositions(
   opts?: PrivateHttpOptions,
 ): Promise<Result<MarginPosition[]>> {
   const { pair } = args;
+  let normalizedPair = pair;
   if (pair !== undefined) {
     const pv = validatePair(pair);
     if (!pv.success) return pv;
+    normalizedPair = pv.data;
   }
-  const params = compactParams({ pair });
+  const params = compactParams({ pair: normalizedPair });
 
   const result = await privateGet<unknown>("/user/margin/positions", params, opts);
   return parseResponse(result, ResponseSchema, "positions");

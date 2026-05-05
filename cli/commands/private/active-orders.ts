@@ -17,11 +17,13 @@ export async function activeOrders(
   opts?: PrivateHttpOptions,
 ): Promise<Result<ActiveOrder[]>> {
   const { pair, count, since, end } = args;
+  let normalizedPair = pair;
   if (pair !== undefined) {
     const pv = validatePair(pair);
     if (!pv.success) return pv;
+    normalizedPair = pv.data;
   }
-  const params = compactParams({ pair, count, since, end });
+  const params = compactParams({ pair: normalizedPair, count, since, end });
 
   const result = await privateGet<unknown>("/user/spot/active_orders", params, opts);
   return parseResponse(result, ActiveOrdersResponseSchema, "orders");

@@ -54,7 +54,11 @@
   - `ticker` / `depth` / `transactions` / `circuit-break` / `candles` /
     `order` / `active-orders` / `trade-history` / `trade-history-all` /
     `orders-info` / `margin-positions` で形式不正な `pair` を URL に補間する前に拒否
+  - `order --order-id=0` / `--order-id=abc`（`IntegerStringSchema` で検証）
+  - `orders-info --order-ids=1,abc` / `,1,2` / `1,0,2`（NaN・先頭カンマ・0 の混入）
   共通ヘルパ `validatePair(pair, missingMessage)` を `cli/validators.ts` に追加。
+  `active-orders` / `margin-positions` では検証後の正規化値（trim 済み）を
+  リクエストパラメータに使うように修正。
   `cancel-order --order-id` 未指定時のエラー文言が
   `order-id is required. Example: --order-id=12345` から
   `id is required. Example: --id=12345` に変更（共通スキーマ既定の文言）。

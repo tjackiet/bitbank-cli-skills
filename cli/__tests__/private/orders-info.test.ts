@@ -74,4 +74,40 @@ describe("ordersInfo", () => {
     expect(result.success).toBe(false);
     if (!result.success) expect(result.error).toContain("Invalid response");
   });
+
+  it("rejects non-numeric order-ids before fetching", async () => {
+    const failFetch = (() => {
+      throw new Error("fetch should not be called");
+    }) as unknown as typeof fetch;
+    const result = await ordersInfo(
+      { pair: "btc_jpy", orderIds: "1,abc" },
+      { fetch: failFetch, retries: 0, credentials: TEST_CREDS, nonce: "1" },
+    );
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("positive integers");
+  });
+
+  it("rejects leading-comma order-ids (zero ID) before fetching", async () => {
+    const failFetch = (() => {
+      throw new Error("fetch should not be called");
+    }) as unknown as typeof fetch;
+    const result = await ordersInfo(
+      { pair: "btc_jpy", orderIds: ",1,2" },
+      { fetch: failFetch, retries: 0, credentials: TEST_CREDS, nonce: "1" },
+    );
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("positive integers");
+  });
+
+  it("rejects order-id=0 in list before fetching", async () => {
+    const failFetch = (() => {
+      throw new Error("fetch should not be called");
+    }) as unknown as typeof fetch;
+    const result = await ordersInfo(
+      { pair: "btc_jpy", orderIds: "1,0,2" },
+      { fetch: failFetch, retries: 0, credentials: TEST_CREDS, nonce: "1" },
+    );
+    expect(result.success).toBe(false);
+    if (!result.success) expect(result.error).toContain("positive integers");
+  });
 });

@@ -2,7 +2,7 @@ import type { z } from "zod";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
 import { parseResponse } from "../../parse-response.js";
 import type { Result } from "../../types.js";
-import { MSG_ORDER_ID, validatePair } from "../../validators.js";
+import { IntegerStringSchema, MSG_ORDER_ID, validatePair } from "../../validators.js";
 import { OrderSchema } from "../shared-schemas.js";
 
 export type Order = z.infer<typeof OrderSchema>;
@@ -16,7 +16,11 @@ export async function order(
   if (!args.orderId) {
     return { success: false, error: MSG_ORDER_ID };
   }
-  const params: Record<string, string> = { pair: pv.data, order_id: args.orderId };
+  const idv = IntegerStringSchema.safeParse(args.orderId);
+  if (!idv.success) {
+    return { success: false, error: idv.error.issues.map((i) => i.message).join("; ") };
+  }
+  const params: Record<string, string> = { pair: pv.data, order_id: idv.data };
   const result = await privateGet<unknown>("/user/spot/order", params, opts);
   return parseResponse(result, OrderSchema);
 }
