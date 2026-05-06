@@ -1,3 +1,4 @@
+// 100行超: PubNub private stream の購読/イベント分岐を網羅
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock PubNub

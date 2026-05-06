@@ -1,3 +1,4 @@
+// 100行超: CLI 全体の E2E ハッピー/エラーパスを網羅
 import { execFile } from "node:child_process";
 import { describe, expect, it } from "vitest";
 

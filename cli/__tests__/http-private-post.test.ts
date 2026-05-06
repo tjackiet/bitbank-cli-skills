@@ -1,3 +1,4 @@
+// 100行超: POST の retries 強制 0 とエラー分岐を網羅
 import { describe, expect, it } from "vitest";
 import { privatePost } from "../http-private-post.js";
 import { TEST_CREDS, mockFetchRaw } from "./test-helpers.js";

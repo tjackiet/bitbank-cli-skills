@@ -1,3 +1,4 @@
+// 100行超: HMAC 認証 GET の各分岐を網羅
 import { describe, expect, it } from "vitest";
 import { signGet } from "../auth.js";
 import { privateGet } from "../http-private.js";

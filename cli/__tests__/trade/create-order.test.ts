@@ -1,3 +1,4 @@
+// 100行超: trade create-order の分岐を網羅
 import { describe, expect, it, vi } from "vitest";
 import { createOrder } from "../../commands/trade/create-order.js";
 import { TEST_CREDS, mockFetchRaw } from "../test-helpers.js";

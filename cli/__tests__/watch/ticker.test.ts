@@ -1,3 +1,4 @@
+// 100行超: ticker socket 接続/メッセージ/エラー分岐を網羅
 import { describe, expect, it, vi } from "vitest";
 import { type IoFactory, parseTicker, startTickerSocket } from "../../watch/ticker.js";
 

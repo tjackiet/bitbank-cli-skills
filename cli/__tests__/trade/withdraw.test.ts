@@ -1,3 +1,4 @@
+// 100行超: withdraw のドライラン/実行/2FA 分岐を網羅
 import { Readable } from "node:stream";
 import { describe, expect, it, vi } from "vitest";
 import { withdraw } from "../../commands/trade/withdraw.js";

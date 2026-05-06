@@ -1,3 +1,4 @@
+// 100行超: candles range の境界を網羅
 import { describe, expect, it } from "vitest";
 import { candles } from "../../commands/public/candles.js";
 

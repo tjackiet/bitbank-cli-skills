@@ -1,3 +1,4 @@
+// 100行超: HTTP リトライ/レート制限/タイムアウト分岐を網羅
 import { describe, expect, it, vi } from "vitest";
 import { publicGet } from "../http.js";
 import { mockFetchRaw } from "./test-helpers.js";

@@ -1,3 +1,4 @@
+// 100行超: candles の YYYYMMDD/yyyy 分岐を網羅
 import { describe, expect, it } from "vitest";
 import { candles, shiftDate } from "../../commands/public/candles.js";
 import { mockFetchData } from "../test-helpers.js";

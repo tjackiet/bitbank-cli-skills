@@ -1,3 +1,4 @@
+// 100行超: profile 切替の各分岐を網羅
 import { chmodSync, existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

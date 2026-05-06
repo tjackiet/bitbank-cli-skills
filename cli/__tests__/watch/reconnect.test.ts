@@ -1,3 +1,4 @@
+// 100行超: 指数バックオフ再接続の境界を網羅
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { backoffSeconds, createReconnect } from "../../watch/reconnect.js";
 

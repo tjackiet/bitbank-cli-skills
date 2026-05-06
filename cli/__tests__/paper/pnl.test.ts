@@ -1,3 +1,4 @@
+// 100行超: PnL 計算の各シナリオを網羅
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

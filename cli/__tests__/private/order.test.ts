@@ -1,3 +1,4 @@
+// 100行超: order 取得の各分岐を網羅
 import { describe, expect, it } from "vitest";
 import { order } from "../../commands/private/order.js";
 import { TEST_CREDS, mockFetchData, mockFetchRaw } from "../test-helpers.js";

@@ -1,3 +1,4 @@
+// 100行超: watch handler の終了/エラー分岐を網羅
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockWatchCommand = vi.fn();

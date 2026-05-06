@@ -1,3 +1,4 @@
+// 100行超: 指値の lazy fill / lock を網羅
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

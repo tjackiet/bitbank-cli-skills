@@ -1,3 +1,4 @@
+// 100行超: watch CLI フラグ/出口分岐を網羅
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { watchCommand } from "../../commands/watch/index.js";
 import { EXIT } from "../../exit-codes.js";

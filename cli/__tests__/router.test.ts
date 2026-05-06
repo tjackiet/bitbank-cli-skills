@@ -1,3 +1,4 @@
+// 100行超: コマンドルーティングの分岐を網羅
 import { describe, expect, it, vi } from "vitest";
 import { COMMANDS, TRADE_COMMANDS } from "../commands/registry.js";
 import { handleSpecialCommand, resolveCommand, runCommandHelp } from "../router.js";

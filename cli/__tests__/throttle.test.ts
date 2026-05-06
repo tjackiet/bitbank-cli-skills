@@ -1,3 +1,4 @@
+// 100行超: トークンバケット境界条件を網羅
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { detectBucket, resetThrottle, updateRateLimit, waitForSlot } from "../throttle.js";
 

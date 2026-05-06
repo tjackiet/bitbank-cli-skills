@@ -1,3 +1,4 @@
+// 100行超: HTTP コアのバックオフ・再試行・Idempotency 分岐を網羅
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EXIT } from "../exit-codes.js";
 import {

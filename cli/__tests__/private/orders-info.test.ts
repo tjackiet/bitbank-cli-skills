@@ -1,3 +1,4 @@
+// 100行超: orders-info の各分岐を網羅
 import { describe, expect, it } from "vitest";
 import { ordersInfo } from "../../commands/private/orders-info.js";
 import { TEST_CREDS, mockFetchData, mockFetchRaw } from "../test-helpers.js";

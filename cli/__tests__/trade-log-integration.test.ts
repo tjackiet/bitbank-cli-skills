@@ -1,3 +1,4 @@
+// 100行超: trade ログの統合パスを網羅
 import { existsSync, readFileSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

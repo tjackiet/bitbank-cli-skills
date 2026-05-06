@@ -1,3 +1,4 @@
+// 100行超: trade ログのフォーマット分岐を網羅
 import { existsSync, readFileSync, statSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

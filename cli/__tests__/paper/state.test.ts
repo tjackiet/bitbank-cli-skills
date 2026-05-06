@@ -1,3 +1,4 @@
+// 100行超: paper state 永続化の互換/移行を網羅
 import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

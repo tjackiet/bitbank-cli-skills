@@ -1,3 +1,4 @@
+// 100行超: 成行/指値発注の分岐を網羅
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
