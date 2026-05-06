@@ -39,6 +39,12 @@ describe("bash completion script", () => {
     expect(bash).not.toMatch(/`bitbank\b/);
   });
 
+  it("completes watch positionals (channel = ticker, then pairs)", () => {
+    expect(bash).toContain('"$cmd" == "watch" && $COMP_CWORD -eq 2');
+    expect(bash).toContain('compgen -W "ticker"');
+    expect(bash).toContain('"$cmd" == "watch" && $COMP_CWORD -eq 3');
+  });
+
   it("matches snapshot for stability", () => {
     expect(bash).toMatchSnapshot();
   });
@@ -62,6 +68,12 @@ describe("zsh completion script", () => {
 
   it("uses _bitbank function name (no environment pollution)", () => {
     expect(zsh).toContain("_bitbank()");
+  });
+
+  it("completes watch positionals (channel = ticker, then pairs)", () => {
+    expect(zsh).toContain('"$cmd" == "watch" && CURRENT -eq 3');
+    expect(zsh).toContain("compadd ticker");
+    expect(zsh).toContain('"$cmd" == "watch" && CURRENT -eq 4');
   });
 
   it("matches snapshot for stability", () => {

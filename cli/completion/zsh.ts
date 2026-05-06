@@ -72,6 +72,12 @@ _bitbank() {
   if [[ "$cmd" == "completion" && CURRENT -eq 3 ]]; then
     compadd bash zsh; return
   fi
+  if [[ "$cmd" == "watch" && CURRENT -eq 3 ]]; then
+    compadd ticker; return
+  fi
+  if [[ "$cmd" == "watch" && CURRENT -eq 4 ]]; then
+    compadd -- \${=pairs}; return
+  fi
 
   if [[ "$cur" == --* ]]; then
     opts="$common_opts"

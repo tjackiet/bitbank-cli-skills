@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const SKILLS_DIR = resolve(import.meta.dirname, "../../../../.claude/skills");
-const SKILLS = ["indicator-analysis", "backtest", "portfolio"];
+const SKILLS = ["indicator-analysis", "backtest", "portfolio", "watch-live"];
 
 const REQUIRED_REFS: Record<string, string[]> = {
   "indicator-analysis": ["bitbank-api-formats.md", "indicator-guide.md"],

@@ -4,7 +4,7 @@
 
 | カテゴリ | ディレクトリ | CLI 呼び出し | 認証 | 説明 |
 |---------|------------|-------------|------|------|
-| public | `cli/commands/public/` | `bitbank <cmd>` | 不要 | 公開マーケットデータ（ticker, candles 等） |
+| public | `cli/commands/public/` | `bitbank <cmd>` | 不要 | 公開マーケットデータ（ticker, candles 等）。WebSocket 経由のライブ購読 `bitbank stream` / `bitbank watch <channel> <pair>` も同カテゴリ |
 | private | `cli/commands/private/` | `bitbank <cmd>` | 必要 | アカウント情報の読み取り（assets, orders 等） |
 | trade | `cli/commands/trade/` | `bitbank trade <cmd>` | 必要 | 資金に影響する操作（create-order, withdraw 等） |
 | paper | `cli/commands/paper/` | `bitbank paper <cmd>` | 不要 | 仮想資金での練習用（ライブ価格 × ローカル state、実 API は public ticker のみ） |

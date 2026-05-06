@@ -72,6 +72,12 @@ _bitbank() {
   if [[ "$cmd" == "completion" && $COMP_CWORD -eq 2 ]]; then
     COMPREPLY=( $(compgen -W "bash zsh" -- "$cur") ); return
   fi
+  if [[ "$cmd" == "watch" && $COMP_CWORD -eq 2 ]]; then
+    COMPREPLY=( $(compgen -W "ticker" -- "$cur") ); return
+  fi
+  if [[ "$cmd" == "watch" && $COMP_CWORD -eq 3 ]]; then
+    COMPREPLY=( $(compgen -W "$pairs" -- "$cur") ); return
+  fi
 
   if [[ "$cur" == --* ]]; then
     opts="$common_opts"

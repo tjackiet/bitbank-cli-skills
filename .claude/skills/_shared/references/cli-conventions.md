@@ -85,3 +85,25 @@
 - `bitbank completion <bash|zsh>` で補完スクリプトを stdout に出す（API は叩かない）。
   インストール手順は README の「Shell 補完」を参照
 
+## watch コマンド（ライブ ticker）
+
+- `bitbank watch ticker <pair>` で WebSocket ベースのライブ ticker 購読を開始する
+- `--format=json` を付けると 1 イベント 1 行 JSONL が stdout に流れる（pipe 向け）
+- TTY なら既定で `--format=table`（ANSI で 1 行を再描画）
+- 長時間動き続けるため、skill から呼ぶときは **必ず `--duration=<秒>` か
+  `--count=<件>` のいずれかを併用する**（無限実行を避ける）
+- 主要例:
+
+  ```bash
+  # 5 秒間 ticker を JSONL で取得
+  npx tsx cli/index.ts watch ticker btc_jpy --duration=5 --format=json
+  # 10 イベント取得して終了
+  npx tsx cli/index.ts watch ticker btc_jpy --count=10 --format=json
+  # last だけ抽出
+  npx tsx cli/index.ts watch ticker btc_jpy --duration=10 --format=json | jq -r '.last'
+  ```
+
+- 切断時は指数バックオフで自動再接続（1, 2, 4, 8, 16, 32, 32...）。
+  `--max-retries=<n>` で上限を設定できる。上限到達時は exit code 5
+- 無音検出は `--idle-timeout=<秒>`（既定 30）で発火し、再接続フローに入る
+

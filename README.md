@@ -200,6 +200,31 @@ npx bitbank stream btc_jpy --channel=transactions
 npx tsx --env-file=.env cli/index.ts stream --private --pair=btc_jpy
 ```
 
+### ライブ価格 watch（WebSocket ticker）
+
+`bitbank watch ticker <pair>` は ticker チャネルを 1 行 JSONL で配信する
+専用コマンド。pipe しやすく、停止条件・自動再接続・無音検出を備える。
+
+```bash
+# 5 秒間 ticker を JSONL で取得（json は pipe 向け）
+npx bitbank watch ticker btc_jpy --duration=5 --format=json
+
+# TTY なら既定で table（ANSI で 1 行を再描画）
+npx bitbank watch ticker btc_jpy
+
+# 10 件取得して終了
+npx bitbank watch ticker btc_jpy --count=10 --format=json
+
+# jq で last だけを抽出
+npx bitbank watch ticker btc_jpy --duration=10 --format=json | jq -r '.last'
+```
+
+- 終了条件: `--duration=<秒>` / `--count=<n>` / SIGINT
+- 切断時は指数バックオフで自動再接続（1, 2, 4, 8, 16, 32, 32...）。
+  上限は `--max-retries=<n>`、上限到達時は exit code 5
+- 無音検出は `--idle-timeout=<秒>`（既定 30）で発火し再接続フローへ
+- depth / transactions など他チャネルは MVP 対象外（`bitbank stream` を使う）
+
 ## 出力フォーマット
 
 全コマンドで `--format` オプションが使えます:
