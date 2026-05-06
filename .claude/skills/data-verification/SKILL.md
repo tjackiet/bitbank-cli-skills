@@ -37,7 +37,7 @@ bitbank candles <pair> --type=<timeframe> --format=json
 bitbank candles <pair> --type=<timeframe> --from=YYYYMMDD --to=YYYYMMDD --format=json
 ```
 
-指定がなければ直近データ（デフォルト 100 本）で検証する。
+指定がなければ直近データ（デフォルト 1000 本）で検証する。
 
 ## 検証項目
 

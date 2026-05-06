@@ -37,7 +37,7 @@ bitbank candles btc_jpy --type=1day --format=json
 # ETH/JPY の4時間足、特定日
 bitbank candles eth_jpy --type=4hour --date=20240301 --format=json
 
-# データ件数を指定（デフォルト100件）
+# データ件数を指定（デフォルト 1000 件）
 bitbank candles btc_jpy --type=1hour --limit=200 --format=json
 ```
 
