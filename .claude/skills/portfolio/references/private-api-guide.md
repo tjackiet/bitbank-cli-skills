@@ -11,8 +11,12 @@ BITBANK_API_SECRET=your_api_secret
 
 ### 実行方法
 
+`.env` を環境変数として読み込んでから呼び出す（詳細は
+`_shared/references/cli-conventions.md` の「認証」を参照）:
+
 ```bash
-npx tsx --env-file=.env cli/index.ts <command> --format=json
+set -a; source .env; set +a
+bitbank <command> --format=json
 ```
 
 ## assets レスポンス形式

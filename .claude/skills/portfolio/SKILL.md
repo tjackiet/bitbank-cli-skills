@@ -28,10 +28,12 @@ BITBANK_API_KEY=your_api_key
 BITBANK_API_SECRET=your_api_secret
 ```
 
-実行時は `--env-file=.env` を付ける:
+実行前に `.env` を環境変数として読み込む（詳細は
+`_shared/references/cli-conventions.md` の「認証」を参照）:
 
 ```bash
-npx tsx --env-file=.env cli/index.ts assets --format=json
+set -a; source .env; set +a
+bitbank assets --format=json
 ```
 
 **API キーがない場合:** ユーザーに設定方法を案内し、Public API（ticker, candles）だけで可能な分析を行う。
@@ -41,7 +43,8 @@ npx tsx --env-file=.env cli/index.ts assets --format=json
 ### Step 1: 保有資産の取得
 
 ```bash
-npx tsx --env-file=.env cli/index.ts assets --format=json
+set -a; source .env; set +a
+bitbank assets --format=json
 ```
 
 ### Step 2: 現在価格の取得

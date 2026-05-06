@@ -30,10 +30,14 @@
 
 ## 認証
 
-- `private` / `trade` カテゴリのコマンドは **`--env-file=.env`** が必要
+- `private` / `trade` カテゴリのコマンドは `.env` の API キーを環境変数に
+  読み込んでから呼び出す。shell の慣用句で 1 セッション分まとめて export する:
   ```bash
-  npx tsx --env-file=.env cli/index.ts assets --format=json
+  set -a; source .env; set +a
+  bitbank assets --format=json
   ```
+  `set -a` 以降は `source` で読まれた変数が自動的に export される
+  （`set +a` で戻す）。bash / zsh で動作する
 - `public` カテゴリ（candles / ticker 等）は `.env` 不要
 - skill が認証必要かどうかは `.claude/rules/commands.md` のカテゴリ表で判定
 
