@@ -35,6 +35,22 @@ describe("setupLifecycle", () => {
     h.teardown();
   });
 
+  it("SIGTERM triggers SIGTERM reason", () => {
+    const reasons: LifecycleReason[] = [];
+    const h = setupLifecycle({ onStop: (r) => reasons.push(r) });
+    process.emit("SIGTERM");
+    expect(reasons).toEqual(["SIGTERM"]);
+    h.teardown();
+  });
+
+  it("teardown removes SIGTERM listener too", () => {
+    const before = process.listenerCount("SIGTERM");
+    const h = setupLifecycle({ onStop: () => {} });
+    expect(process.listenerCount("SIGTERM")).toBe(before + 1);
+    h.teardown();
+    expect(process.listenerCount("SIGTERM")).toBe(before);
+  });
+
   it("only stops once", () => {
     const reasons: LifecycleReason[] = [];
     const h = setupLifecycle({ count: 1, onStop: (r) => reasons.push(r) });
