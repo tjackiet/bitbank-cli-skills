@@ -27,6 +27,7 @@ WebSocket 経由で bitbank の `ticker_<pair>` チャネルを購読し、JSONL
 ## 実行フロー
 
 ### Plan
+
 1. ユーザーの目的を確認（last 値の追跡 / spread 観察 / vol 監視 など）。
 2. **必ず停止条件を決める**:
    - 短時間サンプリング: `--duration=<秒>`（例: 10 秒）
@@ -36,6 +37,7 @@ WebSocket 経由で bitbank の `ticker_<pair>` チャネルを購読し、JSONL
    後処理する。
 
 ### Validate
+
 - pair が `_shared/references/pair-classification.md` の有効ペアか確認。
 - `--duration` または `--count` のどちらかが指定されているか確認
   （無指定なら追加で確認する）。
