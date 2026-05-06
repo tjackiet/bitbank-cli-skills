@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { COMMANDS, PAPER_COMMANDS, TRADE_COMMANDS } from "../../commands/registry.js";
+import {
+  COMMANDS,
+  PAPER_COMMANDS,
+  PROFILE_COMMANDS,
+  TRADE_COMMANDS,
+} from "../../commands/registry.js";
 import { generateBash } from "../../completion/bash.js";
 import { buildCompletionData } from "../../completion/data.js";
 import { generateZsh } from "../../completion/zsh.js";
@@ -23,6 +28,11 @@ describe("bash completion script", () => {
   it("contains every trade and paper subcommand", () => {
     for (const name of Object.keys(TRADE_COMMANDS)) expect(bash).toContain(name);
     for (const name of Object.keys(PAPER_COMMANDS)) expect(bash).toContain(name);
+  });
+
+  it("contains every profile subcommand", () => {
+    for (const name of Object.keys(PROFILE_COMMANDS)) expect(bash).toContain(name);
+    expect(bash).toContain('"$cmd" == "profile" && $COMP_CWORD -eq 2');
   });
 
   it("includes the format values json/table/csv", () => {
@@ -64,6 +74,11 @@ describe("zsh completion script", () => {
   it("contains every trade and paper subcommand", () => {
     for (const name of Object.keys(TRADE_COMMANDS)) expect(zsh).toContain(name);
     for (const name of Object.keys(PAPER_COMMANDS)) expect(zsh).toContain(name);
+  });
+
+  it("contains every profile subcommand", () => {
+    for (const name of Object.keys(PROFILE_COMMANDS)) expect(zsh).toContain(name);
+    expect(zsh).toContain('"$cmd" == "profile" && CURRENT -eq 3');
   });
 
   it("uses _bitbank function name (no environment pollution)", () => {

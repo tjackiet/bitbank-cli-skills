@@ -2,9 +2,10 @@
 import { parseArgs } from "node:util";
 import { COMMON_OPTIONS } from "./common-options.js";
 import { EXIT, type ExitCode } from "./exit-codes.js";
-import { showHelp, showPaperHelp, showTradeHelp } from "./help-print.js";
+import { showHelp, showPaperHelp, showProfileHelp, showTradeHelp } from "./help-print.js";
 import { machineOutput } from "./output.js";
 import { applyProfile } from "./profile.js";
+import { loadProfiles } from "./profiles-store.js";
 import { handleSpecialCommand, resolveCommand, runCommandHelp } from "./router.js";
 import type { Format } from "./types.js";
 
@@ -27,7 +28,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  const { isTrade, isPaper, command, entry } = resolveCommand(p1);
+  const { isTrade, isPaper, isProfile, command, entry } = resolveCommand(p1);
   const merged = { ...COMMON_OPTIONS, ...(entry?.options ?? {}) };
   const { values, positionals } = parseArgs({
     allowPositionals: true,
@@ -36,10 +37,17 @@ async function main(): Promise<void> {
   });
   const machine = values.machine === true;
   if (typeof values.profile === "string") {
-    const r = applyProfile(values.profile);
-    if (!r.success) {
-      fail(machine, r.error, r.exitCode ?? EXIT.GENERAL);
-      return;
+    // profiles.json を優先、無ければ .env.<name> にフォールバック（後方互換）。
+    // Object.hasOwn で prototype 経由の ("__proto__", "toString" 等) を弾く
+    const file = loadProfiles();
+    if (file.success && Object.hasOwn(file.data.profiles, values.profile)) {
+      process.env.BITBANK_PROFILE = values.profile;
+    } else {
+      const r = applyProfile(values.profile);
+      if (!r.success) {
+        fail(machine, r.error, r.exitCode ?? EXIT.GENERAL);
+        return;
+      }
     }
   }
   const format = (values.format ?? "json") as Format;
@@ -48,11 +56,12 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (isTrade || isPaper) {
-    const label = isTrade ? "trade" : "paper";
+  if (isTrade || isPaper || isProfile) {
+    const label = isTrade ? "trade" : isPaper ? "paper" : "profile";
     if (!command) {
       if (isTrade) showTradeHelp();
-      else showPaperHelp();
+      else if (isPaper) showPaperHelp();
+      else showProfileHelp();
       return;
     }
     if (!entry) {

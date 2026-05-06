@@ -10,9 +10,10 @@ _bitbank() {
   cmd="\${COMP_WORDS[1]:-}"
   sub="\${COMP_WORDS[2]:-}"
 
-  local commands="active-orders assets candles circuit-break completion deposit-history deposit-originators depth margin-positions margin-status order orders-info pairs paper profiles schema status stream ticker tickers tickers-jpy trade trade-history trade-history-all transactions unconfirmed-deposits watch withdrawal-accounts withdrawal-history"
+  local commands="active-orders assets candles circuit-break completion deposit-history deposit-originators depth margin-positions margin-status order orders-info pairs paper profile profiles schema status stream ticker tickers tickers-jpy trade trade-history trade-history-all transactions unconfirmed-deposits watch withdrawal-accounts withdrawal-history"
   local trade_subs="cancel-order cancel-orders confirm-deposits confirm-deposits-all create-order withdraw"
   local paper_subs="active-orders assets cancel-order create-order init pnl reset tick trade-history"
+  local profile_subs="add list remove set-default show"
   local pairs="btc_jpy xrp_jpy eth_jpy doge_jpy sol_jpy ltc_jpy ada_jpy avax_jpy dot_jpy bnb_jpy sui_jpy link_jpy mona_jpy bcc_jpy xlm_jpy qtum_jpy bat_jpy omg_jpy xym_jpy boba_jpy enj_jpy astr_jpy axs_jpy flr_jpy sand_jpy gala_jpy ape_jpy chz_jpy oas_jpy mana_jpy grt_jpy dai_jpy op_jpy arb_jpy klay_jpy imx_jpy mask_jpy pol_jpy cyber_jpy render_jpy trx_jpy lpt_jpy atom_jpy sky_jpy"
   local formats="json table csv"
   local common_opts="--profile --format --help --machine --raw --log-file --no-log"
@@ -39,6 +40,9 @@ _bitbank() {
   fi
   if [[ "$cmd" == "paper" && $COMP_CWORD -eq 2 ]]; then
     COMPREPLY=( $(compgen -W "$paper_subs" -- "$cur") ); return
+  fi
+  if [[ "$cmd" == "profile" && $COMP_CWORD -eq 2 ]]; then
+    COMPREPLY=( $(compgen -W "$profile_subs" -- "$cur") ); return
   fi
   if [[ "$cmd" == "completion" && $COMP_CWORD -eq 2 ]]; then
     COMPREPLY=( $(compgen -W "bash zsh" -- "$cur") ); return
@@ -69,6 +73,11 @@ _bitbank() {
         tick) opts="$opts --pair" ;;
         reset) opts="$opts --confirm" ;;
         pnl) opts="$opts --pair" ;;
+      esac
+    elif [[ "$cmd" == "profile" ]]; then
+      case "$sub" in
+        add) opts="$opts --description --default" ;;
+        remove) opts="$opts --confirm" ;;
       esac
     else
       case "$cmd" in
@@ -124,9 +133,10 @@ _bitbank() {
   cmd="\${words[2]:-}"
   sub="\${words[3]:-}"
 
-  local commands="active-orders assets candles circuit-break completion deposit-history deposit-originators depth margin-positions margin-status order orders-info pairs paper profiles schema status stream ticker tickers tickers-jpy trade trade-history trade-history-all transactions unconfirmed-deposits watch withdrawal-accounts withdrawal-history"
+  local commands="active-orders assets candles circuit-break completion deposit-history deposit-originators depth margin-positions margin-status order orders-info pairs paper profile profiles schema status stream ticker tickers tickers-jpy trade trade-history trade-history-all transactions unconfirmed-deposits watch withdrawal-accounts withdrawal-history"
   local trade_subs="cancel-order cancel-orders confirm-deposits confirm-deposits-all create-order withdraw"
   local paper_subs="active-orders assets cancel-order create-order init pnl reset tick trade-history"
+  local profile_subs="add list remove set-default show"
   local pairs="btc_jpy xrp_jpy eth_jpy doge_jpy sol_jpy ltc_jpy ada_jpy avax_jpy dot_jpy bnb_jpy sui_jpy link_jpy mona_jpy bcc_jpy xlm_jpy qtum_jpy bat_jpy omg_jpy xym_jpy boba_jpy enj_jpy astr_jpy axs_jpy flr_jpy sand_jpy gala_jpy ape_jpy chz_jpy oas_jpy mana_jpy grt_jpy dai_jpy op_jpy arb_jpy klay_jpy imx_jpy mask_jpy pol_jpy cyber_jpy render_jpy trx_jpy lpt_jpy atom_jpy sky_jpy"
   local formats="json table csv"
   local common_opts="--profile --format --help --machine --raw --log-file --no-log"
@@ -153,6 +163,9 @@ _bitbank() {
   fi
   if [[ "$cmd" == "paper" && CURRENT -eq 3 ]]; then
     compadd -- \${=paper_subs}; return
+  fi
+  if [[ "$cmd" == "profile" && CURRENT -eq 3 ]]; then
+    compadd -- \${=profile_subs}; return
   fi
   if [[ "$cmd" == "completion" && CURRENT -eq 3 ]]; then
     compadd bash zsh; return
@@ -183,6 +196,11 @@ _bitbank() {
       tick) opts="$opts --pair" ;;
       reset) opts="$opts --confirm" ;;
       pnl) opts="$opts --pair" ;;
+      esac
+    elif [[ "$cmd" == "profile" ]]; then
+      case "$sub" in
+      add) opts="$opts --description --default" ;;
+      remove) opts="$opts --confirm" ;;
       esac
     else
       case "$cmd" in

@@ -65,12 +65,40 @@ cd bitbank-cli-skills
 
 Public API（ticker / candles 等）だけ使うなら不要です。
 
+#### 推奨: `bitbank profile add` でプロファイル登録
+
+```bash
+bitbank profile add main
+# API key を貼り付け（または BITBANK_API_KEY env から自動採用）
+# API secret は対話で hidden 入力（画面に出ない）
+```
+
+`profiles.json` は `$XDG_CONFIG_HOME/bitbank/profiles.json`（未設定時は `~/.bitbank/profiles.json`）に **0600** で保存されます。
+
+```bash
+bitbank profile list                  # 登録済みプロファイル一覧（secret は出ない）
+bitbank profile show main             # 詳細（secret は **** マスク）
+bitbank profile set-default main      # default を切り替え
+bitbank --profile=sub assets          # サブ口座で実行
+bitbank profile remove sub --confirm  # 削除（--confirm 必須）
+
+# secret は flag では受けません（shell 履歴に残るため）。env か対話プロンプトのみ
+```
+
+複数アカウント（メイン / サブ / read-only 検証用 等）を `bitbank --profile=<name> <cmd>` で切り替えられます。`--profile` 未指定時は `BITBANK_PROFILE` env → default profile → legacy env vars の順で解決します。
+
+#### 後方互換: 既存の `.env` 慣用句
+
 ```bash
 cp .env.example .env
 # .env を編集して BITBANK_API_KEY / BITBANK_API_SECRET を設定
+set -a; source .env; set +a
+bitbank assets
 ```
 
-> `.env` は `.gitignore` に含まれています。API キーは絶対にコミットしないでください。
+profile を 1 つも登録していない環境では、従来通り `BITBANK_API_KEY` / `BITBANK_API_SECRET` env vars が読まれます。
+
+> `.env` は `.gitignore` 済み。`profiles.json` はリポジトリ外（`~/.bitbank/`）に保存されます。いずれの形式でも API キーは絶対にコミットしないでください。
 
 ## 使い方
 

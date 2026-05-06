@@ -1,0 +1,122 @@
+---
+name: profile-management
+description: |
+  bitbank CLI の API キー切替プロファイル（`profiles.json`）を管理する。
+  複数アカウント（メイン口座 / サブ口座 / read-only 検証用 等）を
+  ユースケースごとに切り替えて使うための CRUD を提供する。
+  「API キー追加して」「サブ口座のキー登録」「profile 一覧」
+  「default profile 切り替えて」「メインに戻して」「キー削除」
+  「サブ口座のキーで残高見て」「main の secret 見せて」のような
+  発話で起動する。
+  曖昧な「キーの管理」「アカウント切り替えたい」もカバー。
+  注意: secret 値は CLI flag で受け取れない（shell 履歴に残るため）。
+  対話 hidden 入力か `BITBANK_API_SECRET` env vars でしか登録できない。
+  この skill は profiles.json の管理だけを担当し、bitbank API は
+  叩かない。
+compatibility: |
+  Requires bitbank CLI (npx tsx cli/index.ts). Node.js 18+.
+metadata:
+  author: bitbank-aiforge
+  version: "1.0"
+---
+
+# Profile Management Skill
+
+`profiles.json` ベースの API キー切替（`--profile=<name>`）を管理する skill。
+secret は対話プロンプトで hidden 入力する前提で、モデルが flag 経由で
+渡そうとしないように注意する。
+
+## 前提
+
+- `profiles.json` の場所: `$XDG_CONFIG_HOME/bitbank/profiles.json` 優先、
+  無ければ `~/.bitbank/profiles.json`
+- 権限: 0600 強制（atomic write）
+- 解決優先度: `--profile=<name>` flag → `BITBANK_PROFILE` env →
+  default profile → legacy `BITBANK_API_KEY` / `BITBANK_API_SECRET` env vars
+
+## 実行フロー
+
+### Plan
+
+1. ユーザー意図を以下のどれかに分類する:
+   - 新規登録（add）
+   - 一覧（list）
+   - 詳細確認（show）
+   - default 切替（set-default）
+   - 削除（remove）
+   - 別 profile での実行（`--profile=<name>` を private/trade コマンドに付加）
+
+### Validate
+
+- secret は **必ず対話で入力させる**。モデル側で値を flag に渡そうとしない
+- profile 名は `[A-Za-z0-9._-]+`。先頭ドット禁止、`..` 禁止
+- `remove` には `--confirm` が必須
+
+### Execute
+
+#### 新規プロファイル登録
+
+```bash
+# 対話: API key と API secret を聞かれる（secret は hidden 入力）
+bitbank profile add main --format=json
+# default にしたいとき
+bitbank profile add main --default --format=json
+# 説明を付ける
+bitbank profile add sub --description="サブ口座 read-only" --format=json
+```
+
+**重要:** モデルからは絶対に `--api-secret=...` のような flag を作らない
+（そんな flag は実装されていない）。`BITBANK_API_KEY` / `BITBANK_API_SECRET`
+env vars が事前に export されていれば対話プロンプトはスキップされる。
+
+#### 一覧
+
+```bash
+bitbank profile list --format=json
+# → [{ name, default, description }, ...]
+# secret / key は出力されない
+```
+
+#### 詳細
+
+```bash
+bitbank profile show main --format=json
+# → { name, default, keyMasked, secretMasked, description, createdAt }
+# secret / key は **** + 末尾 4 桁にマスクされる
+```
+
+#### default 切替
+
+```bash
+bitbank profile set-default sub --format=json
+```
+
+#### 削除（--confirm 必須）
+
+```bash
+bitbank profile remove sub --confirm --format=json
+# default だった場合は default = null になる
+```
+
+#### 別 profile での実行
+
+```bash
+bitbank --profile=sub assets --format=json
+bitbank --profile=sub --execute trade create-order ...
+```
+
+## Gotchas
+
+- **secret は flag 受け禁止**: `--api-secret=...` 等は実装されていない。
+  shell 履歴に残るリスクを避けるため、env か対話 hidden 入力のみ
+- **show の出力に secret は出ない**: `--format=json` でもマスクされる。
+  「raw secret 見せて」と言われても、本 skill では出せない（profiles.json
+  を直接 `cat` する場合は 0600 なので owner だけが読める）
+- **後方互換**: profile を一度も登録していない環境では従来通り
+  `BITBANK_API_KEY` / `BITBANK_API_SECRET` env vars が読まれる
+- **`bitbank profiles`（複数形）は別物**: cwd 配下の `.env.<name>` ファイル
+  を一覧する legacy コマンド。本 skill が扱うのは `bitbank profile`（単数形）
+- **profiles.json は API を叩かない**: add 時にキー有効性検証は行わない。
+  失敗は実コマンド（assets 等）実行時に返る
+- **0600 でないと stderr に警告**: 既存ファイルの権限が緩いと警告が出るが
+  実行は継続する。`chmod 600 ~/.bitbank/profiles.json` で対処

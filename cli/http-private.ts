@@ -1,6 +1,6 @@
-import { type ApiCredentials, authHeadersGet, loadCredentials } from "./auth.js";
-import { EXIT } from "./exit-codes.js";
+import { type ApiCredentials, authHeadersGet } from "./auth.js";
 import { type BaseFetchOptions, ERROR_CODES, fetchWithRetry, formatApiError } from "./http-core.js";
+import { resolveCredentials } from "./profiles-resolver.js";
 import type { Result } from "./types.js";
 
 export const PRIVATE_BASE_URL = "https://api.bitbank.cc/v1";
@@ -17,8 +17,14 @@ export async function privateGet<T>(
   params?: Record<string, string>,
   opts: PrivateHttpOptions = {},
 ): Promise<Result<T>> {
-  const creds = opts.credentials ?? loadCredentials();
-  if ("error" in creds) return { success: false, error: creds.error, exitCode: EXIT.AUTH };
+  let creds: ApiCredentials;
+  if (opts.credentials) {
+    creds = opts.credentials;
+  } else {
+    const r = resolveCredentials();
+    if (!r.success) return r;
+    creds = r.data;
+  }
 
   const qs =
     params && Object.keys(params).length > 0 ? `?${new URLSearchParams(params).toString()}` : "";

@@ -58,24 +58,28 @@ describe("Chaos A-06: API keys never leak in error messages", () => {
     }
   });
 
-  it("loadCredentials error message mentions env var names, not values", async () => {
-    const { loadCredentials } = await import("../../../auth.js");
+  it("resolveCredentials error message mentions env var names, not values", async () => {
+    const { resolveCredentials } = await import("../../../profiles-resolver.js");
     const origKey = process.env.BITBANK_API_KEY;
     const origSecret = process.env.BITBANK_API_SECRET;
+    const origProfile = process.env.BITBANK_PROFILE;
     // biome-ignore lint/performance/noDelete: process.env requires delete
     delete process.env.BITBANK_API_KEY;
     // biome-ignore lint/performance/noDelete: process.env requires delete
     delete process.env.BITBANK_API_SECRET;
+    // biome-ignore lint/performance/noDelete: process.env requires delete
+    delete process.env.BITBANK_PROFILE;
     try {
-      const r = loadCredentials();
-      expect("error" in r).toBe(true);
-      if ("error" in r) {
+      const r = resolveCredentials();
+      expect(r.success).toBe(false);
+      if (!r.success) {
         expect(r.error).toContain("BITBANK_API_KEY");
         expect(r.error).toContain("BITBANK_API_SECRET");
       }
     } finally {
       if (origKey !== undefined) process.env.BITBANK_API_KEY = origKey;
       if (origSecret !== undefined) process.env.BITBANK_API_SECRET = origSecret;
+      if (origProfile !== undefined) process.env.BITBANK_PROFILE = origProfile;
     }
   });
 });

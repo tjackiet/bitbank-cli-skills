@@ -21,30 +21,33 @@ metadata:
 
 ## 前提: Private API の認証設定
 
-Private API コマンド（`assets`）を使うには `.env` ファイルに API キーを設定する:
+Private API コマンド（`assets`）を使うには API キー / シークレットを設定する。
+詳細は `_shared/references/cli-conventions.md` の「認証」を参照。
 
-```
-BITBANK_API_KEY=your_api_key
-BITBANK_API_SECRET=your_api_secret
+### 推奨: profile（profiles.json）
+
+```bash
+bitbank profile add main          # 一度だけ登録（secret は対話 hidden 入力）
+bitbank assets --format=json      # default profile が使われる
+bitbank --profile=sub assets      # 別アカウントへ切替
 ```
 
-実行前に `.env` を環境変数として読み込む（詳細は
-`_shared/references/cli-conventions.md` の「認証」を参照）:
+### 後方互換: env vars
 
 ```bash
 set -a; source .env; set +a
 bitbank assets --format=json
 ```
 
-**API キーがない場合:** ユーザーに設定方法を案内し、Public API（ticker, candles）だけで可能な分析を行う。
+**API キー未設定の場合:** ユーザーに `bitbank profile add <name>` を案内し、Public API（ticker, candles）だけで可能な分析を行う。
 
 ## 分析フロー
 
 ### Step 1: 保有資産の取得
 
 ```bash
-set -a; source .env; set +a
-bitbank assets --format=json
+bitbank assets --format=json   # profile 利用時はそのまま実行
+# legacy: set -a; source .env; set +a; bitbank assets --format=json
 ```
 
 ### Step 2: 現在価格の取得

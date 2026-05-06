@@ -1,7 +1,7 @@
-import { type ApiCredentials, authHeadersPost, loadCredentials } from "./auth.js";
-import { EXIT } from "./exit-codes.js";
+import { type ApiCredentials, authHeadersPost } from "./auth.js";
 import { type BaseFetchOptions, fetchWithRetry, formatApiError } from "./http-core.js";
 import { PRIVATE_BASE_URL } from "./http-private.js";
+import { resolveCredentials } from "./profiles-resolver.js";
 import type { Result } from "./types.js";
 
 export type PrivatePostOptions = BaseFetchOptions & {
@@ -14,8 +14,14 @@ export async function privatePost<T>(
   body?: Record<string, unknown>,
   opts: PrivatePostOptions = {},
 ): Promise<Result<T>> {
-  const creds = opts.credentials ?? loadCredentials();
-  if ("error" in creds) return { success: false, error: creds.error, exitCode: EXIT.AUTH };
+  let creds: ApiCredentials;
+  if (opts.credentials) {
+    creds = opts.credentials;
+  } else {
+    const r = resolveCredentials();
+    if (!r.success) return r;
+    creds = r.data;
+  }
 
   const url = `${PRIVATE_BASE_URL}${path}`;
   const jsonBody = body ? JSON.stringify(body) : "";

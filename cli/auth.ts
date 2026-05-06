@@ -5,19 +5,6 @@ export type ApiCredentials = {
   apiSecret: string;
 };
 
-export function loadCredentials(): ApiCredentials | { error: string } {
-  const apiKey = process.env.BITBANK_API_KEY;
-  const apiSecret = process.env.BITBANK_API_SECRET;
-  if (!apiKey || !apiSecret) {
-    return {
-      error:
-        "BITBANK_API_KEY and BITBANK_API_SECRET must be set. " +
-        "Export them or use: node --env-file=.env",
-    };
-  }
-  return { apiKey, apiSecret };
-}
-
 export function signGet(nonce: string, path: string, queryString: string, secret: string): string {
   const message = `${nonce}/v1${path}${queryString}`;
   return createHmac("sha256", secret).update(message).digest("hex");

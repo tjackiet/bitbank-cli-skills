@@ -1,6 +1,6 @@
 // 100行超: コマンドルーティングの分岐を網羅
 import { describe, expect, it, vi } from "vitest";
-import { COMMANDS, TRADE_COMMANDS } from "../commands/registry.js";
+import { COMMANDS, PROFILE_COMMANDS, TRADE_COMMANDS } from "../commands/registry.js";
 import { handleSpecialCommand, resolveCommand, runCommandHelp } from "../router.js";
 
 describe("resolveCommand", () => {
@@ -64,6 +64,36 @@ describe("resolveCommand", () => {
     expect(r.isTrade).toBe(true);
     expect(r.command).toBe("create-order");
     expect(r.entry).toBe(TRADE_COMMANDS["create-order"]);
+  });
+
+  it("profile 単独は isProfile=true で entry undefined", () => {
+    const r = resolveCommand(["profile"]);
+    expect(r.isProfile).toBe(true);
+    expect(r.isTrade).toBe(false);
+    expect(r.isPaper).toBe(false);
+    expect(r.command).toBeUndefined();
+    expect(r.entry).toBeUndefined();
+  });
+
+  it("profile <unknown> は entry が undefined", () => {
+    const r = resolveCommand(["profile", "nonexistent"]);
+    expect(r.isProfile).toBe(true);
+    expect(r.command).toBe("nonexistent");
+    expect(r.entry).toBeUndefined();
+  });
+
+  it("profile <known> は PROFILE_COMMANDS の entry を返す", () => {
+    const r = resolveCommand(["profile", "list"]);
+    expect(r.isProfile).toBe(true);
+    expect(r.command).toBe("list");
+    expect(r.entry).toBe(PROFILE_COMMANDS.list);
+  });
+
+  it("profile add に追加 positionals があっても先頭2要素のみ参照", () => {
+    const r = resolveCommand(["profile", "add", "main", "extra"]);
+    expect(r.isProfile).toBe(true);
+    expect(r.command).toBe("add");
+    expect(r.entry).toBe(PROFILE_COMMANDS.add);
   });
 });
 

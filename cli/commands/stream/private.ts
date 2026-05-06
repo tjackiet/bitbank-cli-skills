@@ -1,6 +1,7 @@
 import PubNub from "pubnub";
-import { type ApiCredentials, loadCredentials } from "../../auth.js";
+import type { ApiCredentials } from "../../auth.js";
 import { type PrivateHttpOptions, privateGet } from "../../http-private.js";
+import { resolveCredentials } from "../../profiles-resolver.js";
 import type { Result } from "../../types.js";
 import { type StreamFormat, writeStreamMessage } from "./format.js";
 
@@ -24,8 +25,14 @@ export type PrivateStreamOptions = {
 export async function startPrivateStream(
   opts: PrivateStreamOptions,
 ): Promise<Result<{ stop: () => void }>> {
-  const creds = opts.credentials ?? loadCredentials();
-  if ("error" in creds) return { success: false, error: creds.error };
+  let creds: ApiCredentials;
+  if (opts.credentials) {
+    creds = opts.credentials;
+  } else {
+    const r = resolveCredentials();
+    if (!r.success) return r;
+    creds = r.data;
+  }
 
   const httpOpts = { ...opts.httpOpts, credentials: creds };
   const sub = await privateGet<SubscribeResponse>("/user/subscribe", undefined, httpOpts);

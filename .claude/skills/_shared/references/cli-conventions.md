@@ -30,16 +30,38 @@
 
 ## 認証
 
-- `private` / `trade` カテゴリのコマンドは `.env` の API キーを環境変数に
-  読み込んでから呼び出す。shell の慣用句で 1 セッション分まとめて export する:
-  ```bash
-  set -a; source .env; set +a
-  bitbank assets --format=json
-  ```
-  `set -a` 以降は `source` で読まれた変数が自動的に export される
-  （`set +a` で戻す）。bash / zsh で動作する
-- `public` カテゴリ（candles / ticker 等）は `.env` 不要
-- skill が認証必要かどうかは `.claude/rules/commands.md` のカテゴリ表で判定
+`private` / `trade` カテゴリのコマンドは API キー / シークレットが必要。`public` / `paper` カテゴリは不要。skill が認証必要かどうかは `.claude/rules/commands.md` のカテゴリ表で判定。
+
+### 主: profile（推奨）
+
+`profiles.json`（`~/.bitbank/profiles.json`、0600 / atomic write）に複数の key/secret を登録して切り替える。
+
+```bash
+# 一度だけ登録（secret は対話 hidden 入力。flag では受けない）
+bitbank profile add main
+
+# default profile が自動で使われる
+bitbank assets --format=json
+
+# 別 profile に切り替える
+bitbank --profile=sub assets --format=json
+
+# env で切り替えてセッションを通す
+BITBANK_PROFILE=sub bitbank assets --format=json
+```
+
+解決優先度: `--profile=<name>` flag → `BITBANK_PROFILE` env → default profile → legacy env vars。
+
+### 副: legacy env vars（後方互換）
+
+profile を一度も登録していない環境では従来通り env vars でも動く。
+
+```bash
+set -a; source .env; set +a
+bitbank assets --format=json
+```
+
+`set -a` 以降は `source` で読まれた変数が自動的に export される（`set +a` で戻す）。bash / zsh で動作する。CI 環境などで profile を使えない場合のフォールバックとして利用する。
 
 ## stderr の扱い
 

@@ -22,8 +22,8 @@ vi.mock("../../http-private.js", () => ({
   privateGet: (...args: unknown[]) => mockPrivateGet(...args),
 }));
 
-vi.mock("../../auth.js", () => ({
-  loadCredentials: () => ({ apiKey: "key", apiSecret: "secret" }),
+vi.mock("../../profiles-resolver.js", () => ({
+  resolveCredentials: () => ({ success: true, data: { apiKey: "key", apiSecret: "secret" } }),
 }));
 
 import { writeStreamMessage } from "../../commands/stream/format.js";
@@ -144,21 +144,24 @@ describe("startPrivateStream", () => {
     stderr.mockRestore();
   });
 
-  it("uses loadCredentials() when credentials are not provided", async () => {
+  it("uses resolveCredentials() when credentials are not provided", async () => {
     const result = await startPrivateStream({ format: "json" });
     expect(result.success).toBe(true);
   });
 
-  it("propagates loadCredentials errors", async () => {
-    vi.doMock("../../auth.js", () => ({
-      loadCredentials: () => ({ error: "missing api key" }),
+  it("propagates resolveCredentials errors", async () => {
+    vi.doMock("../../profiles-resolver.js", () => ({
+      resolveCredentials: () => ({ success: false, error: "missing api key", exitCode: 2 }),
     }));
     vi.resetModules();
-    const { startPrivateStream: freshStart } = await import("../../commands/stream/private.js");
-    const result = await freshStart({ format: "json" });
-    expect(result.success).toBe(false);
-    if (!result.success) expect(result.error).toContain("missing api key");
-    vi.doUnmock("../../auth.js");
-    vi.resetModules();
+    try {
+      const { startPrivateStream: freshStart } = await import("../../commands/stream/private.js");
+      const result = await freshStart({ format: "json" });
+      expect(result.success).toBe(false);
+      if (!result.success) expect(result.error).toContain("missing api key");
+    } finally {
+      vi.doUnmock("../../profiles-resolver.js");
+      vi.resetModules();
+    }
   });
 });

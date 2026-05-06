@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { authHeadersGet, authHeadersPost, loadCredentials, signGet, signPost } from "../auth.js";
+import { describe, expect, it } from "vitest";
+import { authHeadersGet, authHeadersPost, signGet, signPost } from "../auth.js";
 
 describe("signGet", () => {
   it("generates correct HMAC-SHA256 for GET requests", () => {
@@ -53,39 +53,5 @@ describe("authHeadersPost", () => {
     expect(headers["ACCESS-NONCE"]).toBe("9999");
     expect(headers["ACCESS-SIGNATURE"]).toBeTruthy();
     expect(headers["Content-Type"]).toBe("application/json");
-  });
-});
-
-describe("loadCredentials", () => {
-  const origKey = process.env.BITBANK_API_KEY;
-  const origSecret = process.env.BITBANK_API_SECRET;
-
-  afterEach(() => {
-    if (origKey) process.env.BITBANK_API_KEY = origKey;
-    // biome-ignore lint/performance/noDelete: process.env requires delete
-    else delete process.env.BITBANK_API_KEY;
-    if (origSecret) process.env.BITBANK_API_SECRET = origSecret;
-    // biome-ignore lint/performance/noDelete: process.env requires delete
-    else delete process.env.BITBANK_API_SECRET;
-  });
-
-  it("returns error when keys are missing", () => {
-    // biome-ignore lint/performance/noDelete: process.env requires delete
-    delete process.env.BITBANK_API_KEY;
-    // biome-ignore lint/performance/noDelete: process.env requires delete
-    delete process.env.BITBANK_API_SECRET;
-    const result = loadCredentials();
-    expect("error" in result).toBe(true);
-  });
-
-  it("returns credentials when keys are set", () => {
-    process.env.BITBANK_API_KEY = "mykey";
-    process.env.BITBANK_API_SECRET = "mysecret";
-    const result = loadCredentials();
-    expect("error" in result).toBe(false);
-    if (!("error" in result)) {
-      expect(result.apiKey).toBe("mykey");
-      expect(result.apiSecret).toBe("mysecret");
-    }
   });
 });

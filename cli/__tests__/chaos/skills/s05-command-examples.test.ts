@@ -19,7 +19,14 @@ function extractCommands(content: string): string[] {
 }
 
 describe("Chaos S-05: Skill CLI command examples match real commands", () => {
-  const knownCommands = new Set([...Object.keys(COMMANDS), "schema", "profiles"]);
+  const knownCommands = new Set([
+    ...Object.keys(COMMANDS),
+    "schema",
+    "profiles",
+    "trade",
+    "paper",
+    "profile",
+  ]);
 
   for (const skill of SKILLS) {
     it(`${skill}: all referenced commands exist in CLI`, () => {
