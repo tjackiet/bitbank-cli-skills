@@ -3,7 +3,7 @@
 // paper はライブ価格 × 仮想資金のシミュレーションを行うため例外的に
 // state を持つ（CLAUDE.md 参照）。スキーマ・I/O・v1→v2 マイグレーション・
 // 残高ロック集計をまとめて集約。
-import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
+import { mkdir, open, readFile, rename, unlink } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { z } from "zod";
@@ -138,14 +138,21 @@ export async function saveState(
   state: PaperState,
   path = defaultStatePath(),
 ): Promise<Result<{ saved: true }>> {
+  const data = `${JSON.stringify(state, null, 2)}\n`;
+  const tmp = `${path}.${process.pid}.${Math.random().toString(36).slice(2, 10)}.tmp`;
   try {
     await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, `${JSON.stringify(state, null, 2)}\n`, {
-      encoding: "utf-8",
-      mode: 0o600,
-    });
+    const fh = await open(tmp, "w", 0o600);
+    try {
+      await fh.writeFile(data);
+      await fh.sync();
+    } finally {
+      await fh.close();
+    }
+    await rename(tmp, path);
     return { success: true, data: { saved: true } };
   } catch (e) {
+    await unlink(tmp).catch(() => {});
     const msg = e instanceof Error ? e.message : String(e);
     return { success: false, error: `Failed to write paper state: ${msg}` };
   }
