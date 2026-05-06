@@ -35,13 +35,35 @@ bitbank candles <pair> --type=<timeframe> --format=json
 bitbank candles btc_jpy --type=1day --format=json
 
 # ETH/JPY の4時間足、特定日
-bitbank candles eth_jpy --type=4hour --date=20240301 --format=json
+bitbank candles eth_jpy --type=4hour --date=20250301 --format=json
 
-# データ件数を指定（デフォルト100件）
+# データ件数を指定（デフォルト 1000 件）
 bitbank candles btc_jpy --type=1hour --limit=200 --format=json
+
+# 期間指定で取得（2025 年通年など）
+bitbank candles btc_jpy --type=1day --from=20250101 --to=20251231 --format=json
 ```
 
 `--format=json` を使う。JSON はモデルがパースしやすいため。
+
+## 取得本数の目安
+
+**ユーザーが期間・日時を指定した場合はそれを最優先**する:
+
+- 期間指定（「過去 1 ヶ月」「2024 年 3 月だけ」等）→ `--from=YYYYMMDD --to=YYYYMMDD`
+- 単独日のみ（特定日のローソク足を見たい）→ `--date=YYYYMMDD`
+- 「過去 N 本」「直近の動き」のような本数指定 → `--limit=N`
+
+期間/日時の指示がなく `--limit` も省略すると CLI は 1000 件取得する。
+1000 件は context を大きく消費するため、分析対象に応じて
+「必要本数 + warmup」を目安に明示指定する:
+
+- **デフォルト分析セット**（SMA 200 を含む）: `--limit=300`
+- **短期指標のみ**（RSI / MACD / BB / ATR / ROC）: `--limit=100`
+- **長期トレンド・サンプル数が必要な統計**: `--limit=1000`（= CLI default）
+
+warmup を確保するのは、SMA(N) や ATR(N) は最初の N-1 本が定義不能で捨てるため。
+迷ったら `--limit=300` で始める。
 
 ## デフォルト分析セット
 
