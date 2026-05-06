@@ -11,6 +11,8 @@ description: |
   「練習用に 100万円で始めたい」「仮想で sell シミュレーションして」
   「paper trade-history 見せて」「仮想口座リセットして」
   「ペーパーの指値キャンセルして」「指値の fill 確認して」
+  「ペーパーの損益見せて」「仮想口座いくら勝ってる？」
+  「含み益どれくらい？」「BTC のペーパー P&L は？」
   のような発話で起動する。
   実発注（`bitbank trade ...`）とは別物で、状態は CLI 側のローカルファイル
   （`~/.bitbank/paper-state.json`）に保存される。
@@ -103,7 +105,25 @@ npx tsx cli/index.ts paper tick --format=json
 指値を出している間は `locked` が増え、`available = total - locked` で
 発注可能額を判断する。
 
-### Step 5: 指値のキャンセル
+### Step 5: 損益（P&L）を見る
+
+```bash
+# 全ペア + 合計
+npx tsx cli/index.ts paper pnl --format=json
+# 単一ペアに絞る
+npx tsx cli/index.ts paper pnl --pair=btc_jpy --format=json
+```
+
+- `paper trade-history` から加重平均でコスト基底を再構築し、`realizedPnl`
+  / `unrealizedPnl` / `totalPnl` を JPY 建てで返す。state スキーマには
+  キャッシュを持たず、毎回履歴から計算する
+- 手数料は買い側で `avgCost` に上乗せ、売り側は `realizedPnl` から減算
+- `unrealizedPnl` は現在 ticker（last）で評価。ペアごとに並列 fetch する
+- JPY 建て（`*_jpy`）以外のペアは stderr に warning を出して計算から除外
+- `position == 0 && realizedPnl == 0` のペアは出力されない。`realizedPnl`
+  が非ゼロなら position 0 でも残る
+
+### Step 6: 指値のキャンセル
 
 ```bash
 npx tsx cli/index.ts paper cancel-order --id=<id> --format=json
@@ -112,7 +132,7 @@ npx tsx cli/index.ts paper cancel-order --id=<id> --format=json
 `active-orders` が返す `id` を渡す。キャンセル後はロックが解除され、
 `available` が即座に回復する。
 
-### Step 6: リセット（必要な場合のみ）
+### Step 7: リセット（必要な場合のみ）
 
 ```bash
 npx tsx cli/index.ts paper reset --confirm --format=json

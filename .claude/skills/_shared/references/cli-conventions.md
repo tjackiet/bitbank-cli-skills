@@ -72,6 +72,7 @@
   npx tsx cli/index.ts paper cancel-order --id=<id> --format=json
   npx tsx cli/index.ts paper tick --format=json
   npx tsx cli/index.ts paper trade-history --format=json
+  npx tsx cli/index.ts paper pnl --format=json
   npx tsx cli/index.ts paper reset --confirm --format=json
   ```
 
