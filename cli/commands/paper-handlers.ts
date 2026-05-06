@@ -2,6 +2,12 @@ import type { CommandEntry } from "./handler-types.js";
 import { bool, str, valStr } from "./handler-types.js";
 import { handler } from "./make-handler.js";
 
+const pnlHandler: CommandEntry["handler"] = async (_a, values, format) => {
+  const { paperPnl, formatPnl } = await import("./paper/pnl.js");
+  const r = await paperPnl({ pair: valStr(values, "pair") });
+  formatPnl(r, format, values.raw === true, values.machine === true);
+};
+
 export const paperCommands: Record<string, CommandEntry> = {
   init: {
     description: "Initialize a paper trading account (virtual JPY balance)",
@@ -54,5 +60,10 @@ export const paperCommands: Record<string, CommandEntry> = {
     handler: handler("./paper/reset.js", "paperReset", (_a, v) => ({
       confirm: !!v.confirm,
     })),
+  },
+  pnl: {
+    description: "Show paper trading P&L (realized + unrealized, per pair + total)",
+    options: { pair: str },
+    handler: pnlHandler,
   },
 };
