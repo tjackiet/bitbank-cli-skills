@@ -126,5 +126,5 @@ ETH  | 2.0     | 612,500    | 24.5%
 - **locked_amount に注意。** オーダー中の資産は `locked_amount` に入る。表示には `onhand_amount`（総量）を使う。`free_amount` だけ見ると注文中の資産が消える
 - **JPY は ticker がない。** JPY の「価格」は常に 1。ticker で取得しようとするとエラーになる
 - **月次ローソク足の `--date` は年（YYYY）。** `--date=2025` で2025年の全月データが取れる。YYYYMMDD で指定すると空データが返る
-- **API エラー時は `references/bitbank-api-formats.md` を参照**
+- **API エラー時は `_shared/references/bitbank-api-formats.md` を参照**
 - **20001 エラー（認証失敗）** → `.env` の設定を確認するようユーザーに案内
