@@ -122,6 +122,14 @@ private / trade コマンドの変更時に確認:
 
 - `SKILL.md` が `.claude/rules/skills.md` のテンプレートに従っているか
 - Skill に分析ロジックのコードが含まれていないか（CLI 呼び出しの指示書であること）
+- description が新ルールに従っているか:
+  1〜2 文の説明 + 代表トリガー 3〜5 個 + 「注意」行（境界の明示）。
+  トリガー語の網羅は SKILL.md 本文の「## いつ使うか」セクションに委ねる
+- recipe skill（`metadata.recipe: true`）の場合:
+  - `metadata.requires.skills` に依存 skill が実行順で列挙されている
+  - recipe 自体は計算をしていない（個別 skill に委ねている）
+  - description が個別 skill のトリガー語と被らない
+- 共通参照資料は `_shared/references/` を参照しているか（各 skill 配下にコピーしていない）
 - `references/` の資料が正確か
 
 ## 出力フォーマット
