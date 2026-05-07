@@ -54,6 +54,36 @@ bitbank paper create-order --pair=btc_jpy --side=buy --type=market --amount=0.00
 
 カテゴリは分析系・取引系（paper-trade）・ユーティリティ・Recipe。詳細は [Agent Skills](#agent-skills) を参照。
 
+## Plugin としてインストールする
+
+各エージェントの plugin システムから直接インストールできます（CLI 本体の install は別途 `./install.sh` が必要）。
+
+### Claude Code
+
+```bash
+/plugin install https://github.com/tjackiet/bitbank-cli-skills
+```
+
+### Cursor
+
+Cursor 拡張機能設定から GitHub URL を指定。
+
+### Codex CLI
+
+```bash
+codex plugin install tjackiet/bitbank-cli-skills
+```
+
+### Gemini CLI
+
+```bash
+gemini extensions install https://github.com/tjackiet/bitbank-cli-skills
+```
+
+Plugin install で skills が登録され、`bitbank` CLI（`./install.sh` で別途セットアップ）と組み合わせて使えます。自動 install したくない場合は [Codex CLI / Gemini CLI で使う](#codex-cli--gemini-cli-で使う) の手動コピー手順も使えます。
+
+> 注: 各エージェントの plugin install コマンドは仕様変更が多いため、動かない場合は公式ドキュメントを確認してください。
+
 ## 想定する使い方
 
 **Claude Code などのエージェント環境から自然言語で操作する**のが基本スタイルです。
@@ -548,4 +578,9 @@ cli/
   __tests__/            # 全コマンドのテスト（37ファイル / 140テスト）
 skills/                 # Agent Skills（12本 + _shared/references/、.claude/skills/ から symlink）
 docs/                   # ADR・フェーズ管理・カスタマイズガイド
+.claude-plugin/         # Claude Code plugin manifest
+.cursor-plugin/         # Cursor plugin manifest
+.codex-plugin/          # Codex CLI plugin manifest（marketplace interface 含む）
+gemini-extension.json   # Gemini CLI extension manifest（CONTEXT.md を参照）
+CONTEXT.md              # Gemini 用エージェント指示書（CLAUDE.md への symlink）
 ```
