@@ -3,7 +3,7 @@
 ## ディレクトリ構造
 
 ```
-.claude/skills/
+skills/
   _shared/
     references/
       bitbank-api-formats.md   # 全 Skill 共通の API レスポンス形式
@@ -44,7 +44,7 @@ metadata:
 ## references/ の規約
 
 - 共通資料（`bitbank-api-formats.md`、`pair-classification.md` 等）は
-  `.claude/skills/_shared/references/` に集約する。各 Skill 配下にコピーしない
+  `skills/_shared/references/` に集約する。各 Skill 配下にコピーしない
 - SKILL.md から共通資料を参照するときは
   `_shared/references/<file>.md` というパスで明示的に書く
 - ドメイン固有の資料は `<skill>/references/<domain>-guide.md` や
@@ -60,7 +60,7 @@ metadata:
 
 - ディレクトリ名・`name` ともに `recipe-<目的>` プレフィックスを付ける
   （例: `recipe-pre-trade-check`）
-- 配置先は通常の skill と同じ `.claude/skills/<name>/`。recipe 専用ディレクトリは作らない
+- 配置先は通常の skill と同じ `skills/<name>/`。recipe 専用ディレクトリは作らない
 
 ### フロントマター
 

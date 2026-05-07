@@ -11,7 +11,7 @@ Skill は「モデルへの指示書」です。コードは書きません。CL
 ### ディレクトリを作成
 
 ```
-.claude/skills/
+skills/
   _shared/
     references/
       bitbank-api-formats.md   # 既存。全 Skill 共通の API レスポンス形式
