@@ -1,0 +1,6 @@
+{
+  "name": "bitbank-cli-skills",
+  "version": "0.1.0",
+  "description": "bitbank 暗号資産取引所の CLI と Agent Skills スターターキット。",
+  "contextFileName": "CONTEXT.md"
+}
