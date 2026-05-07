@@ -15,7 +15,7 @@ description: |
   単一銘柄のリスク特性は volatility-profile、シグナル → 将来リターンの
   予測力は signal-explorer、保有資産の評価は portfolio が担当。
 compatibility: |
-  Requires bitbank CLI. Node.js 18+.
+  Requires bitbank CLI. Node.js 20+.
 metadata:
   author: bitbank-aiforge
   version: "1.0"

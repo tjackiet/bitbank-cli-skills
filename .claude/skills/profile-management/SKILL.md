@@ -14,7 +14,7 @@ description: |
   この skill は profiles.json の管理だけを担当し、bitbank API は
   叩かない。
 compatibility: |
-  Requires bitbank CLI (npx tsx cli/index.ts). Node.js 18+.
+  Requires bitbank CLI (npx tsx cli/index.ts). Node.js 20+.
 metadata:
   author: bitbank-aiforge
   version: "1.0"

@@ -7,10 +7,12 @@ const SKILLS_DIR = resolve(import.meta.dirname, "../../.claude/skills");
 const SKILLS = ["indicator-analysis", "backtest", "portfolio", "watch-live"];
 
 const EXPECTED_REFERENCES: Record<string, string[]> = {
-  "indicator-analysis": ["bitbank-api-formats.md", "indicator-guide.md"],
-  backtest: ["bitbank-api-formats.md", "strategy-patterns.md"],
-  portfolio: ["bitbank-api-formats.md", "private-api-guide.md"],
+  "indicator-analysis": ["indicator-guide.md"],
+  backtest: ["strategy-patterns.md"],
+  portfolio: ["private-api-guide.md"],
 };
+
+const SHARED_REFERENCES = ["bitbank-api-formats.md"];
 
 describe("Agent Skills", () => {
   for (const skill of SKILLS) {
@@ -70,4 +72,13 @@ describe("Agent Skills", () => {
       });
     });
   }
+
+  describe("_shared/references", () => {
+    it("contains common references", () => {
+      for (const ref of SHARED_REFERENCES) {
+        const refPath = resolve(SKILLS_DIR, "_shared/references", ref);
+        expect(existsSync(refPath), `Missing: ${ref}`).toBe(true);
+      }
+    });
+  });
 });

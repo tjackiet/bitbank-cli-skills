@@ -9,7 +9,7 @@ description: |
   「このデータ信頼できる？」「品質チェックして」のようなリクエストで使用。
   注意: indicator-analysis や backtest の自動前処理としては起動しない。
 compatibility: |
-  Requires bitbank CLI. Node.js 18+.
+  Requires bitbank CLI. Node.js 20+.
 metadata:
   author: bitbank-aiforge
   version: "1.0"

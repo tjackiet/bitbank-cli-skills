@@ -13,7 +13,7 @@ description: |
   注意: 「RSI を見て」「移動平均のクロスは？」のような売買シグナル系の
   リクエストは indicator-analysis 側の担当。本 skill は起動しない。
 compatibility: |
-  Requires bitbank CLI. Node.js 18+.
+  Requires bitbank CLI. Node.js 20+.
 metadata:
   author: bitbank-aiforge
   version: "1.0"
