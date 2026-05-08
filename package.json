@@ -1,11 +1,24 @@
 {
-  "name": "bitbank",
+  "name": "bitbank-lab-cli",
   "version": "0.1.0",
   "description": "bitbank 暗号資産取引所の CLI & Agent Skills スターターキット",
   "type": "module",
   "bin": {
     "bitbank": "./bin/bitbank"
   },
+  "files": [
+    "bin/",
+    "cli/*.ts",
+    "cli/commands/",
+    "cli/completion/",
+    "cli/watch/",
+    "skills/",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "CONTEXT.md",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "test": "vitest",
     "lint": "biome check cli/",
@@ -29,6 +42,25 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "homepage": "https://github.com/tjackiet/bitbank-cli-skills",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tjackiet/bitbank-cli-skills.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tjackiet/bitbank-cli-skills/issues"
+  },
+  "keywords": [
+    "bitbank",
+    "cryptocurrency",
+    "trading",
+    "agent-skills",
+    "cli",
+    "paper-trading"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "license": "MIT"
 }

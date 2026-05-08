@@ -1,23 +1,26 @@
-#!/usr/bin/env bash
-# bitbank CLI launcher.
-# Resolves its real location through symlinks (npm link installs a symlink in
-# the global bin) and execs the repo-local tsx so we don't depend on a
-# globally installed tsx.
-set -e
+#!/usr/bin/env node
+// bitbank CLI launcher.
+// Resolves tsx via createRequire so it works whether installed locally,
+// globally (npm i -g), or run via `npx`. Avoids the `--import tsx` CWD
+// resolution pitfall by invoking tsx's CLI entry directly.
+import { spawn } from "node:child_process";
+import { createRequire } from "node:module";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-SOURCE="${BASH_SOURCE[0]}"
-while [ -L "$SOURCE" ]; do
-  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
-  SOURCE="$(readlink "$SOURCE")"
-  [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE"
-done
-DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
-ROOT="$(cd "$DIR/.." && pwd)"
+const require = createRequire(import.meta.url);
+const here = dirname(fileURLToPath(import.meta.url));
+const entry = resolve(here, "..", "cli", "index.ts");
+const tsxCli = require.resolve("tsx/cli");
 
-TSX="$ROOT/node_modules/.bin/tsx"
-if [ ! -x "$TSX" ]; then
-  echo "Error: $TSX not found. Run './install.sh' or 'npm install' in $ROOT." >&2
-  exit 1
-fi
-
-exec "$TSX" "$ROOT/cli/index.ts" "$@"
+const child = spawn(process.execPath, [tsxCli, entry, ...process.argv.slice(2)], {
+  stdio: "inherit",
+});
+child.on("error", (err) => {
+  process.stderr.write(`bitbank: failed to start tsx: ${err.message}\n`);
+  process.exit(1);
+});
+child.on("exit", (code, signal) => {
+  if (signal) process.kill(process.pid, signal);
+  else process.exit(code ?? 0);
+});
