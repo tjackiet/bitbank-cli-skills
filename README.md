@@ -561,6 +561,10 @@ npm run typecheck # 型チェック
 
 `npm test` では実 API を叩く E2E ブロックは `TEST_E2E=1` で gating されており、デフォルトでは skip される。実 API に対する E2E を走らせる場合は `TEST_E2E=1 npm test` を指定する（`.env.example` の API キー設定が必要）。
 
+### リリース
+
+npm publish 手順とバージョン同期の仕組みは [`docs/dev/release.md`](docs/dev/release.md) を参照。`npm version <bump>` で 5 ファイル一括同期されるので、`package.json` や plugin manifest を手動編集しないこと。
+
 ### コントリビューター向けセットアップ
 
 このリポジトリ自体に PR を送る場合は、Claude Code 用の hook をローカルで
