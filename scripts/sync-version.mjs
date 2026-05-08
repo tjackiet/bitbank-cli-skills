@@ -18,16 +18,18 @@ const targets = [
   "gemini-extension.json",
 ];
 
+const versionRegex = /("version"\s*:\s*")[^"]+(")/;
+
 let changed = 0;
 for (const rel of targets) {
   const path = join(root, rel);
   const before = readFileSync(path, "utf8");
-  const after = before.replace(/("version"\s*:\s*")[^"]+(")/, `$1${version}$2`);
-  if (after === before) continue;
-  if (!/("version"\s*:\s*")[^"]+(")/.test(before)) {
+  if (!versionRegex.test(before)) {
     console.error(`sync-version: no version field found in ${rel}`);
     process.exit(1);
   }
+  const after = before.replace(versionRegex, `$1${version}$2`);
+  if (after === before) continue;
   writeFileSync(path, after);
   console.log(`  ${rel} -> ${version}`);
   changed++;
