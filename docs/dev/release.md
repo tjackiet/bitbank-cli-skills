@@ -18,11 +18,33 @@ plugin manifest に転写してから commit + tag が作られる。
 ```bash
 npm version patch        # 0.1.0 → 0.1.1 (5 ファイル同期 + commit + tag)
 git push --follow-tags   # tag を含めて push
-# /tmp で動作確認してから (鉄則)
-cd /tmp && npx -y bitbank-lab-cli ticker btc_jpy
-# 問題なければ
+# tag を push すると .github/workflows/release.yml が起動し、
+# OIDC trusted publishing 経由で `npm publish --provenance` を実行する。
+# 完了後に /tmp で動作確認 (鉄則)
+cd /tmp && npx -y bitbank-lab-cli@<新 version> ticker btc_jpy
+```
+
+### 手動 publish（フォールバック）
+
+OIDC が使えない / workflow が失敗した場合の緊急用:
+
+```bash
 npm publish --otp=<OTP>
 ```
+
+`--provenance` は OIDC 経由でしか付かないため、手動 publish したバージョンは
+provenance 表示が無くなる点に注意。
+
+## OIDC trusted publishing 設定（初回のみ）
+
+1. https://www.npmjs.com/package/bitbank-lab-cli/access で
+   "Trusted Publisher" を追加
+2. GitHub repo: `tjackiet/bitbank-cli-skills`、workflow: `release.yml`、
+   environment は空でよい
+3. アカウント側で 2FA を `auth-and-writes` に設定（手動 publish 時の保険）
+
+その他のリポジトリ側初回設定（branch protection / private vulnerability
+reporting 等）は [`repo-security.md`](repo-security.md) を参照。
 
 `patch` / `minor` / `major` は SemVer に従う。0.x は SemVer 上 minor で
 breaking 可なので初期改修は `npm version patch` で増やしていく。
