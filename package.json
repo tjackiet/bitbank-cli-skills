@@ -1,7 +1,7 @@
 {
   "name": "bitbank-lab-cli",
   "version": "0.1.0",
-  "description": "bitbank 暗号資産取引所の CLI & Agent Skills スターターキット",
+  "description": "Experimental CLI & Agent Skills starter kit for bitbank — botters lab community edition. Market data, paper trading, account read, and Private API trading with safety guards.",
   "type": "module",
   "bin": {
     "bitbank": "bin/bitbank"
