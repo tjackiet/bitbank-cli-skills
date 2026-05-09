@@ -19,7 +19,7 @@ jobs:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
 
-      - run: npm install -g npm@latest
+      - run: npm install -g npm@11.5.1
 
       - run: npm ci --ignore-scripts
 
