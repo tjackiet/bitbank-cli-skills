@@ -1,7 +1,7 @@
 {
   "name": "bitbank-cli-skills",
   "version": "0.1.0",
-  "description": "bitbank 暗号資産取引所の CLI と Agent Skills スターターキット。",
+  "description": "Experimental CLI & Agent Skills starter kit for bitbank — botters lab community edition. Market data, paper trading, account read, and Private API trading with safety guards.",
   "author": {
     "name": "tjackiet",
     "url": "https://github.com/tjackiet"
@@ -20,8 +20,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "bitbank CLI & Agent Skills",
-    "shortDescription": "bitbank 取引所の生 OHLCV をモデルに渡し、指標もロジックも自由にカスタマイズ。",
-    "longDescription": "bitbank API への薄い CLI アクセス層と、Claude Code / Cursor 用 Agent Skills のスターターキット。MCP の固定実装と異なり、生データを LLM に渡すアプローチで指標のパラメータもロジックも完全カスタマイズ可能。ペーパートレード（仮想資金 × ライブ価格）、ポートフォリオ分析、テクニカル指標、ボラティリティ分析、相関分析、バックテスト、シグナル探索、recipe（買う前チェック / ポートフォリオ総点検）など 12 本の skill を同梱。",
+    "shortDescription": "Pass raw OHLCV from bitbank to the model — fully customize indicators and logic.",
+    "longDescription": "A thin CLI access layer over the bitbank API, plus an Agent Skills starter kit for Claude Code / Cursor. Unlike MCP's fixed implementations, raw data is passed to the LLM so indicator parameters and logic stay fully customizable. Bundles 12 skills including paper trading (virtual funds × live prices), portfolio analysis, technical indicators, volatility profiling, correlation analysis, backtesting, signal exploration, and recipes (pre-trade check / portfolio review).",
     "developerName": "tjackiet",
     "category": "Finance",
     "capabilities": ["Read"],
