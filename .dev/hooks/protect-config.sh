@@ -3,7 +3,7 @@
 # biome.json, tsconfig.json, lefthook.yml, package.json, ci.yml への
 # Edit/Write を遮断し、人間のレビューを強制する
 
-PROTECTED_FILES="biome.json tsconfig.json lefthook.yml .github/workflows/ci.yml"
+PROTECTED_FILES="biome.json tsconfig.json lefthook.yml package.json .github/workflows/ci.yml"
 
 file_path="${CLAUDE_FILE_PATH:-}"
 
