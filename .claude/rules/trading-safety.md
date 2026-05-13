@@ -21,6 +21,27 @@
 
 - `--execute` に加えて `--confirm` による対話確認が必須
 - 両方が揃わない限り API を叩かない
+- 出金先は **`--to=<ラベル>`** で指定する。`--uuid` 直書きは受け付けない
+- 指定したラベルが **ローカル allowlist** に含まれていることを最初に確認する
+  - allowlist パス: `~/.bitbank/withdrawal-allowlist.json`（`$XDG_CONFIG_HOME/bitbank/...` または
+    `$BITBANK_WITHDRAWAL_ALLOWLIST_PATH` で上書き可）
+  - フォーマット: `{ "version": 1, "labels": ["<bitbank ラベル>", ...] }`
+  - mode 0600 推奨（world-readable だと stderr に警告）
+  - **allowlist は UUID を持たない**。UUID は実行時に bitbank API
+    (`GET /user/withdrawal_account`) でラベルから動的解決する
+    （ローカル改ざんで攻撃者 UUID を捏造させない設計）
+- 解決された UUID が `POST /user/request_withdrawal` に渡される。bitbank
+  側で重複ラベルがあれば曖昧として拒否、未登録ラベルなら見つからずに拒否
+
+### 防御モデル（脅威別）
+
+| 脅威 | 防御層 |
+|------|--------|
+| 攻撃者が任意アドレスに送金 | bitbank 側のアドレス登録ゲート（Web UI + 2FA + メール確認） |
+| 混乱した AI が `withdrawal-accounts` から拾った UUID を投げる | `--uuid` 引数の廃止 + `--to=<ラベル>` 強制 |
+| 攻撃者が登録済み UUID 全集合に等しく送る | ローカル allowlist によるラベル subset 制限 |
+| 攻撃者がローカル allowlist を改ざんして UUID を捏造 | allowlist が UUID を持たないため不可能（ラベル→UUID 解決は bitbank API） |
+| 攻撃者がローカル allowlist にラベルを追加 | bitbank 側に同名ラベルが無ければ解決失敗（多層防御） |
 
 ## POST のリトライ無効化（冪等性の保護）
 

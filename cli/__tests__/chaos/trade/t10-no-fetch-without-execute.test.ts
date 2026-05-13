@@ -5,6 +5,7 @@ import { confirmDepositsAll } from "../../../commands/trade/confirm-deposits-all
 import { confirmDeposits } from "../../../commands/trade/confirm-deposits.js";
 import { createOrder } from "../../../commands/trade/create-order.js";
 import { withdraw } from "../../../commands/trade/withdraw.js";
+import { fakeAllowlist } from "../../test-helpers.js";
 
 describe("Chaos T-10: no fetch called without --execute", () => {
   const fetchSpy = vi.fn();
@@ -47,7 +48,10 @@ describe("Chaos T-10: no fetch called without --execute", () => {
   });
 
   it("withdraw does not fetch", async () => {
-    await withdraw({ asset: "btc", uuid: "u-1", amount: "1.0" }, { fetch: fetchSpy, retries: 0 });
+    await withdraw(
+      { asset: "btc", to: "cold-wallet", amount: "1.0" },
+      { fetch: fetchSpy, retries: 0, loadAllowlist: fakeAllowlist(["cold-wallet"]) },
+    );
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 });

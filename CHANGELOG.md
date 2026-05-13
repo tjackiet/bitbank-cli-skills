@@ -7,6 +7,20 @@
 
 ### Breaking Changes
 
+- `trade withdraw` の出金先指定方法を変更。`--uuid=<UUID>` を **廃止** し、
+  `--to=<bitbank ラベル>` を必須化。あわせてローカル allowlist
+  (`~/.bitbank/withdrawal-allowlist.json`) を導入し、allowlist に登録された
+  ラベルしか出金できなくなる。
+  - 動機: bitbank の API キーが流出した場合、登録済み出金先 UUID 全体に対して
+    等しく送金可能になる穴があり、混乱した AI エージェントが
+    `withdrawal-accounts` から拾った UUID を `trade withdraw` に投げる経路を
+    塞ぐ必要があった
+  - 設計: allowlist はラベル文字列のみ保持し UUID は持たない。
+    実 UUID は実行時に `GET /user/withdrawal_account` で動的解決するため、
+    ローカルファイル改ざんで攻撃者 UUID を捏造することは不可能
+  - 移行: `~/.bitbank/withdrawal-allowlist.json` を mode 0600 で作成し、
+    `{ "version": 1, "labels": ["<bitbank Web UI で登録したラベル>"] }`
+    の形式で記述する。詳細は `.claude/rules/trading-safety.md`
 - API エラーコード `60001` の取り扱いを訂正。公式 errors.md と突き合わせた
   結果、これは "Insufficient amount"（残高不足）であり、レート制限ではない
   ことが判明したため:

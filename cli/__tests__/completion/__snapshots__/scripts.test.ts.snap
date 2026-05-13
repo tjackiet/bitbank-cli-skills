@@ -63,7 +63,7 @@ _bitbank() {
         cancel-orders) opts="$opts --pair --order-ids --execute" ;;
         confirm-deposits) opts="$opts --id --execute" ;;
         confirm-deposits-all) opts="$opts --execute" ;;
-        withdraw) opts="$opts --asset --uuid --amount --token --execute --confirm" ;;
+        withdraw) opts="$opts --asset --to --amount --token --execute --confirm" ;;
       esac
     elif [[ "$cmd" == "paper" ]]; then
       case "$sub" in
@@ -186,7 +186,7 @@ _bitbank() {
       cancel-orders) opts="$opts --pair --order-ids --execute" ;;
       confirm-deposits) opts="$opts --id --execute" ;;
       confirm-deposits-all) opts="$opts --execute" ;;
-      withdraw) opts="$opts --asset --uuid --amount --token --execute --confirm" ;;
+      withdraw) opts="$opts --asset --to --amount --token --execute --confirm" ;;
       esac
     elif [[ "$cmd" == "paper" ]]; then
       case "$sub" in

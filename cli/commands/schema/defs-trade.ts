@@ -64,7 +64,10 @@ export const tradeSchemas: Record<string, SchemaDef> = {
     category: "trade",
     params: {
       asset: p("string", "Asset to withdraw (e.g. btc)"),
-      uuid: p("string", "Withdrawal account UUID"),
+      to: p(
+        "string",
+        "Bitbank withdrawal account label (must be in local withdrawal allowlist; default: ~/.bitbank/withdrawal-allowlist.json, overridable via $XDG_CONFIG_HOME / $BITBANK_WITHDRAWAL_ALLOWLIST_PATH)",
+      ),
       amount: p("string", "Withdrawal amount"),
       token: p("string", "OTP token"),
       execute,

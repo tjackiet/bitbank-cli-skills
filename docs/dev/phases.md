@@ -99,8 +99,11 @@
 - [x] `trade cancel-orders` — 複数注文一括キャンセル（最大30件）
 - [x] `trade confirm-deposits` — 入金確認
 - [x] `trade confirm-deposits-all` — 全入金確認
-- [x] `trade withdraw` — 出金リクエスト（--execute + --confirm 必須）
-  - **運用方針 (PoC スコープ)**: 実装・テスト・安全ガードは完備しているが、本 PoC では **AI エージェント経由での起動は非推奨**。人間が CLI から直接実行する用途のみとし、Skill / MCP からの自動起動フローは組まない。read-only な `withdrawal-accounts` / `withdrawal-history` は AI 経由でも利用可。
+- [x] `trade withdraw` — 出金リクエスト（--execute + --confirm + ラベル allowlist 必須）
+  - **追加ガード (Phase 3.5)**: `--uuid` 直書きは廃止し、`--to=<bitbank ラベル>` 強制。
+    ラベルはローカル `~/.bitbank/withdrawal-allowlist.json` にも登録が必要。UUID は
+    実行時に bitbank API で動的解決し、ローカルに保持しない（改ざんによる UUID 捏造を防止）。
+    詳細は `.claude/rules/trading-safety.md`。
 
 ### テスト
 
