@@ -76,6 +76,27 @@ describe("buildLogRecord", () => {
     expect(data.meta.inner.credential).toBe("***");
   });
 
+  it("masks wallet-related keys (private_key / seed / mnemonic / passphrase)", () => {
+    const r = buildLogRecord(
+      "withdraw",
+      {},
+      {
+        success: true,
+        data: {
+          private_key: "pk",
+          seed_phrase: "abc",
+          mnemonic: "word word",
+          passphrase: "p",
+        },
+      },
+    );
+    const data = r.data as Record<string, string>;
+    expect(data.private_key).toBe("***");
+    expect(data.seed_phrase).toBe("***");
+    expect(data.mnemonic).toBe("***");
+    expect(data.passphrase).toBe("***");
+  });
+
   it("masks sensitive keys inside arrays within data", () => {
     const r = buildLogRecord(
       "withdraw",

@@ -184,6 +184,17 @@ profile を 1 つも登録していない環境では、従来通り `BITBANK_AP
 
 > `.env` は `.gitignore` 済み。`profiles.json` はリポジトリ外（`~/.bitbank/`）に保存されます。いずれの形式でも API キーは絶対にコミットしないでください。
 
+#### 推奨ポリシー（secret の取扱い）
+
+24/7 で trade API を握る運用（botter 等）では、secret 漏洩のコストが片側に寄ります。最低限以下を守ってください。
+
+- **`profiles.json` 経路を default に**: 0600 強制 / `process.env` 非汚染 / `BITBANK_*` 以外のキーは読み捨て。`.env` より意図的に狭く作っています
+- **secret は CLI flag で渡さない**: shell 履歴・`ps` 出力に残るため、env か対話 hidden 入力のみ（`--api-secret=...` のような flag は実装していません）
+- **trade 用と read-only 用を別 profile に分ける**: 監視には read-only キー、trade には trade キーを `--profile=<name>` で使い分けると、誤爆の被害が局所化できます
+- **外部 secret manager を使う場合**: クラウド系（Vault / SaaS 各種）や OS keychain で secret を管理しているなら、ラッパで `BITBANK_API_KEY` / `BITBANK_API_SECRET` を env に注入してから `bitbank` を起動すれば動きます。CLI は env 経路を受けるだけで、特定ツールには依存しません
+- **trade コマンドの安全ガード**: `--execute` / `--confirm` / 出金 allowlist の詳細は [`.claude/rules/trading-safety.md`](.claude/rules/trading-safety.md) を参照
+- **脆弱性の報告**: 公開 Issue ではなく [`SECURITY.md`](SECURITY.md) の private vulnerability reporting フローを使ってください
+
 ## 使い方
 
 ### Claude Code / Cursor で使う（推奨）

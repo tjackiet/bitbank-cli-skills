@@ -17,7 +17,8 @@ export async function writeTradeLog(
 }
 
 const SENSITIVE_KEYS = new Set(["token", "otp_token"]);
-const SENSITIVE_PATTERN = /secret|password|credential|auth_token/i;
+const SENSITIVE_PATTERN =
+  /secret|password|credential|auth_token|private_key|seed|mnemonic|passphrase/i;
 
 function maskSensitiveDeep(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(maskSensitiveDeep);
