@@ -1,5 +1,7 @@
 # bitbank CLI & Agent Skills
 
+[![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/tjackiet/bitbank-cli-skills?utm_source=oss&utm_medium=github&utm_campaign=tjackiet%2Fbitbank-cli-skills&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
+
 bitbank 暗号資産取引所の CLI と Agent Skills スターターキット。
 
 ## ⚠️ 免責事項
