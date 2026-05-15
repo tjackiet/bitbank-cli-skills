@@ -67,10 +67,27 @@ bitbank paper create-order --pair=btc_jpy --side=buy --type=market --amount=0.00
 
 ### Claude Code
 
-```bash
-/plugin marketplace add tjackiet/bitbank-cli-skills
-/plugin install bitbank-lab-cli@bitbank-lab-cli
-```
+slash command は **1 行ずつ送信**してください（一気に貼り付けると 1 つのコマンドとして解釈されて失敗します）。
+
+1. マーケットプレイスを登録:
+
+   ```
+   /plugin marketplace add tjackiet/bitbank-cli-skills
+   ```
+
+2. plugin をインストール:
+
+   ```
+   /plugin install bitbank-lab-cli@bitbank-lab-cli
+   ```
+
+3. インストール直後に同じセッションで使い始めたい場合のみ:
+
+   ```
+   /reload-plugins
+   ```
+
+   新しいセッションでは起動時に自動ロードされるため不要です。
 
 ### Cursor
 
