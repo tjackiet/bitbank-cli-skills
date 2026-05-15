@@ -68,7 +68,8 @@ bitbank paper create-order --pair=btc_jpy --side=buy --type=market --amount=0.00
 ### Claude Code
 
 ```bash
-/plugin install https://github.com/tjackiet/bitbank-cli-skills
+/plugin marketplace add tjackiet/bitbank-cli-skills
+/plugin install bitbank-lab-cli@bitbank-lab-cli
 ```
 
 ### Cursor

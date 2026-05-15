@@ -9,6 +9,11 @@
 `gemini-extension.json`）の 5 ファイルが同じ version を持つ必要がある。
 **手動で個別編集しないこと**（同期漏れの温床）。
 
+`.claude-plugin/marketplace.json` も同じディレクトリにあるが、こちらの
+`"version"` は marketplace schema バージョン（`"1.0"`）で plugin
+バージョンとは別物のため version sync 対象外。`scripts/sync-version.mjs`
+の targets にも入れない。
+
 `npm version <bump>` 実行時に `scripts.version` フック経由で
 `scripts/sync-version.mjs` が走り、`package.json` の新 version を
 plugin manifest に転写してから commit + tag が作られる。
