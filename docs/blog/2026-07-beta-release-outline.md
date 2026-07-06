@@ -8,10 +8,12 @@
 
 - **1本の記事で MCP / CLI の両方を扱う**（リリース側の「技術ブログ」リンクが1つのため）。
   冒頭に「使い分け早見」を置き、読者が自分に合う方のクイックスタートへジャンプできる構成にする
+- **トーンは「Claude Desktop やコーディングエージェントにつないで面白いことやろう」**。
+  告知文の敬体は保ちつつ、体験デモ主導で読ませる。締めるところ（安全・免責）は締める
 - **技術の内部の話はしない**。アーキテクチャ・実装（Zod / Result パターン / HMAC 等）には触れず、
   コードは「コピペで動く導入コマンド」と「AIに話しかける言葉」だけにする
-- **すぐ使える**: 各ツール「5分で試す」を最短経路（npx / npm 一発）で書く
-- **意図とユースケースが伝わる**: なぜ2つあるのか（gitbook の使い分け）、誰の何が楽になるのか、を軸にする
+- **すぐ使える**: 各ツール「5分で試す」を最短経路（npx / npm 一発）で書き、
+  **ユースケース例はそれぞれのクイックスタート直下にまとめる**（独立章にしない）
 - 想定読者: リリースを見て興味を持った開発者・botter・AIツール好き（bitbank API 未経験でも試せるトーン）
 
 ---
@@ -30,10 +32,15 @@
 
 ### リード（はじめに）
 
+- **冒頭に画面録画（動画）**: Claude Desktop と会話しながらポートフォリオ分析をするデモ。
+  「AIに話しかけたら資産構成と損益が返ってくる」瞬間をキャッチーに見せ、
+  「あなたの AI クライアントを bitbank につないで面白いことをやろう」のノリで入る
+  - 30〜60 秒、音声不要。掲載先が動画非対応なら GIF + 静止スクショにフォールバック
+  - デモは読み取り専用キー + デモ用アカウントで撮影（本物の残高・注文情報を映さない）
 - コーポレートリリースの要約（AIエージェント経由の新しい取引体験の実証実験として、
   MCPサーバと CLI のベータ版を OSS 公開）+ リリースへのリンク
 - この記事でわかること 3 点:
-  1. 何ができるツールなのか（デモ会話 or スクショを1枚先出し）
+  1. 何ができるツールなのか（↑の動画がその答え）
   2. MCP と CLI のどちらを使えばいいか
   3. 5分で試す手順
 - ベータ版・自己責任・免責事項リンクをここで一度明示（詳細は末尾）
@@ -41,9 +48,9 @@
 ### 1. 何を公開したのか（全体像）
 
 - 2つの OSS（いずれも MIT / npm 公開済み / ローカル動作 / Node.js 22+）
-  - **bitbank-lab-mcp** — Claude Desktop などの MCP 対応 AI チャットから、自然言語で市場分析
+  - **bitbank-lab-mcp** — Claude Desktop などの MCP 対応 AI チャットから、自然言語で市場分析〜取引操作
   - **bitbank-lab-cli** — Claude Code / Cursor / Codex などのコーディングエージェントから、
-    データ取得と柔軟な分析（Agent Skills 同梱）
+    データ取得と自由度の高い分析（Agent Skills 同梱）
 - 図解1枚: 「AIクライアント ⇔ MCP / CLI ⇔ bitbank 公開API」の位置づけ
   （ローカルで動く・利用者の API キーで動く、を視覚で伝える）
 - 「bitbank-mcp-server という別リポジトリとは無関係。本実証実験の対象は bitbank-lab-*」の注記
@@ -66,8 +73,8 @@ gitbook「[bitbank-lab-docs](https://bitbank-lab.gitbook.io/bitbank-lab-docs)」
 ### 3. bitbank-lab-mcp を5分で試す
 
 - 前提: Node.js 22+ / Claude Desktop
-- `claude_desktop_config.json` に貼るだけの最小設定（Public のみ・API キー不要の「A」パターンのみ掲載。
-  B/C は README / gitbook へ誘導）
+- `claude_desktop_config.json` に貼るだけの最小設定（Public のみ・API キー不要の「A」パターンを掲載。
+  資産参照 B / 取引実行 C の段階は1行で存在だけ示し、README / gitbook へ誘導）
 
 ```json
 {
@@ -81,13 +88,20 @@ gitbook「[bitbank-lab-docs](https://bitbank-lab.gitbook.io/bitbank-lab-docs)」
   - 「BTC の今の市場状況を分析して」
   - 「ビットコインは買いと売りどちらが優勢？」
   - 「ここ 30 日のボラ推移をチャートで見せて」
-- **スクショ2枚**: 分析結果の会話 / SVG チャート
-- できることダイジェスト（列挙のみ・深掘りしない）:
-  テクニカル指標・フロー分析・板圧力・パターン検出・総合スコア・チャート生成（Public 32 ツール）
-- 発展: API キーを設定すると資産確認・ポートフォリオ分析・発注まで（48 ツール）。
-  **権限は「参照」のみ推奨・「出金」権限は付けない**、を1行で（詳細は Private API ガイドへ）
-- 「何を聞けばいいかわからない」→ 同梱プロンプト集（docs/prompts-table.md）へ誘導。
-  「おはようレポート」を1行紹介
+- **スクショ1〜2枚**: 分析結果の会話 / SVG チャート
+
+#### MCP のユースケース例
+
+1. **朝のキャッチアップ**: 「おはようレポート」で寝ている間の相場変動を要約
+2. **ポートフォリオ分析**（冒頭動画の種明かし）: 読み取り専用キーを設定すると
+   資産構成・損益を会話で確認できる
+3. **自然言語で注文・キャンセルまで**: 「BTC を成行で 0.001 買って」→ 必ず注文内容の
+   プレビュー → 確認 → 実行の 2 ステップ。キャンセルも同様。
+   「AI に任せても勝手に約定しない」設計であることをここで体験として伝える
+   （権限・安全設計の詳細は「安全性への考え方」へ）
+4. **迷ったら Prompts 機能**: 何を聞けばいいかわからない人向けの動線。
+   Claude Desktop のプロンプトメニューに初心者🔰〜中級者向けの分析プロンプトが
+   組み込みで出てくるので、選ぶだけで分析が始まる（プロンプト集 docs/prompts-table.md にも誘導）
 
 ### 4. bitbank-lab-cli を5分で試す
 
@@ -107,28 +121,22 @@ bitbank candles btc_jpy --type=1day --format=table
 /plugin install bitbank-lab-cli@bitbank-lab-cli
 ```
 
-- 話しかける例:
-  - 「BTC の RSI を見て」（indicator-analysis）
-  - 「SMA クロス戦略をバックテストして」（backtest）
-  - 「BTC を仮想で 0.01 買って」（paper-trade）
-  - 「買う前にざっと見て」（recipe-pre-trade-check）
 - **スクショ or 会話ログ1〜2枚**: Skill がコマンドを組み立てて分析を返す様子
-- Agent Skills ダイジェスト: 分析系7・ペーパートレード・ユーティリティ2・recipe 2 の「一覧表」だけ載せる
-  （個々の説明は README / gitbook へ）
-- Skill は**自分で追加・編集して育てる前提**であること（`skills/<name>/SKILL.md` を置くだけ）を1段落
-  — 「意図」が伝わる重要ポイント
 
-### 5. ユースケース例（こんな使い方）
+#### CLI のユースケース例
 
-意図を伝えるパート。各 3〜5 行 + 可能ならスクショ:
+1. **自由度の高い分析**: 生データを LLM に渡す設計なので、指標のパラメータ変更・自作指標・
+   分析ロジックの組み替えが自在。「RSI を 20 期間で」「この 2 銘柄のラグ相関を見て」のような
+   細かい注文が通る。`--format=csv` で手元の分析環境への持ち出しも
+2. **サンプル Skill をプラグインで入れて試す**: 上の plugin install で分析系 Skill 12 本が入る。
+   「BTC の RSI を見て」「SMA クロス戦略をバックテストして」「買う前にざっと見て」
+   （recipe-pre-trade-check が GO / WAIT / NO-GO まで出す。最終判断は人間）。
+   Skill は `skills/<name>/SKILL.md` を置くだけで**自分で追加・編集して育てる前提** — ここが CLI の意図
+3. **ペーパートレードで AI 売買の練習**: 「BTC を仮想で 0.01 買って」。ライブ価格 × 仮想資金で、
+   実 API は public のみ。損益確認・指値・リセットまで一通り遊べるので、
+   発注系を試す前の練習場としてすすめる
 
-1. **朝のキャッチアップ**（MCP）: 「おはようレポート」で寝ている間の相場変動を要約
-2. **買う前の総点検**（CLI）: recipe-pre-trade-check が保有資産・ボラ・データ品質・指標を順に確認し
-   GO / WAIT / NO-GO を提示（最終判断は人間）
-3. **仮想資金で AI 売買の練習**（CLI）: paper trade はライブ価格 × 仮想資金。実 API は public のみで安全に試せる
-4. **自分の分析への取り込み**（CLI）: `--format=csv` でローソク足を吐いて手元の分析へ / 自作 Skill・自作指標の検証
-
-### 6. 安全性への考え方
+### 5. 安全性への考え方
 
 技術詳細ではなく「思想」を伝える:
 
@@ -138,7 +146,7 @@ bitbank candles btc_jpy --type=1day --format=table
   - CLI: デフォルトはドライラン。`--execute` + 固定フレーズ `--confirm` の両方が揃って初めて実行
 - それでもベータ版であり、安全対策は補助機能。利用は自己責任で（免責事項へ）
 
-### 7. 今後の展開
+### 6. 今後の展開
 
 リリース文と整合させて短く:
 
@@ -146,7 +154,7 @@ bitbank candles btc_jpy --type=1day --format=table
 - リモート MCP サーバ（まずはパブリックデータ）→ プライベートデータ・取引機能・動的 UI へ段階的に
 - 将来像: 方針・リスク許容度に基づき AI が分析〜注文まで担う取引体験
 
-### 8. フィードバック募集
+### 7. フィードバック募集
 
 - GitHub Issues（両リポ）
 - ビボラボ Discord `#mcp-cli-contributors`: 感想・ユースケースのアイデア・「こんな Skill 作った」歓迎
@@ -166,18 +174,24 @@ bitbank candles btc_jpy --type=1day --format=table
 | 内容 | 場所 |
 |---|---|
 | MCP 導入 JSON・話しかけ例・A/B/C 3段階設定 | bitbank-lab-mcp README「クイックスタート」 |
-| プロンプト集（9種・🔰付き） | bitbank-lab-mcp docs/prompts-table.md |
+| プロンプト集（9種・🔰付き）/ Prompts 機能 | bitbank-lab-mcp docs/prompts-table.md |
+| 発注・キャンセルの preview → execute | bitbank-lab-mcp README「Private API」/ docs/private-api.md |
 | MCP ツール一覧と使い分け | bitbank-lab-mcp docs/tools.md |
 | CLI クイックスタート・plugin install 手順 | bitbank-lab-cli README |
 | Skills 一覧（12本）と代表トリガー | bitbank-lab-cli README「Agent Skills」/ skills/INDEX.md |
+| ペーパートレードのコマンド・制約 | bitbank-lab-cli README「Paper」 |
 | 使い分けの言い回し | gitbook トップ（docs/gitbook/README.md）|
 | 免責事項の文言 | 両 README「免責事項」（リリースと同トーン） |
 
 ### 準備物
 
-- [ ] スクショ: Claude Desktop での分析会話（MCP）
-- [ ] スクショ: SVG チャート出力（MCP）
+- [ ] **冒頭動画**: Claude Desktop で会話しながらポートフォリオ分析（30〜60秒 / 読み取り専用キー +
+      デモ用アカウントで撮影 / 動画非対応媒体向けに GIF・静止画版も用意）
+- [ ] スクショ: MCP の分析会話・SVG チャート（各1枚）
+- [ ] スクショ: MCP の注文プレビュー → 確認ダイアログ（「勝手に約定しない」の画）
+- [ ] スクショ: Claude Desktop の Prompts メニュー
 - [ ] スクショ or ログ: Claude Code で Skill が発火する様子（CLI）
+- [ ] スクショ or ログ: ペーパートレードの売買〜損益確認（CLI）
 - [ ] 図解: AIクライアント ⇔ MCP/CLI ⇔ bitbank API の位置づけ 1 枚
 - [ ] リリース側の「技術ブログ：[※リンクを追記]」に記事 URL を渡す（7/10 公開に間に合わせる）
 
@@ -194,4 +208,5 @@ bitbank candles btc_jpy --type=1day --format=table
 - 内部実装の解説（Zod・Result パターン・リトライ設計・テスト戦略など）
 - コマンドリファレンスの網羅（README / gitbook に委ねる）
 - 投資判断に踏み込む表現（「儲かる」「勝てる」等）。分析例の数値はあくまで例示と明記
+- 動画・スクショに本物の残高・注文情報・API キーを映さない
 - bitbank-mcp-server（別リポ）との混同を招く記述
