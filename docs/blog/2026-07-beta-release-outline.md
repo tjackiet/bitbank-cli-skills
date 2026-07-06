@@ -122,8 +122,11 @@ gitbook「[bitbank-lab-docs](https://bitbank-lab.gitbook.io/bitbank-lab-docs)」
 
 ### 4. bitbank-lab-cli を5分で試す
 
+構成・文言は bitbank-lab-cli の README をベースにする
+（クイックスタート → plugin install → 自然言語で使う、の流れがそのまま記事に使える）。
+
 - 前提: Node.js 22+
-- ターミナルで動作確認:
+- ターミナルで動作確認（install なしで試すなら `npx -y bitbank-lab-cli ticker btc_jpy` も README にある）:
 
 ```bash
 npm i -g bitbank-lab-cli
