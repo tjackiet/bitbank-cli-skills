@@ -72,9 +72,15 @@ gitbook「[bitbank-lab-docs](https://bitbank-lab.gitbook.io/bitbank-lab-docs)」
 
 ### 3. bitbank-lab-mcp を5分で試す
 
+構成・文言は gitbook の
+[クイックスタート](https://bitbank-lab.gitbook.io/bitbank-lab-docs/mcp-sb/quickstart)
+をベースにする（インストール作業なし、`npx` 起動で設定ファイルに数行追記するだけ、という導入）。
+流れ: 前提 → 設定ファイル追記 → 再起動 → 話しかけて動作確認。
+
 - 前提: Node.js 22+ / Claude Desktop
-- `claude_desktop_config.json` に貼るだけの最小設定（Public のみ・API キー不要の「A」パターンを掲載。
-  資産参照 B / 取引実行 C の段階は1行で存在だけ示し、README / gitbook へ誘導）
+- `claude_desktop_config.json` への追記は **A / B / C の3段構成をそのまま並べる**
+  （用途に応じて選べて、あとから env を足すだけで昇格できる）:
+  - **A. Public データのみ**（API キー不要）— 価格・板・ローソク足の取得と分析
 
 ```json
 {
@@ -84,11 +90,22 @@ gitbook「[bitbank-lab-docs](https://bitbank-lab.gitbook.io/bitbank-lab-docs)」
 }
 ```
 
-- 話しかける例（そのままコピペできる日本語）:
+  - **B. Private データ参照系**（要 API キー）— 資産残高・約定履歴・ポートフォリオ分析。
+    発注はできない。**権限は「参照」のみ推奨**
+  - **C. 取引注文・キャンセル実行**（要 API キー + `BITBANK_TRUST_HOST_APPROVAL`）—
+    B に加えて AI からの発注・キャンセル。実行前に必ず確認ステップ。
+    **権限は「参照」+「取引」のみ・「出金」権限は絶対に有効化しない**
+  - B / C も JSON を掲載（A との差分は `env` ブロックだけ、が一目でわかる並べ方に）
+  - A → B → C は「AI に渡す権限を段階的に広げるはしご」— この設計意図を1段落で書く
+    （「5. 安全性への考え方」への伏線になる）
+- Claude Desktop を完全終了して再起動 → 新規チャットで動作確認:
+  - 「**BTC/JPY の今の価格を教えて**」→ リアルタイム価格が返ってくれば成功
+- 続けて話しかける例（そのままコピペできる日本語）:
   - 「BTC の今の市場状況を分析して」
   - 「ビットコインは買いと売りどちらが優勢？」
   - 「ここ 30 日のボラ推移をチャートで見せて」
 - **スクショ1〜2枚**: 分析結果の会話 / SVG チャート
+- うまく動かないとき・他クライアント（Cursor / Claude Code 等）は gitbook へ誘導
 
 #### MCP のユースケース例
 
@@ -173,7 +190,7 @@ bitbank candles btc_jpy --type=1day --format=table
 
 | 内容 | 場所 |
 |---|---|
-| MCP 導入 JSON・話しかけ例・A/B/C 3段階設定 | bitbank-lab-mcp README「クイックスタート」 |
+| MCP 導入 JSON・A/B/C 3段構成・動作確認の流れ | gitbook [mcp-sb/quickstart](https://bitbank-lab.gitbook.io/bitbank-lab-docs/mcp-sb/quickstart)（ソース: bitbank-lab-mcp docs/gitbook/getting-started/quickstart.md）/ README「クイックスタート」 |
 | プロンプト集（9種・🔰付き）/ Prompts 機能 | bitbank-lab-mcp docs/prompts-table.md |
 | 発注・キャンセルの preview → execute | bitbank-lab-mcp README「Private API」/ docs/private-api.md |
 | MCP ツール一覧と使い分け | bitbank-lab-mcp docs/tools.md |
